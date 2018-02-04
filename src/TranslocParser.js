@@ -73,7 +73,7 @@ class TranslocParser {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
 
         return this.requestor.get(url).then((response) => {
-            let vehicle_data = response.data.data[this.agency_id]
+            let vehicle_data = response.data.data[this.agency_id] || []
 
             return vehicle_data.reduce((acc, vehicle) => {
                 let v = new VehicleType({

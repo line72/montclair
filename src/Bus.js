@@ -20,10 +20,6 @@ import L from 'leaflet';
 import './Bus.css';
 
 class Bus extends Component {
-    constructor(props) {
-        super(props);
-
-    }
     render() {
         const url = `https://realtimebjcta.availtec.com/InfoPoint/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
 
