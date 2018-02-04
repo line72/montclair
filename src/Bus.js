@@ -13,21 +13,18 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import BaseMap from './BaseMap';
+import { CircleMarker } from 'react-leaflet';
 
-import './App.css';
-import './w3.css';
-import 'leaflet/dist/leaflet.css';
-import 'font-awesome/css/font-awesome.min.css';
-
-class App extends Component {
+class Bus extends Component {
     render() {
-        return (
-            <div className="App">
-                <BaseMap />
-            </div>
-        );
+        const color = `#${this.props.color}`;
+
+        console.log(`bus ${this.props.id} at ${this.props.position}`);
+        return (<CircleMarker
+                center={this.props.position}
+                color={color}
+                />);
     }
 }
 
-export default App;
+export default Bus;
