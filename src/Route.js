@@ -44,38 +44,38 @@ class Route extends Component {
             };
         };
 
+        let buses = this.props.vehicles.map((vehicle, index) => {
+            let onOpen = () => {
+                this.setState({
+                    selected: true
+                });
+            }
+            let onClose = () => {
+                this.setState({
+                    selected: false
+                });
+            }
+
+            return (
+                <Bus key={vehicle.id}
+                     id={vehicle.id}
+                     position={vehicle.position}
+                     heading={vehicle.heading}
+                     route_id={vehicle.route_id}
+                     route_name={this.props.name}
+                     on_board={vehicle.on_board}
+                     destination={vehicle.destination}
+                     status={vehicle.op_status}
+                     deviation={vehicle.deviation}
+                     color={this.props.color}
+                     onOpen={onOpen}
+                     onClose={onClose}
+                     />
+            );
+
+        });
+
         if (this.state.geojson != null) {
-            let buses = this.props.vehicles.map((vehicle, index) => {
-                let onOpen = () => {
-                    this.setState({
-                        selected: true
-                    });
-                }
-                let onClose = () => {
-                    this.setState({
-                        selected: false
-                    });
-                }
-
-                return (
-                    <Bus key={vehicle.id}
-                         id={vehicle.id}
-                         position={vehicle.position}
-                         heading={vehicle.heading}
-                         route_id={vehicle.route_id}
-                         route_name={this.props.name}
-                         on_board={vehicle.on_board}
-                         destination={vehicle.destination}
-                         status={vehicle.op_status}
-                         deviation={vehicle.deviation}
-                         color={vehicle.color}
-                         onOpen={onOpen}
-                         onClose={onClose}
-                         />
-                );
-
-            });
-
             return (
                 <div>
                     <GeoJSON
@@ -85,7 +85,7 @@ class Route extends Component {
                 </div>
             );
         } else {
-            return (<div />);
+            return (<div>{buses}</div>);
         }
     }
 }

@@ -57,17 +57,18 @@ class AvailtecParser {
         });
     }
     parseVehicle(route, vehicle) {
-        return new VehicleType({id: vehicle.VehicleId,
-                                position: [vehicle.Latitude, vehicle.Longitude],
-                                direction: vehicle.DirectionLong,
-                                heading: vehicle.Heading,
-                                destination: vehicle.Destination,
-                                on_board: vehicle.OnBoard,
-                                deviation: vehicle.Deviation,
-                                op_status: vehicle.OpStatus,
-                                color: route.Color,
-                                route_id: route.RouteId,
-                               });
+        return new VehicleType({
+            id: vehicle.VehicleId,
+            position: [vehicle.Latitude, vehicle.Longitude],
+            direction: vehicle.DirectionLong,
+            heading: vehicle.Heading,
+            destination: vehicle.Destination,
+            on_board: vehicle.OnBoard,
+            deviation: vehicle.Deviation,
+            op_status: vehicle.OpStatus,
+            color: route.Color,
+            route_id: route.RouteId,
+        });
     }
 }
 

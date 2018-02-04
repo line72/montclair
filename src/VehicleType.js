@@ -13,8 +13,8 @@
  *******************************************/
 
 class VehicleType {
-    constructor({id, position, direction, heading,
-                 destination, on_board = 0, deviation,
+    constructor({id, position, direction = '', heading,
+                 destination, on_board = 0, deviation = 0,
                  op_status = '', color, route_id}) {
 
         this.id = id;

@@ -27,10 +27,16 @@ class RouteType {
     }
 
     async getPath() {
-        return axios.get(this.kml).then((response) => {
-            let xml = new DOMParser().parseFromString(response.data, 'text/xml');
-            return toGeoJSON.kml(xml);
-        });
+        if (this.kml != null) {
+            return axios.get(this.kml).then((response) => {
+                let xml = new DOMParser().parseFromString(response.data, 'text/xml');
+                return toGeoJSON.kml(xml);
+            });
+        } else {
+            new Promise((resolve, reject) => {
+                resolve(null);
+            })
+        }
     }
 }
 

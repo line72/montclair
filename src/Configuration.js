@@ -13,10 +13,12 @@
  *******************************************/
 
 import AvailtecParser from './AvailtecParser';
-//import TransocParser from './TranslocParser';
+import TranslocParser from './TranslocParser';
 
 class Configuration {
     constructor() {
+        this.transloc_key = '';
+
         // // Birmingham, AL
         // this.center = [33.5084801, -86.8006611];
 
@@ -31,19 +33,27 @@ class Configuration {
         //     // }
         // ]
 
+        // Raleigh, NC
+        this.center = [35.7740151,-78.6449387];
+        this.agencies = [
+            {
+                name: 'Raleigh, NC',
+                parser: new TranslocParser(this.transloc_key, '20')
+            }
+        ]
 
-        // Arkon, OH
+        // Akron, OH
         //this.base_url = 'https://realtimemetro.availtec.com/InfoPoint';
 
         // Grand Rapids, MI
-        this.center = [42.956337, -85.7301293];
+        // this.center = [42.956337, -85.7301293];
 
-        this.agencies = [
-            {
-                name: 'Grand Rapids',
-                parser: new AvailtecParser('http://connect.ridetherapid.org/InfoPoint')
-            },
-        ]
+        // this.agencies = [
+        //     {
+        //         name: 'Grand Rapids',
+        //         parser: new AvailtecParser('http://connect.ridetherapid.org/InfoPoint')
+        //     },
+        // ]
     }
 }
 
