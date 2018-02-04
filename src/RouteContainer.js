@@ -19,40 +19,40 @@ import Route from './Route';
 
 class RouteContainer extends Component {
     constructor() {
-	super();
+        super();
 
-	this.state = {
-	    routes: []
-	}
+        this.state = {
+            routes: []
+        }
 
-	let configuration = new Configuration();
-	let url = configuration.base_url + '/rest/Routes/GetVisibleRoutes';
-	axios.get(url).then((response) => {
-	    let routes = response.data.map((route, index) => {
-		console.log(`route=${route.RouteId} ${route.ShortName}`);
-		return {id: route.RouteId,
-			name: route.ShortName,
-			color: route.Color,
-			path: configuration.base_url + '/Resources/Traces/' + route.RouteTraceFilename
-		       }
-	    });
+        let configuration = new Configuration();
+        let url = configuration.base_url + '/rest/Routes/GetVisibleRoutes';
+        axios.get(url).then((response) => {
+            let routes = response.data.map((route, index) => {
+                console.log(`route=${route.RouteId} ${route.ShortName}`);
+                return {id: route.RouteId,
+                        name: route.ShortName,
+                        color: route.Color,
+                        path: configuration.base_url + '/Resources/Traces/' + route.RouteTraceFilename
+                       }
+            });
 
-	    // update the state
-	    this.setState({
-		routes: routes
-	    });
-	});
+            // update the state
+            this.setState({
+                routes: routes
+            });
+        });
     }
 
     render() {
-	const routes = this.state.routes.map((route) => {
-	    return (<Route id={route.id}
-		    path={route.path}
-		    name={route.name}
-		    color={route.color} />);
-	});
+        const routes = this.state.routes.map((route) => {
+            return (<Route id={route.id}
+                    path={route.path}
+                    name={route.name}
+                    color={route.color} />);
+        });
 
-	return (<div>{routes}</div>);
+        return (<div>{routes}</div>);
     }
 }
 

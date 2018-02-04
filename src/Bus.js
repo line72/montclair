@@ -13,21 +13,7 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import BaseMap from './BaseMap';
 
-import './App.css';
-import './w3.css';
-import 'leaflet/dist/leaflet.css';
-import 'font-awesome/css/font-awesome.min.css';
+class Bus extends Component {
 
-class App extends Component {
-    render() {
-        return (
-            <div className="App">
-                <BaseMap />
-            </div>
-        );
-    }
 }
-
-export default App;

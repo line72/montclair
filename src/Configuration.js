@@ -14,7 +14,7 @@
 
 class Configuration {
     constructor() {
-	this.base_url = 'https://realtimebjcta.availtec.com/InfoPoint';
+        this.base_url = 'https://realtimebjcta.availtec.com/InfoPoint';
     }
 }
 

@@ -18,7 +18,7 @@ import RouteContainer from './RouteContainer';
 
 class BaseMap extends React.Component {
     constructor() {
-	super();
+        super();
 
         // pulled from:
         //  https://leaflet-extras.github.io/leaflet-providers/preview/
@@ -35,29 +35,29 @@ class BaseMap extends React.Component {
             }
         }
 
-	this.state = {
-	    center: [33.5084801, -86.8006611],
-	    zoom: 13,
-	    tile: tiles.stamen_toner
-	};
+        this.state = {
+            center: [33.5084801, -86.8006611],
+            zoom: 13,
+            tile: tiles.stamen_toner
+        };
     }
 
     render() {
-	const position = this.state.center;
+        const position = this.state.center;
 
-	return (
-	    <div className="map-container">
-	      <Map center={position} zoom={this.state.zoom} zoomControl={false}>
-		<TileLayer
-                  attribution={this.state.tile.attribution}
-                  url={this.state.tile.url}
-                  subdomains={this.state.tile.subdomains}
-                  />
+        return (
+            <div className="map-container">
+                <Map center={position} zoom={this.state.zoom} zoomControl={false}>
+                    <TileLayer
+                        attribution={this.state.tile.attribution}
+                        url={this.state.tile.url}
+                        subdomains={this.state.tile.subdomains}
+                        />
 
-		<RouteContainer />
-	      </Map>
-	    </div>
-	);
+                    <RouteContainer />
+                </Map>
+            </div>
+        );
     }
 }
 
