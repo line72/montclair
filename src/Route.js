@@ -15,9 +15,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { GeoJSON } from 'react-leaflet';
-import toGeoJSON from 'togeojson';
-
-import Configuration from './Configuration';
+import toGeoJSON from '@mapbox/togeojson';
 
 class Route extends Component {
     constructor(props) {
@@ -42,8 +40,13 @@ class Route extends Component {
     }
 
     render() {
+	const style = {color: `#${this.props.color}`};
+
 	if (this.state.geojson != null) {
-	    return (<GeoJSON key={this.props.id} data={this.state.geojson} />);
+	    return (<GeoJSON key={this.props.id}
+		    data={this.state.geojson}
+		    style={style}
+		    />);
 	} else {
 	    return (<div />);
 	}

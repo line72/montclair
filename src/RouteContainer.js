@@ -45,14 +45,14 @@ class RouteContainer extends Component {
     }
 
     render() {
-	//const routes = this.props
-	const route = this.state.routes[0];
+	const routes = this.state.routes.map((route) => {
+	    return (<Route id={route.id}
+		    path={route.path}
+		    name={route.name}
+		    color={route.color} />);
+	});
 
-	if (route != null) {
-	    return (<Route id={route.id} path={route.path} />);
-	} else {
-	    return (<div />);
-	}
+	return (<div>{routes}</div>);
     }
 }
 

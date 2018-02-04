@@ -34,7 +34,7 @@ class BaseMap extends React.Component {
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }
         }
-	
+
 	this.state = {
 	    center: [33.5084801, -86.8006611],
 	    zoom: 13,
