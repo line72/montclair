@@ -56,13 +56,15 @@ class Route extends Component {
                 });
             }
 
+            let route_name = `${this.props.number} - ${this.props.name}`;
+
             return (
                 <Bus key={vehicle.id}
                      id={vehicle.id}
                      position={vehicle.position}
                      heading={vehicle.heading}
                      route_id={vehicle.route_id}
-                     route_name={this.props.name}
+                     route_name={route_name}
                      on_board={vehicle.on_board}
                      destination={vehicle.destination}
                      status={vehicle.op_status}

@@ -28,6 +28,7 @@ class AvailtecParser {
             let routes = response.data.reduce((acc, route) => {
                 acc[route.RouteId] = new RouteType({
                     id: route.RouteId,
+                    number: route.RouteId,
                     name: route.ShortName,
                     color: route.Color,
                     kml: this.url + '/Resources/Traces/' + route.RouteTraceFilename

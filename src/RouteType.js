@@ -16,8 +16,9 @@ import axios from 'axios';
 import toGeoJSON from '@mapbox/togeojson';
 
 class RouteType {
-    constructor({id, name, color, kml}) {
+    constructor({id, number, name, color, kml}) {
         this.id = id;
+        this.number = number;
         this.name = name;
         this.color = color;
         this.selected = false;

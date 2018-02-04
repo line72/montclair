@@ -13,6 +13,7 @@
  *******************************************/
 
 import React, { Component } from 'react';
+import renderIf from 'render-if';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -41,20 +42,32 @@ class Bus extends Component {
                         <tbody>
                             <tr>
                                 <td className="Bus-header">Route:</td>
-                                <td>{this.props.route_id} - {this.props.route_name}</td>
+                                <td>{this.props.route_name}</td>
                             </tr>
-                            <tr>
-                                <td className="Bus-header">Destination:</td>
-                                <td>{this.props.destination}</td>
-                            </tr>
-                            <tr>
-                                <td className="Bus-header">Riders:</td>
-                                <td>{this.props.on_board}</td>
-                            </tr>
-                            <tr>
-                                <td className="Bus-header">Status:</td>
-                                <td>{this.props.status} ({this.props.deviation} minutes)</td>
-                            </tr>
+                            {
+                                renderIf(this.props.destination !== '')(
+                                    <tr>
+                                        <td className="Bus-header">Destination:</td>
+                                        <td>{this.props.destination}</td>
+                                    </tr>
+                                )
+                            }
+                            {
+                                renderIf(this.props.on_board !== '')(
+                                    <tr>
+                                        <td className="Bus-header">Riders:</td>
+                                        <td>{this.props.on_board}</td>
+                                    </tr>
+                                )
+                            }
+                            {
+                                renderIf(this.props.status !== '')(
+                                    <tr>
+                                        <td className="Bus-header">Status:</td>
+                                        <td>{this.props.status} ({this.props.deviation} minutes)</td>
+                                    </tr>
+                                )
+                            }
                         </tbody>
                     </table>
                 </Popup>

@@ -38,6 +38,7 @@ class TranslocParser {
             let routes = route_data.reduce((acc, route) => {
                 acc[route.route_id] = new RouteType({
                     id: route.route_id,
+                    number: route.short_name,
                     name: route.long_name,
                     color: route.color
                 });
@@ -61,7 +62,7 @@ class TranslocParser {
                     position: [vehicle.location.lat, vehicle.location.lng],
                     heading: vehicle.heading,
                     destination: '',
-                    on_board: vehicle.passenger_load,
+                    on_board: vehicle.passenger_load || '',
                     route_id: vehicle.route_id
                 });
 
