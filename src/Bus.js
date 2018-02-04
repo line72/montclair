@@ -13,7 +13,18 @@
  *******************************************/
 
 import React, { Component } from 'react';
+import { CircleMarker } from 'react-leaflet';
 
 class Bus extends Component {
+    render() {
+        const color = `#${this.props.color}`;
 
+        console.log(`bus ${this.props.id} at ${this.props.position}`);
+        return (<CircleMarker
+                center={this.props.position}
+                color={color}
+                />);
+    }
 }
+
+export default Bus;
