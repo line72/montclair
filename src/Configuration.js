@@ -14,16 +14,16 @@
 
 class Configuration {
     constructor() {
-        // BJCTA
-        //this.base_url = 'https://realtimebjcta.availtec.com/InfoPoint';
-        //this.center = [33.5084801, -86.8006611];
+        // Birmingham, AL (BJCTA)
+        this.base_url = 'https://realtimebjcta.availtec.com/InfoPoint';
+        this.center = [33.5084801, -86.8006611];
 
         // Arkon, OH
         //this.base_url = 'https://realtimemetro.availtec.com/InfoPoint';
 
         // Grand Rapids, MI
-        this.base_url = 'http://connect.ridetherapid.org/InfoPoint';
-        this.center = [42.956337, -85.7301293];
+        //this.base_url = 'http://connect.ridetherapid.org/InfoPoint';
+        //this.center = [42.956337, -85.7301293];
     }
 }
 
