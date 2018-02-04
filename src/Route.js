@@ -13,9 +13,7 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import axios from 'axios';
 import { GeoJSON } from 'react-leaflet';
-import toGeoJSON from '@mapbox/togeojson';
 import Bus from './Bus';
 
 
@@ -29,16 +27,11 @@ class Route extends Component {
         };
 
         // fetch the kml
-        axios.get(this.props.path).then((response) => {
-            // parse the xml and convert to geojson
-            let xml = new DOMParser().parseFromString(response.data, 'text/xml');
-            let geojson = toGeoJSON.kml(xml);
-
+        this.props.route.getPath().then((geojson) => {
             this.setState({
                 geojson: geojson
             });
         });
-
     }
 
     render() {

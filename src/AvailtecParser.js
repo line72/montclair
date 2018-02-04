@@ -13,6 +13,8 @@
  *******************************************/
 
 import axios from 'axios';
+import RouteType from './RouteType';
+import VehicleType from './VehicleType';
 
 class AvailtecParser {
     constructor(url) {
@@ -24,14 +26,12 @@ class AvailtecParser {
 
         return axios.get(url).then((response) => {
             let routes = response.data.reduce((acc, route) => {
-                acc[route.RouteId] =  {
+                acc[route.RouteId] = new RouteType({
                     id: route.RouteId,
                     name: route.ShortName,
                     color: route.Color,
-                    selected: false,
-                    path: this.url + '/Resources/Traces/' + route.RouteTraceFilename,
-                    vehicles: []
-                };
+                    kml: this.url + '/Resources/Traces/' + route.RouteTraceFilename
+                });
 
                 return acc;
             }, {});
@@ -57,17 +57,17 @@ class AvailtecParser {
         });
     }
     parseVehicle(route, vehicle) {
-        return {id: vehicle.VehicleId,
-                position: [vehicle.Latitude, vehicle.Longitude],
-                direction: vehicle.DirectionLong,
-                heading: vehicle.Heading,
-                destination: vehicle.Destination,
-                on_board: vehicle.OnBoard,
-                deviation: vehicle.Deviation,
-                op_status: vehicle.OpStatus,
-                color: route.Color,
-                route_id: route.RouteId
-               };
+        return new VehicleType({id: vehicle.VehicleId,
+                                position: [vehicle.Latitude, vehicle.Longitude],
+                                direction: vehicle.DirectionLong,
+                                heading: vehicle.Heading,
+                                destination: vehicle.Destination,
+                                on_board: vehicle.OnBoard,
+                                deviation: vehicle.Deviation,
+                                op_status: vehicle.OpStatus,
+                                color: route.Color,
+                                route_id: route.RouteId,
+                               });
     }
 }
 

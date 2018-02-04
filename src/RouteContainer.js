@@ -88,8 +88,8 @@ class RouteContainer extends Component {
 
                 return (
                     <Route key={route.id}
+                           route={route}
                            id={route.id}
-                           path={route.path}
                            name={route.name}
                            selected={route.selected}
                            color={route.color}
