@@ -13,6 +13,8 @@
  *******************************************/
 
 import axios from 'axios';
+import polyUtil from 'polyline-encoded';
+
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
 
@@ -29,24 +31,41 @@ class TranslocParser {
     }
 
     getRoutes() {
-        let url = `/routes.json?agencies=${this.agency_id}`;
-
+        // first get the segments so we can build our route paths
+        let url = `/segments.json?agencies=${this.agency_id}`;
         return this.requestor.get(url).then((response) => {
-            let route_data = response.data.data[this.agency_id]
+            let segments = response.data.data;
 
-            // parse it
-            let routes = route_data.reduce((acc, route) => {
-                acc[route.route_id] = new RouteType({
-                    id: route.route_id,
-                    number: route.short_name,
-                    name: route.long_name,
-                    color: route.color
-                });
+            let url = `/routes.json?agencies=${this.agency_id}`;
 
-                return acc;
-            }, {});
+            return this.requestor.get(url).then((response) => {
+                let route_data = response.data.data[this.agency_id]
 
-            return routes;
+                // parse it
+                let routes = route_data.reduce((acc, route) => {
+                    // build out the segments
+                    let polyline = route.segments.map((segment) => {
+                        let lat_lng = polyUtil.decode(segments[segment[0]]);
+                        if (segment[1] === "backward") {
+                            return lat_lng.reverse();
+                        } else {
+                            return lat_lng;
+                        }
+                    });
+
+                    acc[route.route_id] = new RouteType({
+                        id: route.route_id,
+                        number: route.short_name,
+                        name: route.long_name,
+                        color: route.color,
+                        polyline: polyline
+                    });
+
+                    return acc;
+                }, {});
+
+                return routes;
+            });
         });
     }
 
