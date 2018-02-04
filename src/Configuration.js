@@ -12,18 +12,38 @@
  * Licensed Under the GPLv3
  *******************************************/
 
+import AvailtecParser from './AvailtecParser';
+//import TransocParser from './TranslocParser';
+
 class Configuration {
     constructor() {
-        // Birmingham, AL (BJCTA)
-        this.base_url = 'https://realtimebjcta.availtec.com/InfoPoint';
-        this.center = [33.5084801, -86.8006611];
+        // // Birmingham, AL
+        // this.center = [33.5084801, -86.8006611];
+
+        // this.agencies = [
+        //     {
+        //         name: 'BJCTA',
+        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
+        //     },
+        //     // {
+        //     //     name: 'UAB',
+        //     //     parser: new TranslocParser('395')
+        //     // }
+        // ]
+
 
         // Arkon, OH
         //this.base_url = 'https://realtimemetro.availtec.com/InfoPoint';
 
         // Grand Rapids, MI
-        //this.base_url = 'http://connect.ridetherapid.org/InfoPoint';
-        //this.center = [42.956337, -85.7301293];
+        this.center = [42.956337, -85.7301293];
+
+        this.agencies = [
+            {
+                name: 'Grand Rapids',
+                parser: new AvailtecParser('http://connect.ridetherapid.org/InfoPoint')
+            },
+        ]
     }
 }
 

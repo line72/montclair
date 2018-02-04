@@ -13,157 +13,96 @@
  *******************************************/
 
 import React, { Component } from 'react';
+import update from 'immutability-helper';
 import axios from 'axios';
 import Configuration from './Configuration';
 import Route from './Route';
-import Bus from './Bus';
 
 class RouteContainer extends Component {
     constructor() {
         super();
 
+        let configuration = new Configuration();
+
+        let agencies = configuration.agencies.map((a) => {
+            return {name: a.name,
+                    parser: a.parser,
+                    routes: {}};
+        });
+
         this.state = {
-            routes: {},
-            vehicles: []
-        }
+            agencies: agencies
+        };
 
-        // set up a timer to fetch the routes and vehicles
-        //  every 10 seconds
-        this.fetchRoutes();
-        setInterval(() => {this.fetchVehicles();}, 10000);
-    }
 
-    fetchRoutes() {
-        let configuration = new Configuration();
-        let url = configuration.base_url + '/rest/Routes/GetVisibleRoutes';
-        axios.get(url).then((response) => {
-            let routes = response.data.reduce((acc, route) => {
-                acc[route.RouteId] =  {
-                    id: route.RouteId,
-                    name: route.ShortName,
-                    color: route.Color,
-                    selected: false,
-                    path: configuration.base_url + '/Resources/Traces/' + route.RouteTraceFilename,
-                };
-
-                return acc;
-            }, {});
-            let vehicles_list = response.data.map((route, index) => {
-                let vehicles = route.Vehicles.map((vehicle, i) => {
-                    return this.parseVehicle(route, vehicle);
-                });
-                return vehicles;
-            });
-            // flatten the map
-            let vehicles = Array.prototype.concat.apply([], vehicles_list)
-
-            // update the state
-            this.setState({
-                routes: routes,
-                vehicles: vehicles
-            });
-        });
-    }
-    fetchVehicles() {
-        let configuration = new Configuration();
-        let url = configuration.base_url + '/rest/Routes/GetVisibleRoutes';
-        axios.get(url).then((response) => {
-            let vehicles_list = response.data.map((route, index) => {
-                let vehicles = route.Vehicles.map((vehicle, i) => {
-                    return this.parseVehicle(route, vehicle);
-                });
-                return vehicles;
-            });
-            // flatten the map
-            let vehicles = Array.prototype.concat.apply([], vehicles_list)
-
-            // update the state
-            this.setState({
-                vehicles: vehicles
-            });
+        this.getRoutes().then((x) => {
+            // setup a timer to fetch the vehicles
+            this.getVehicles();
+            setInterval(() => {this.getVehicles();}, 10000);
         });
     }
 
-    parseVehicle(route, vehicle) {
-        return {id: vehicle.VehicleId,
-                position: [vehicle.Latitude, vehicle.Longitude],
-                direction: vehicle.DirectionLong,
-                heading: vehicle.Heading,
-                destination: vehicle.Destination,
-                on_board: vehicle.OnBoard,
-                deviation: vehicle.Deviation,
-                op_status: vehicle.OpStatus,
-                color: route.Color,
-                route_id: route.RouteId
-               };
+    getRoutes() {
+        return axios.all(this.state.agencies.map((a, index) => {
+            return a.parser.getRoutes().then((routes) => {
+                // update the agency without mutating the original
+                const agencies = update(this.state.agencies, {[index]: {routes: {$set: routes}}});
+
+                this.setState({
+                    agencies: agencies
+                });
+
+                return routes;
+            });
+        }));
     }
 
-    generateDashes(index) {
-        // let variants = [
-        //     "1, 15, 1, 15",
-        //     "15, 1, 15, 1",
-        //     "1, 25, 1, 25",
-        //     "25, 1, 25, 1",
-        //     "1, 10, 20, 30, 20, 10, 1",
-        // ];
-        let variants = [
-            "25, 45"
-        ];
+    getVehicles() {
+        return axios.all(this.state.agencies.map((a, index) => {
+            return a.parser.getVehicles().then((vehicle_map) => {
+                Object.keys(vehicle_map).map((route_id) => {
+                    let vehicles = vehicle_map[route_id];
 
-        return variants[index % variants.length];
+                    const agencies = update(this.state.agencies,
+                                            {[index]:
+                                             {routes:
+                                              {[route_id]:
+                                               {vehicles:
+                                                {$set: vehicles}}}}});
+
+                    this.setState({
+                        agencies: agencies
+                    });
+
+                    return vehicles;
+                });
+
+                return {};
+            });
+        }));
     }
-
     render() {
-        let routes = Object.keys(this.state.routes).map((key) => {
-            let route = this.state.routes[key];
-            return (<Route key={route.id}
-                    id={route.id}
-                    path={route.path}
-                    name={route.name}
-                    selected={route.selected}
-                    color={route.color} />
-                   );
+        let routes_list = this.state.agencies.map((agency) => {
+            return Object.keys(agency.routes).map((key) => {
+                let route = agency.routes[key];
+
+                return (
+                    <Route key={route.id}
+                           id={route.id}
+                           path={route.path}
+                           name={route.name}
+                           selected={route.selected}
+                           color={route.color}
+                           vehicles={route.vehicles}
+                           />
+                );
+            });
         });
-        let vehicles = this.state.vehicles.map((vehicle) => {
-            let onOpen = () => {
-                let routes = this.state.routes;
+        // flatten
+        let routes = Array.prototype.concat.apply([], routes_list);
 
-                let route = routes[vehicle.route_id];
-                route.selected = true;
-
-                routes[vehicle.route_id] = route;
-                this.setState({routes: routes});
-            }
-            let onClose = () => {
-                let routes = this.state.routes;
-
-                let route = routes[vehicle.route_id];
-                route.selected = false;
-
-                routes[vehicle.route_id] = route;
-                this.setState({routes: routes});
-            }
-
-            let route_name = this.state.routes[vehicle.route_id] != null ? this.state.routes[vehicle.route_id].name : ""
-            return (<Bus key={vehicle.id}
-                    id={vehicle.id}
-                    position={vehicle.position}
-                    heading={vehicle.heading}
-                    route_id={vehicle.route_id}
-                    route_name={route_name}
-                    on_board={vehicle.on_board}
-                    destination={vehicle.destination}
-                    status={vehicle.op_status}
-                    deviation={vehicle.deviation}
-                    color={vehicle.color}
-                    onOpen={onOpen}
-                    onClose={onClose}
-                    />);
-        });
-
-
-        return (<div>{routes}{vehicles}</div>);
-       }
+        return (<div>{routes}</div>);
+    }
 }
 
 export default RouteContainer;

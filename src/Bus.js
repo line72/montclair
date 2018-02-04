@@ -15,7 +15,6 @@
 import React, { Component } from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import Configuration from './Configuration';
 
 import './Bus.css';
 
@@ -23,8 +22,7 @@ class Bus extends Component {
     constructor(props) {
         super(props);
 
-        let configuration = new Configuration();
-        this.url = configuration.base_url + `/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
+        this.url = `https://realtimebjcta.availtec.com/InfoPoint/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
     }
     render() {
         const icon = L.icon({
@@ -34,32 +32,34 @@ class Bus extends Component {
             popupAnchor: [0, -50]
         });
 
-        return (<Marker position={this.props.position}
-                icon={icon}>
+        return (
+            <Marker position={this.props.position}
+                    icon={icon}>
                 <Popup onOpen={this.props.onOpen}
-                onClose={this.props.onClose}>
-                <table className="Bus-table">
-                <tbody>
-                <tr>
-                <td className="Bus-header">Route:</td>
-                <td>{this.props.route_id} - {this.props.route_name}</td>
-                </tr>
-                <tr>
-                <td className="Bus-header">Destination:</td>
-                <td>{this.props.destination}</td>
-                </tr>
-                <tr>
-                <td className="Bus-header">Riders:</td>
-                <td>{this.props.on_board}</td>
-                </tr>
-                <tr>
-                <td className="Bus-header">Status:</td>
-                <td>{this.props.status} ({this.props.deviation} minutes)</td>
-                </tr>
-                </tbody>
-                </table>
+                       onClose={this.props.onClose}>
+                    <table className="Bus-table">
+                        <tbody>
+                            <tr>
+                                <td className="Bus-header">Route:</td>
+                                <td>{this.props.route_id} - {this.props.route_name}</td>
+                            </tr>
+                            <tr>
+                                <td className="Bus-header">Destination:</td>
+                                <td>{this.props.destination}</td>
+                            </tr>
+                            <tr>
+                                <td className="Bus-header">Riders:</td>
+                                <td>{this.props.on_board}</td>
+                            </tr>
+                            <tr>
+                                <td className="Bus-header">Status:</td>
+                                <td>{this.props.status} ({this.props.deviation} minutes)</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </Popup>
-                </Marker>);
+            </Marker>
+        );
     }
 }
 
