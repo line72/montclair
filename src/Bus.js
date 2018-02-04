@@ -23,11 +23,12 @@ class Bus extends Component {
     constructor(props) {
         super(props);
 
-        this.url = `https://realtimebjcta.availtec.com/InfoPoint/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
     }
     render() {
-        const icon = L.icon({
-            iconUrl: this.url,
+        const url = `https://realtimebjcta.availtec.com/InfoPoint/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
+
+        let icon = L.icon({
+            iconUrl: url,
             iconSize: [39, 50],
             iconAnchor: [20, 50],
             popupAnchor: [0, -50]
