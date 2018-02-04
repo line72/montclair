@@ -89,6 +89,7 @@ class RouteContainer extends Component {
                 position: [vehicle.Latitude, vehicle.Longitude],
                 direction: vehicle.DirectionLong,
                 heading: vehicle.Heading,
+                destination: vehicle.Destination,
                 on_board: vehicle.OnBoard,
                 deviation: vehicle.Deviation,
                 op_status: vehicle.OpStatus,
@@ -143,13 +144,15 @@ class RouteContainer extends Component {
                 this.setState({routes: routes});
             }
 
+            let route_name = this.state.routes[vehicle.route_id] != null ? this.state.routes[vehicle.route_id].name : ""
             return (<Bus key={vehicle.id}
                     id={vehicle.id}
                     position={vehicle.position}
                     heading={vehicle.heading}
                     route_id={vehicle.route_id}
-                    route_name={this.state.routes[vehicle.route_id].name}
+                    route_name={route_name}
                     on_board={vehicle.on_board}
+                    destination={vehicle.destination}
                     status={vehicle.op_status}
                     deviation={vehicle.deviation}
                     color={vehicle.color}
