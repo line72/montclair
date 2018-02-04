@@ -23,40 +23,34 @@ class RouteContainer extends Component {
         super();
 
         this.state = {
-            routes: [],
+            routes: {},
             vehicles: []
         }
 
         // set up a timer to fetch the routes and vehicles
-        //  every 30 seconds
+        //  every 10 seconds
         this.fetchRoutes();
-        setInterval(() => {this.fetchRoutes();}, 10000);
+        setInterval(() => {this.fetchVehicles();}, 10000);
     }
 
     fetchRoutes() {
-        console.log('fetch vehicles');
         let configuration = new Configuration();
         let url = configuration.base_url + '/rest/Routes/GetVisibleRoutes';
         axios.get(url).then((response) => {
-            let routes = response.data.map((route, index) => {
-                console.log(`route=${route.RouteId} ${route.ShortName}`);
+            let routes = response.data.reduce((acc, route) => {
+                acc[route.RouteId] =  {
+                    id: route.RouteId,
+                    name: route.ShortName,
+                    color: route.Color,
+                    selected: false,
+                    path: configuration.base_url + '/Resources/Traces/' + route.RouteTraceFilename,
+                };
 
-                return {id: route.RouteId,
-                        name: route.ShortName,
-                        color: route.Color,
-                        path: configuration.base_url + '/Resources/Traces/' + route.RouteTraceFilename,
-                       };
-            });
+                return acc;
+            }, {});
             let vehicles_list = response.data.map((route, index) => {
                 let vehicles = route.Vehicles.map((vehicle, i) => {
-                    return {id: vehicle.VehicleId,
-                            position: [vehicle.Latitude, vehicle.Longitude],
-                            direction: vehicle.DirectionLong,
-                            on_board: vehicle.OnBoard,
-                            deviation: vehicle.Deviation,
-                            op_status: vehicle.OpStatus,
-                            color: route.Color
-                           };
+                    return this.parseVehicle(route, vehicle);
                 });
                 return vehicles;
             });
@@ -71,20 +65,12 @@ class RouteContainer extends Component {
         });
     }
     fetchVehicles() {
-        console.log('fetch vehicles');
         let configuration = new Configuration();
         let url = configuration.base_url + '/rest/Routes/GetVisibleRoutes';
         axios.get(url).then((response) => {
             let vehicles_list = response.data.map((route, index) => {
                 let vehicles = route.Vehicles.map((vehicle, i) => {
-                    return {id: vehicle.VehicleId,
-                            position: [vehicle.Latitude, vehicle.Longitude],
-                            direction: vehicle.DirectionLong,
-                            on_board: vehicle.OnBoard,
-                            deviation: vehicle.Deviation,
-                            op_status: vehicle.OpStatus,
-                            color: route.Color
-                           };
+                    return this.parseVehicle(route, vehicle);
                 });
                 return vehicles;
             });
@@ -98,20 +84,78 @@ class RouteContainer extends Component {
         });
     }
 
+    parseVehicle(route, vehicle) {
+        return {id: vehicle.VehicleId,
+                position: [vehicle.Latitude, vehicle.Longitude],
+                direction: vehicle.DirectionLong,
+                heading: vehicle.Heading,
+                on_board: vehicle.OnBoard,
+                deviation: vehicle.Deviation,
+                op_status: vehicle.OpStatus,
+                color: route.Color,
+                route_id: route.RouteId
+               };
+    }
+
+    generateDashes(index) {
+        // let variants = [
+        //     "1, 15, 1, 15",
+        //     "15, 1, 15, 1",
+        //     "1, 25, 1, 25",
+        //     "25, 1, 25, 1",
+        //     "1, 10, 20, 30, 20, 10, 1",
+        // ];
+        let variants = [
+            "25, 45"
+        ];
+
+        return variants[index % variants.length];
+    }
+
     render() {
-        const routes = this.state.routes.map((route) => {
+        let routes = Object.keys(this.state.routes).map((key) => {
+            let route = this.state.routes[key];
             return (<Route key={route.id}
                     id={route.id}
                     path={route.path}
                     name={route.name}
+                    selected={route.selected}
                     color={route.color} />
                    );
         });
-        const vehicles = this.state.vehicles.map((vehicle) => {
+        let vehicles = this.state.vehicles.map((vehicle) => {
+            let onOpen = () => {
+                let routes = this.state.routes;
+
+                let route = routes[vehicle.route_id];
+                route.selected = true;
+
+                routes[vehicle.route_id] = route;
+                this.setState({routes: routes});
+            }
+            let onClose = () => {
+                let routes = this.state.routes;
+
+                let route = routes[vehicle.route_id];
+                route.selected = false;
+
+                routes[vehicle.route_id] = route;
+                this.setState({routes: routes});
+            }
+
             return (<Bus key={vehicle.id}
                     id={vehicle.id}
                     position={vehicle.position}
-                    color={vehicle.color} />);
+                    heading={vehicle.heading}
+                    route_id={vehicle.route_id}
+                    route_name={this.state.routes[vehicle.route_id].name}
+                    on_board={vehicle.on_board}
+                    status={vehicle.op_status}
+                    deviation={vehicle.deviation}
+                    color={vehicle.color}
+                    onOpen={onOpen}
+                    onClose={onClose}
+                    />);
         });
 
 

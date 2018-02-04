@@ -30,7 +30,7 @@ class BaseMap extends React.Component {
             },
             black_and_white: {
                 url: 'https://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
-                subdomains: null,
+                subdomains: 'abcd',
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }
         }
