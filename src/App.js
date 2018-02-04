@@ -1,19 +1,31 @@
+/* -*- Mode: rjsx -*- */
+
+/*******************************************
+ * Copyright (2018)
+ *  Marcus Dillavou <line72@line72.net>
+ *  http://line72.net
+ *
+ * Montclair:
+ *  https://github.com/line72/montclair
+ *  https://montclair.line72.net
+ *
+ * Licensed Under the GPLv3
+ *******************************************/
+
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import BaseMap from './BaseMap';
+
 import './App.css';
+import './w3.css';
+import 'leaflet/dist/leaflet.css';
+import 'font-awesome/css/font-awesome.min.css';
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+	<div className="App">
+	  <BaseMap />
+	</div>
     );
   }
 }

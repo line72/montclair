@@ -12,11 +12,10 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+class Configuration {
+    constructor() {
+	this.base_url = 'https://realtimebjcta.availtec.com/InfoPoint';
+    }
+}
 
-ReactDOM.render(<App />, document.getElementById('root'));
-registerServiceWorker();
+export default Configuration;
