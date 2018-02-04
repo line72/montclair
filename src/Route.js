@@ -27,11 +27,10 @@ class Route extends Component {
 
         // fetch the kml
         axios.get(this.props.path).then((response) => {
-            //console.log(`Received kml for ${this.props.id}: ${response.data}`);
             // parse the xml and convert to geojson
             let xml = new DOMParser().parseFromString(response.data, 'text/xml');
             let geojson = toGeoJSON.kml(xml);
-            //console.log(`geojson=${geojson}`);
+
             this.setState({
                 geojson: geojson
             });
@@ -40,7 +39,14 @@ class Route extends Component {
     }
 
     render() {
-        const style = {color: `#${this.props.color}`};
+        let style = () => {
+            let w = this.props.selected ? 7 : 1;
+
+            return {
+                color: `#${this.props.color}`,
+                weight: w
+            };
+        };
 
         if (this.state.geojson != null) {
             return (<GeoJSON

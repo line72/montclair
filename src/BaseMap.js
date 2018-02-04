@@ -15,6 +15,7 @@
 import React from 'react';
 import { Map, TileLayer } from 'react-leaflet';
 import RouteContainer from './RouteContainer';
+import Configuration from './Configuration';
 
 class BaseMap extends React.Component {
     constructor() {
@@ -30,13 +31,15 @@ class BaseMap extends React.Component {
             },
             black_and_white: {
                 url: 'https://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
-                subdomains: null,
+                subdomains: 'abcd',
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }
         }
 
+        let configuration = new Configuration();
+
         this.state = {
-            center: [33.5084801, -86.8006611],
+            center: configuration.center,
             zoom: 13,
             tile: tiles.stamen_toner
         };
