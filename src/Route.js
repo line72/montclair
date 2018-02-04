@@ -13,34 +13,30 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import axios from 'axios';
 import { GeoJSON } from 'react-leaflet';
-import toGeoJSON from '@mapbox/togeojson';
+import Bus from './Bus';
+
 
 class Route extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            geojson: null
+            geojson: null,
+            selected: false
         };
 
         // fetch the kml
-        axios.get(this.props.path).then((response) => {
-            // parse the xml and convert to geojson
-            let xml = new DOMParser().parseFromString(response.data, 'text/xml');
-            let geojson = toGeoJSON.kml(xml);
-
+        this.props.route.getPath().then((geojson) => {
             this.setState({
                 geojson: geojson
             });
         });
-
     }
 
     render() {
         let style = () => {
-            let w = this.props.selected ? 7 : 1;
+            let w = this.state.selected ? 7 : 1;
 
             return {
                 color: `#${this.props.color}`,
@@ -48,13 +44,50 @@ class Route extends Component {
             };
         };
 
+        let buses = this.props.vehicles.map((vehicle, index) => {
+            let onOpen = () => {
+                this.setState({
+                    selected: true
+                });
+            }
+            let onClose = () => {
+                this.setState({
+                    selected: false
+                });
+            }
+
+            let route_name = `${this.props.number} - ${this.props.name}`;
+
+            return (
+                <Bus key={vehicle.id}
+                     id={vehicle.id}
+                     position={vehicle.position}
+                     heading={vehicle.heading}
+                     route_id={vehicle.route_id}
+                     route_name={route_name}
+                     on_board={vehicle.on_board}
+                     destination={vehicle.destination}
+                     status={vehicle.op_status}
+                     deviation={vehicle.deviation}
+                     color={this.props.color}
+                     onOpen={onOpen}
+                     onClose={onClose}
+                     />
+            );
+
+        });
+
         if (this.state.geojson != null) {
-            return (<GeoJSON
-                    data={this.state.geojson}
-                    style={style}
-                    />);
+            return (
+                <div>
+                    <GeoJSON
+                        data={this.state.geojson}
+                        style={style} />
+                    {buses}
+                </div>
+            );
         } else {
-            return (<div />);
+            return (<div>{buses}</div>);
         }
     }
 }
