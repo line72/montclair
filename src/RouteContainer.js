@@ -18,6 +18,10 @@ import axios from 'axios';
 import Configuration from './Configuration';
 import Route from './Route';
 import BaseMap from './BaseMap';
+import AgencyList from './AgencyList';
+
+import './w3.css';
+import './RouteContainer.css';
 
 class RouteContainer extends Component {
     constructor() {
@@ -103,7 +107,23 @@ class RouteContainer extends Component {
         // flatten
         let routes = Array.prototype.concat.apply([], routes_list);
 
-        return (<div><BaseMap>{routes}</BaseMap></div>);
+        return ([
+            <AgencyList key="agency-list" agencies={this.state.agencies} />,
+            <div key="main" className="w3-main RouteContainer-main">
+                {/* Push content down on small screens */}
+                <div className="w3-hide-large RouteContainer-header-margin">
+                </div>
+
+                <div className="w3-hide-medium w3-hide-small RouteContainer-header">
+                    <h1 className="RouteContainer-h1">Birmingham Transit</h1>
+                </div>
+
+                <div className="w3-container">
+                    <BaseMap>{routes}</BaseMap>
+                </div>
+            </div>
+            ]
+        );
     }
 }
 
