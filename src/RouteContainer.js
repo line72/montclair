@@ -17,6 +17,7 @@ import update from 'immutability-helper';
 import axios from 'axios';
 import Configuration from './Configuration';
 import Route from './Route';
+import BaseMap from './BaseMap';
 
 class RouteContainer extends Component {
     constructor() {
@@ -102,7 +103,7 @@ class RouteContainer extends Component {
         // flatten
         let routes = Array.prototype.concat.apply([], routes_list);
 
-        return (<div>{routes}</div>);
+        return (<div><BaseMap>{routes}</BaseMap></div>);
     }
 }
 
