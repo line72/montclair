@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 
 import './AgencyList.css';
+import './images/checked.svg';
 
 class AgencyList extends Component {
     onOpen() {
@@ -32,16 +33,22 @@ class AgencyList extends Component {
             let routes = Object.keys(agency.routes).map((key, index) => {
                 let route = agency.routes[key];
                 return (
-                    <button
-                        key={route.id}
-                        className="w3-bar-item w3-button">
-                        {route.name}
-                    </button>
+                    <span className="AgencyList-route w3-bar-item">
+                        <span
+                            key={route.id}
+                            className="AgencyList-route-name">
+                            {route.name}
+                        </span>
+                        <button className="AgencyList-checked w3-button" />
+                    </span>
                 );
             });
 
             return (
-                <span className="AgencyList-agency">{agency.name}{routes}</span>
+                <span className="AgencyList-agency">
+                    <span className="AgencyList-header">{agency.name}</span>
+                    {routes}
+                </span>
             );
         });
 

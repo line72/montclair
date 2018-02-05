@@ -25,6 +25,7 @@ class RouteType {
         this.selected = false;
         this.kml = kml;
         this.polyline = polyline;
+        this.visible = true;
 
         this.vehicles = []
     }

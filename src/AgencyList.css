@@ -2,6 +2,13 @@
 
 }
 
+.AgencyList-header {
+    display: block;
+    text-align: left!important;
+    padding-left: 16px;
+    font-size: 20px;
+}
+
 .AgencyList-sidebar {
     width: 250px!important;
     z-index: 3000!important;
@@ -22,5 +29,35 @@
     padding-top:0px!important;
     padding-bottom:0px!important;
     padding-right:0px!important;
+}
+
+.AgencyList-agency button {
+    /*padding-left: 25px !important;*/
+}
+
+.AgencyList-route {
+    padding-left: 25px !important;
+}
+
+.AgencyList-route-name {
+    display: inline-block;
+    max-width: 160px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.AgencyList-checked {
+    margin-left: auto;
+    margin-right: 0;
+    display: inline-block;
+    float: right;
+    background: url(images/checked.svg) no-repeat;
+    width: 22px;
+    height: 22px;
+}
+
+.AgencyList-unchecked {
+
 }
 
