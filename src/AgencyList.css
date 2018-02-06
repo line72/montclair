@@ -1,0 +1,76 @@
+.AgencyList {
+
+}
+
+.AgencyList-header {
+    display: inline-block;
+    max-width: 160px;
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow: ellipsis;
+    text-align: left!important;
+    padding-left: 0px;
+    font-size: 24px;
+    font-style: italic;
+}
+
+.AgencyList-sidebar {
+    width: 250px!important;
+    z-index: 3000!important;
+}
+
+.AgencyList-sidebar-overlay {
+    cursor: pointer;
+    z-index: 2999!important;
+}
+
+
+.AgencyList-bar-item {
+    font-size: .90em;
+}
+
+.AgencyList-padding-0 {
+    padding-left:0px!important;
+    padding-top:0px!important;
+    padding-bottom:0px!important;
+    padding-right:0px!important;
+}
+
+.AgencyList-agency button {
+    /*padding-left: 25px !important;*/
+}
+
+.AgencyList-route {
+    padding-left: 25px !important;
+}
+
+.AgencyList-route-name {
+    display: inline-block;
+    max-width: 160px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.AgencyList-checked {
+    margin-top: 4px;
+    margin-left: auto;
+    margin-right: 0;
+    display: inline-block;
+    float: right;
+    background: url(images/checked.svg) no-repeat;
+    width: 22px;
+    height: 22px;
+}
+
+.AgencyList-unchecked {
+    margin-top: 4px;
+    margin-left: auto;
+    margin-right: 0;
+    display: inline-block;
+    float: right;
+    background: url(images/unchecked.svg) no-repeat;
+    width: 22px;
+    height: 22px;
+}
+

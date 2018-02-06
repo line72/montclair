@@ -14,7 +14,6 @@
 
 import React from 'react';
 import { Map, TileLayer } from 'react-leaflet';
-import RouteContainer from './RouteContainer';
 import Configuration from './Configuration';
 
 class BaseMap extends React.Component {
@@ -57,7 +56,8 @@ class BaseMap extends React.Component {
                         subdomains={this.state.tile.subdomains}
                         />
 
-                    <RouteContainer />
+                    {this.props.children}
+
                 </Map>
             </div>
         );

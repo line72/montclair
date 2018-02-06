@@ -29,7 +29,7 @@ class AvailtecParser {
                 acc[route.RouteId] = new RouteType({
                     id: route.RouteId,
                     number: route.RouteId,
-                    name: route.ShortName,
+                    name: route.LongName,
                     color: route.Color,
                     kml: this.url + '/Resources/Traces/' + route.RouteTraceFilename
                 });

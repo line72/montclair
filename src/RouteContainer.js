@@ -17,6 +17,12 @@ import update from 'immutability-helper';
 import axios from 'axios';
 import Configuration from './Configuration';
 import Route from './Route';
+import BaseMap from './BaseMap';
+import AgencyList from './AgencyList';
+import LocalStorage from './LocalStorage';
+
+import './w3.css';
+import './RouteContainer.css';
 
 class RouteContainer extends Component {
     constructor() {
@@ -26,16 +32,19 @@ class RouteContainer extends Component {
 
         let agencies = configuration.agencies.map((a) => {
             return {name: a.name,
+                    visible: true,
                     parser: a.parser,
                     routes: {}};
         });
+
+        this.storage = new LocalStorage();
 
         this.state = {
             agencies: agencies
         };
 
 
-        this.getRoutes().then((x) => {
+        this.getRoutes().then((results) => {
             // setup a timer to fetch the vehicles
             this.getVehicles();
             setInterval(() => {this.getVehicles();}, 10000);
@@ -44,9 +53,22 @@ class RouteContainer extends Component {
 
     getRoutes() {
         return axios.all(this.state.agencies.map((a, index) => {
+            a.visible = this.storage.isAgencyVisible(a);
+
             return a.parser.getRoutes().then((routes) => {
+                // the visibility is stored offline in local storage,
+                //  restore it.
+                const r = Object.keys(routes).reduce((acc, key) => {
+                    let route = routes[key];
+
+                    route.visible = this.storage.isRouteVisible(a, route);
+                    acc[key] = route;
+
+                    return acc;
+                }, {});
+
                 // update the agency without mutating the original
-                const agencies = update(this.state.agencies, {[index]: {routes: {$set: routes}}});
+                const agencies = update(this.state.agencies, {[index]: {routes: {$set: r}}});
 
                 this.setState({
                     agencies: agencies
@@ -59,32 +81,73 @@ class RouteContainer extends Component {
 
     getVehicles() {
         return axios.all(this.state.agencies.map((a, index) => {
+            // if an Agency isn't visible, don't update it
+            if (!a.visible) {
+                return {};
+            }
+
             return a.parser.getVehicles().then((vehicle_map) => {
                 Object.keys(vehicle_map).map((route_id) => {
-                    let vehicles = vehicle_map[route_id];
+                    if (a.routes[route_id].visible) {
+                        let vehicles = vehicle_map[route_id];
 
-                    const agencies = update(this.state.agencies,
-                                            {[index]:
-                                             {routes:
-                                              {[route_id]:
-                                               {vehicles:
-                                                {$set: vehicles}}}}});
+                        const agencies = update(this.state.agencies,
+                                                {[index]:
+                                                 {routes:
+                                                  {[route_id]:
+                                                   {vehicles:
+                                                    {$set: vehicles}}}}});
 
-                    this.setState({
-                        agencies: agencies
-                    });
+                        this.setState({
+                            agencies: agencies
+                        });
 
-                    return vehicles;
+                        return vehicles;
+                    }
+                    return [];
                 });
 
                 return {};
             });
         }));
     }
+
+    toggleAgency(agency) {
+        let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
+        const agencies = update(this.state.agencies, {[i]: {visible: {$set: !agency.visible}}});
+
+        this.setState({
+            agencies: agencies
+        });
+
+        // !mwd - we pass agencies, not this.agencies
+        //  since our state update hasn't happened yet!
+        this.storage.updateVisibility(agencies);
+    }
+
+    toggleRoute(agency, route) {
+        let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
+        const agencies = update(this.state.agencies, {[i]: {routes: {[route.id]: {visible: {$set: !route.visible}}}}});
+        this.setState({
+            agencies: agencies
+        });
+
+        // !mwd - we pass agencies, not this.agencies
+        //  since our state update hasn't happened yet!
+        this.storage.updateVisibility(agencies);
+    }
+
     render() {
         let routes_list = this.state.agencies.map((agency) => {
+            if (!agency.visible) {
+                return [];
+            }
             return Object.keys(agency.routes).map((key) => {
                 let route = agency.routes[key];
+
+                if (!route.visible) {
+                    return (null);
+                }
 
                 return (
                     <Route key={route.id}
@@ -102,7 +165,23 @@ class RouteContainer extends Component {
         // flatten
         let routes = Array.prototype.concat.apply([], routes_list);
 
-        return (<div>{routes}</div>);
+        return ([
+                <AgencyList key="agency-list" agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
+            <div key="main" className="w3-main RouteContainer-main">
+                {/* Push content down on small screens */}
+                <div className="w3-hide-large RouteContainer-header-margin">
+                </div>
+
+                <div className="w3-hide-medium w3-hide-small RouteContainer-header">
+                    <h1 className="RouteContainer-h1">Birmingham Transit</h1>
+                </div>
+
+                <div className="">
+                    <BaseMap>{routes}</BaseMap>
+                </div>
+            </div>
+            ]
+        );
     }
 }
 

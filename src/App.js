@@ -13,7 +13,7 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import BaseMap from './BaseMap';
+import RouteContainer from './RouteContainer';
 
 import './App.css';
 import './w3.css';
@@ -24,7 +24,7 @@ class App extends Component {
     render() {
         return (
             <div className="App">
-                <BaseMap />
+                <RouteContainer />
             </div>
         );
     }
