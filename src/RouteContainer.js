@@ -176,7 +176,7 @@ class RouteContainer extends Component {
                     <h1 className="RouteContainer-h1">Birmingham Transit</h1>
                 </div>
 
-                <div className="w3-container">
+                <div className="">
                     <BaseMap>{routes}</BaseMap>
                 </div>
             </div>
