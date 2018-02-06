@@ -19,6 +19,7 @@ import Configuration from './Configuration';
 import Route from './Route';
 import BaseMap from './BaseMap';
 import AgencyList from './AgencyList';
+import LocalStorage from './LocalStorage';
 
 import './w3.css';
 import './RouteContainer.css';
@@ -36,6 +37,8 @@ class RouteContainer extends Component {
                     routes: {}};
         });
 
+        this.storage = new LocalStorage();
+
         this.state = {
             agencies: agencies
         };
@@ -50,15 +53,15 @@ class RouteContainer extends Component {
 
     getRoutes() {
         return axios.all(this.state.agencies.map((a, index) => {
+            a.visible = this.storage.isAgencyVisible(a);
+
             return a.parser.getRoutes().then((routes) => {
                 // the visibility is stored offline in local storage,
                 //  restore it.
                 const r = Object.keys(routes).reduce((acc, key) => {
                     let route = routes[key];
 
-                    if (localStorage.getItem(key) === "false") {
-                        route.visible = false;
-                    }
+                    route.visible = this.storage.isRouteVisible(a, route);
                     acc[key] = route;
 
                     return acc;
@@ -116,6 +119,10 @@ class RouteContainer extends Component {
         this.setState({
             agencies: agencies
         });
+
+        // !mwd - we pass agencies, not this.agencies
+        //  since our state update hasn't happened yet!
+        this.storage.updateVisibility(agencies);
     }
 
     toggleRoute(agency, route) {
@@ -125,8 +132,9 @@ class RouteContainer extends Component {
             agencies: agencies
         });
 
-        //!mwd - this is bad, it assumes routes have a globally unique id!
-        localStorage.setItem(route.id, !route.visible);
+        // !mwd - we pass agencies, not this.agencies
+        //  since our state update hasn't happened yet!
+        this.storage.updateVisibility(agencies);
     }
 
     render() {
