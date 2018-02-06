@@ -78,12 +78,12 @@ class AgencyList extends Component {
 
                 {/* Top menu on small screens */}
                 <header className="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
-                    <div className="w3-bar-item w3-padding-24 w3-wide AgencyList-bar-item">
+                    <span className="AgencyList-bar-item">
                         Birmingham Transit
-                    </div>
-                    <button className="w3-bar-item w3-button w3-padding-24 w3-right" onClick={() => this.onOpen()}>
+                    </span>
+                    <span className="w3-button w3-right" onClick={() => this.onOpen()}>
                         <i className="fa fa-bars"></i>
-                    </button>
+                    </span>
                 </header>
 
                 {/* Overlay effect with sidebar */}
