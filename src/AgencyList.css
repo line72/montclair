@@ -3,7 +3,11 @@
 }
 
 .AgencyList-header {
-    display: block;
+    display: inline-block;
+    max-width: 160px;
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow: ellipsis;
     text-align: left!important;
     padding-left: 16px;
     font-size: 20px;

@@ -31,6 +31,7 @@ class RouteContainer extends Component {
 
         let agencies = configuration.agencies.map((a) => {
             return {name: a.name,
+                    visible: true,
                     parser: a.parser,
                     routes: {}};
         });
@@ -43,7 +44,7 @@ class RouteContainer extends Component {
         this.getRoutes().then((results) => {
             // setup a timer to fetch the vehicles
             this.getVehicles();
-            setInterval(() => {this.getVehicles();}, 10000);
+            setInterval(() => {this.getVehicles();}, 120000);
         });
     }
 
@@ -103,6 +104,15 @@ class RouteContainer extends Component {
         }));
     }
 
+    toggleAgency(agency) {
+        let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
+        const agencies = update(this.state.agencies, {[i]: {visible: {$set: !agency.visible}}});
+
+        this.setState({
+            agencies: agencies
+        });
+    }
+
     toggleRoute(agency, route) {
         let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
         const agencies = update(this.state.agencies, {[i]: {routes: {[route.id]: {visible: {$set: !route.visible}}}}});
@@ -116,6 +126,9 @@ class RouteContainer extends Component {
 
     render() {
         let routes_list = this.state.agencies.map((agency) => {
+            if (!agency.visible) {
+                return [];
+            }
             return Object.keys(agency.routes).map((key) => {
                 let route = agency.routes[key];
 
@@ -140,7 +153,7 @@ class RouteContainer extends Component {
         let routes = Array.prototype.concat.apply([], routes_list);
 
         return ([
-            <AgencyList key="agency-list" agencies={this.state.agencies} onClick={(agency, route) => this.toggleRoute(agency, route) } />,
+                <AgencyList key="agency-list" agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
             <div key="main" className="w3-main RouteContainer-main">
                 {/* Push content down on small screens */}
                 <div className="w3-hide-large RouteContainer-header-margin">

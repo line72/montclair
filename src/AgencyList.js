@@ -42,15 +42,21 @@ class AgencyList extends Component {
                             {route.name}
                         </span>
                         <button className={is_checked + " w3-button"}
-                                onClick={() => this.props.onClick(agency, route) }
+                                onClick={() => this.props.onRouteClick(agency, route) }
                             />
                     </span>
                 );
             });
 
+            let is_checked = agency.visible ? "AgencyList-checked" : "AgencyList-unchecked";
             return (
                 <span key={agency.name} className="AgencyList-agency">
-                    <span className="AgencyList-header">{agency.name}</span>
+                    <span className="w3-bar-item">
+                        <span className="AgencyList-header">{agency.name}</span>
+                        <button className={is_checked + " w3-button"}
+                                onClick={() => this.props.onAgencyClick(agency) }
+                            />
+                    </span>
                     {routes}
                 </span>
             );
