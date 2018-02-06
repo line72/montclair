@@ -43,7 +43,7 @@ class RouteContainer extends Component {
         this.getRoutes().then((x) => {
             // setup a timer to fetch the vehicles
             this.getVehicles();
-            setInterval(() => {this.getVehicles();}, 10000);
+            setInterval(() => {this.getVehicles();}, 120000);
         });
     }
 
@@ -86,10 +86,23 @@ class RouteContainer extends Component {
             });
         }));
     }
+
+    toggleRoute(agency, route) {
+        let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
+        const agencies = update(this.state.agencies, {[i]: {routes: {[route.id]: {visible: {$set: !route.visible}}}}});
+        this.setState({
+            agencies: agencies
+        });
+    }
+
     render() {
         let routes_list = this.state.agencies.map((agency) => {
             return Object.keys(agency.routes).map((key) => {
                 let route = agency.routes[key];
+
+                if (!route.visible) {
+                    return (null);
+                }
 
                 return (
                     <Route key={route.id}
@@ -108,7 +121,7 @@ class RouteContainer extends Component {
         let routes = Array.prototype.concat.apply([], routes_list);
 
         return ([
-            <AgencyList key="agency-list" agencies={this.state.agencies} />,
+            <AgencyList key="agency-list" agencies={this.state.agencies} onClick={(agency, route) => this.toggleRoute(agency, route) } />,
             <div key="main" className="w3-main RouteContainer-main">
                 {/* Push content down on small screens */}
                 <div className="w3-hide-large RouteContainer-header-margin">
