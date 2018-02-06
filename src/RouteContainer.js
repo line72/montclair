@@ -44,7 +44,7 @@ class RouteContainer extends Component {
         this.getRoutes().then((results) => {
             // setup a timer to fetch the vehicles
             this.getVehicles();
-            setInterval(() => {this.getVehicles();}, 120000);
+            setInterval(() => {this.getVehicles();}, 10000);
         });
     }
 
@@ -78,6 +78,11 @@ class RouteContainer extends Component {
 
     getVehicles() {
         return axios.all(this.state.agencies.map((a, index) => {
+            // if an Agency isn't visible, don't update it
+            if (!a.visible) {
+                return {};
+            }
+
             return a.parser.getVehicles().then((vehicle_map) => {
                 Object.keys(vehicle_map).map((route_id) => {
                     if (a.routes[route_id].visible) {
