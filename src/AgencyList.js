@@ -32,14 +32,14 @@ class AgencyList extends Component {
         const agencies = this.props.agencies.map((agency, index) => {
             let routes = Object.keys(agency.routes).map((key, index) => {
                 let route = agency.routes[key];
-                let is_checked = route.visible ? "AgencyList-checked" : "AgencyList-unchecked";
+                let is_checked = (agency.visible && route.visible) ? "AgencyList-checked" : "AgencyList-unchecked";
 
                 return (
                     <span key={route.id} className="AgencyList-route w3-bar-item">
                         <span
                             key={route.id}
-                            className="AgencyList-route-name">
-                            {route.name}
+                            className="AgencyList-route-name" title={route.number + " " + route.name}>
+                            {route.number + " " + route.name}
                         </span>
                         <button className={is_checked + " w3-button"}
                                 onClick={() => this.props.onRouteClick(agency, route) }
@@ -52,7 +52,11 @@ class AgencyList extends Component {
             return (
                 <span key={agency.name} className="AgencyList-agency">
                     <span className="w3-bar-item">
-                        <span className="AgencyList-header">{agency.name}</span>
+                        <span className="AgencyList-header">
+                            {agency.name}
+                            <i className="fa fa-caret-down w3-margin-left"></i>
+                        </span>
+
                         <button className={is_checked + " w3-button"}
                                 onClick={() => this.props.onAgencyClick(agency) }
                             />
