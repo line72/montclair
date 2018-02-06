@@ -40,7 +40,7 @@ class RouteContainer extends Component {
         };
 
 
-        this.getRoutes().then((x) => {
+        this.getRoutes().then((results) => {
             // setup a timer to fetch the vehicles
             this.getVehicles();
             setInterval(() => {this.getVehicles();}, 10000);
@@ -50,8 +50,21 @@ class RouteContainer extends Component {
     getRoutes() {
         return axios.all(this.state.agencies.map((a, index) => {
             return a.parser.getRoutes().then((routes) => {
+                // the visibility is stored offline in local storage,
+                //  restore it.
+                const r = Object.keys(routes).reduce((acc, key) => {
+                    let route = routes[key];
+
+                    if (localStorage.getItem(key) === "false") {
+                        route.visible = false;
+                    }
+                    acc[key] = route;
+
+                    return acc;
+                }, {});
+
                 // update the agency without mutating the original
-                const agencies = update(this.state.agencies, {[index]: {routes: {$set: routes}}});
+                const agencies = update(this.state.agencies, {[index]: {routes: {$set: r}}});
 
                 this.setState({
                     agencies: agencies
@@ -96,6 +109,9 @@ class RouteContainer extends Component {
         this.setState({
             agencies: agencies
         });
+
+        //!mwd - this is bad, it assumes routes have a globally unique id!
+        localStorage.setItem(route.id, !route.visible);
     }
 
     render() {
