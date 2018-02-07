@@ -90,7 +90,7 @@ class RouteContainer extends Component {
             // update our agency
             return a.parser.getVehicles().then((vehicle_map) => {
                 let routes = Object.keys(vehicle_map).reduce((acc, route_id) => {
-                    if (a.routes[route_id].visible) {
+                    if (a.routes[route_id] && a.routes[route_id].visible) {
                         let vehicles = vehicle_map[route_id];
                         // sort vehicles based on id
                         vehicles.sort((a, b) => { return a.id <= b.id; });
