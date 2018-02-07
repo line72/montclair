@@ -83,33 +83,46 @@ class RouteContainer extends Component {
         return axios.all(this.state.agencies.map((a, index) => {
             // if an Agency isn't visible, don't update it
             if (!a.visible) {
-                return {};
+                return {name: a.name,
+                        routes: a.routes};
             }
 
+            // update our agency
             return a.parser.getVehicles().then((vehicle_map) => {
-                Object.keys(vehicle_map).map((route_id) => {
+                let routes = Object.keys(vehicle_map).reduce((acc, route_id) => {
                     if (a.routes[route_id].visible) {
                         let vehicles = vehicle_map[route_id];
+                        // sort vehicles based on id
+                        vehicles.sort((a, b) => { return a.id <= b.id; });
 
-                        const agencies = update(this.state.agencies,
-                                                {[index]:
-                                                 {routes:
-                                                  {[route_id]:
-                                                   {vehicles:
-                                                    {$set: vehicles}}}}});
+                        // create a new map with the update
+                        //  we like immutability.
+                        const updated_routes = update(acc,
+                                                      {[route_id]:
+                                                       {vehicles:
+                                                        {$set: vehicles}}});
 
-                        this.setState({
-                            agencies: agencies
-                        });
-
-                        return vehicles;
+                        return updated_routes;
+                    } else {
+                        // don't update the state
+                        return acc;
                     }
-                    return [];
-                });
+                }, this.state.agencies[index].routes);
 
-                return {};
+                return {name: a.name,
+                        routes: routes};
             });
-        }));
+        })).then((results) => {
+            let agencies = results.map((r) => {
+                let i = this.state.agencies.findIndex((e) => {return e.name === r.name});
+
+                return update(this.state.agencies, {[i]: {routes: {$set: r.routes}}})[i];
+            });
+
+            this.setState({
+               agencies: agencies
+            });
+        });
     }
 
     toggleAgency(agency) {
