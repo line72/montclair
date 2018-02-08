@@ -48,6 +48,20 @@ class AvailtecParser {
             let vehicles = response.data.reduce((acc, route) => {
                 let vehicles = route.Vehicles.map((vehicle, i) => {
                     return this.parseVehicle(route, vehicle);
+                }).filter((v) => {
+                    // filter vehicles not within the bounds
+                    // !mwd - we expand the search region a little bit
+                    //  so that vehicles don't jump in and out of the screen
+                    let epsilon = 0.008;
+                    let bottomLeft = [bounds["_southWest"]["lat"] - epsilon, bounds["_southWest"]["lng"] - epsilon];
+                    let topRight = [bounds["_northEast"]["lat"] + epsilon, bounds["_northEast"]["lng"] + epsilon];
+
+                    if (v.position[0] >= bottomLeft[0] && v.position[0] <= topRight[0] &&
+                        v.position[1] >= bottomLeft[1] && v.position[1] <= topRight[1]) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 });
                 acc[route.RouteId] = vehicles;
 
