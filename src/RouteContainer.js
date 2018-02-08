@@ -38,6 +38,7 @@ class RouteContainer extends Component {
         });
 
         this.storage = new LocalStorage();
+        this.bounds = null;
 
         this.state = {
             agencies: agencies
@@ -88,7 +89,7 @@ class RouteContainer extends Component {
             }
 
             // update our agency
-            return a.parser.getVehicles().then((vehicle_map) => {
+            return a.parser.getVehicles(this.bounds).then((vehicle_map) => {
                 let routes = Object.keys(vehicle_map).reduce((acc, route_id) => {
                     if (a.routes[route_id] && a.routes[route_id].visible) {
                         let vehicles = vehicle_map[route_id];
@@ -150,6 +151,10 @@ class RouteContainer extends Component {
         this.storage.updateVisibility(agencies);
     }
 
+    onBoundsChanged = (bounds) => {
+        this.bounds = bounds;
+    }
+
     render() {
         let routes_list = this.state.agencies.map((agency) => {
             if (!agency.visible) {
@@ -190,7 +195,7 @@ class RouteContainer extends Component {
                 </div>
 
                 <div className="">
-                    <BaseMap>{routes}</BaseMap>
+                    <BaseMap onBoundsChanged={this.onBoundsChanged}>{routes}</BaseMap>
                 </div>
             </div>
             ]

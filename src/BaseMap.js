@@ -13,8 +13,9 @@
  *******************************************/
 
 import React from 'react';
-import { Map, TileLayer } from 'react-leaflet';
+import { TileLayer } from 'react-leaflet';
 import Configuration from './Configuration';
+import BoundsMap from './BoundsMap';
 
 class BaseMap extends React.Component {
     constructor() {
@@ -44,12 +45,18 @@ class BaseMap extends React.Component {
         };
     }
 
+    onBoundsChanged = (bounds) => {
+        if (this.props.onBoundsChanged) {
+            this.props.onBoundsChanged(bounds);
+        }
+    }
+
     render() {
         const position = this.state.center;
 
         return (
             <div className="map-container">
-                <Map center={position} zoom={this.state.zoom} zoomControl={false}>
+                <BoundsMap center={position} zoom={this.state.zoom} zoomControl={false} onBoundsChanged={this.onBoundsChanged}>
                     <TileLayer
                         attribution={this.state.tile.attribution}
                         url={this.state.tile.url}
@@ -58,7 +65,7 @@ class BaseMap extends React.Component {
 
                     {this.props.children}
 
-                </Map>
+                </BoundsMap>
             </div>
         );
     }

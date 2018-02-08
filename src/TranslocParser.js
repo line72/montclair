@@ -69,8 +69,12 @@ class TranslocParser {
         });
     }
 
-    getVehicles() {
+    getVehicles(bounds) {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
+
+        if (bounds != null) {
+            url=`${url}&geo_area=${bounds["_southWest"]["lat"]},${bounds["_southWest"]["lng"]}|${bounds["_northEast"]["lat"]},${bounds["_northEast"]["lng"]}`;
+        }
 
         return this.requestor.get(url).then((response) => {
             let vehicle_data = response.data.data[this.agency_id] || []
