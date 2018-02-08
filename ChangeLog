@@ -1,4 +1,7 @@
-2018-02-06  Marcus Dillavou  <marcus.dillavou@helplightning.com>
+2018-02-07  Marcus Dillavou  <line72@line72.net>
+	* ISSUE-7 - Optimize requests and state changes
+
+2018-02-06  Marcus Dillavou  <line72@line72.net>
 	* ISSUE-3 - Allow hiding/showing of routes
 
 2018-02-04  Marcus Dillavou  <line72@line72.net>

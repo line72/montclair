@@ -69,8 +69,19 @@ class TranslocParser {
         });
     }
 
-    getVehicles() {
+    getVehicles(bounds) {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
+
+        if (bounds != null) {
+            // filter vehicles not within the bounds
+            // !mwd - we expand the search region a little bit
+            //  so that vehicles don't jump in and out of the screen
+            let epsilon = 0.008;
+            let bottomLeft = [bounds["_southWest"]["lat"] - epsilon, bounds["_southWest"]["lng"] - epsilon];
+            let topRight = [bounds["_northEast"]["lat"] + epsilon, bounds["_northEast"]["lng"] + epsilon];
+
+            url=`${url}&geo_area=${bottomLeft[0]},${bottomLeft[1]}|${topRight[0]},${topRight[1]}`;
+        }
 
         return this.requestor.get(url).then((response) => {
             let vehicle_data = response.data.data[this.agency_id] || []
