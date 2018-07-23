@@ -19,6 +19,7 @@ import Configuration from './Configuration';
 import Route from './Route';
 import BaseMap from './BaseMap';
 import AgencyList from './AgencyList';
+import FirstRunHint from './FirstRunHint';
 import LocalStorage from './LocalStorage';
 
 import './w3.css';
@@ -197,6 +198,7 @@ class RouteContainer extends Component {
                 </div>
 
                 <div className="">
+                    <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
                     <BaseMap onBoundsChanged={this.onBoundsChanged}>{routes}</BaseMap>
                 </div>
             </div>

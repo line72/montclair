@@ -74,6 +74,9 @@ class LocalStorage {
             return acc;
         }, {});
 
+        // user has selected something
+        this.state.is_first_run = false;
+
         this.saveState();
     }
 
