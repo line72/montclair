@@ -4,7 +4,7 @@ set -ex
 
 svg=../src/logo.svg
 
-size=(16 24 32 48 72 96 144 152 192 196)
+size=(16 24 32 48 72 96 144 152 192 196 512)
 
 echo Making bitmaps from your svg...
 
