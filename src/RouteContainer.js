@@ -19,6 +19,7 @@ import Configuration from './Configuration';
 import Route from './Route';
 import BaseMap from './BaseMap';
 import AgencyList from './AgencyList';
+import FirstRunHint from './FirstRunHint';
 import LocalStorage from './LocalStorage';
 
 import './w3.css';
@@ -183,8 +184,10 @@ class RouteContainer extends Component {
         // flatten
         let routes = Array.prototype.concat.apply([], routes_list);
 
+        let first_run = this.storage.isFirstRun();
+
         return ([
-                <AgencyList key="agency-list" agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
+                <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
             <div key="main" className="w3-main RouteContainer-main">
                 {/* Push content down on small screens */}
                 <div className="w3-hide-large RouteContainer-header-margin">
@@ -195,6 +198,7 @@ class RouteContainer extends Component {
                 </div>
 
                 <div className="">
+                    <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
                     <BaseMap onBoundsChanged={this.onBoundsChanged}>{routes}</BaseMap>
                 </div>
             </div>

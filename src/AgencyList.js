@@ -29,6 +29,12 @@ class AgencyList extends Component {
     }
 
     render() {
+        const first_run = this.props.isFirstRun;
+        let display = '';
+        if (first_run) { /* pop open the sidebar */
+            display = 'block';
+        }
+
         const agencies = this.props.agencies.map((agency, index) => {
             let routes = Object.keys(agency.routes).map((key, index) => {
                 let route = agency.routes[key];
@@ -68,7 +74,7 @@ class AgencyList extends Component {
 
         return(
             <div>
-                <nav className="w3-sidebar w3-bar-block w3-white w3-collapse w3-top AgencyList-sidebar" id="sidebar">
+                <nav className="w3-sidebar w3-bar-block w3-white w3-collapse w3-top AgencyList-sidebar" id="sidebar" style={{display: display}}>
                     {/* Close Button */}
                     <div className="w3-container w3-display-container">
                         <i onClick={() => this.onClose()} className="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
@@ -100,6 +106,7 @@ class AgencyList extends Component {
                 <div className="w3-overlay w3-hide-large AgencyList-sidebar-overlay"
                      title="Close side menu"
                      id="sidebar-overlay"
+                     style={{display: display}}
                      onClick={() => this.onClose()}>
                 </div>
             </div>
