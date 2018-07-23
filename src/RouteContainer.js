@@ -183,8 +183,10 @@ class RouteContainer extends Component {
         // flatten
         let routes = Array.prototype.concat.apply([], routes_list);
 
+        let first_run = this.storage.isFirstRun();
+
         return ([
-                <AgencyList key="agency-list" agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
+                <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
             <div key="main" className="w3-main RouteContainer-main">
                 {/* Push content down on small screens */}
                 <div className="w3-hide-large RouteContainer-header-margin">

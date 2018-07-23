@@ -14,11 +14,15 @@
 
 class LocalStorage {
     constructor() {
-        let v = localStorage.getItem('visibility');
+        let v = localStorage.getItem('state');
         if (v !== null) {
-            this.visibility = JSON.parse(v);
+            this.state = this.loadState(v);
+
+            // no longer the first time
+            this.state.is_first_run = false;
+            this.saveState();
         } else {
-            this.visibility = {}
+            this.state = this.initialState();
         }
     }
 
@@ -30,12 +34,12 @@ class LocalStorage {
         //  agency2_id: {visible: false,
         //               routes: {route1_id: true,
         //                       route2_id: true}}}
-        return this.visibility;
+        return this.state.visibility;
     }
 
     isAgencyVisible(agency) {
-        if (agency.name in this.visibility) {
-            return this.visibility[agency.name]['visible'];
+        if (agency.name in this.state.visibility) {
+            return this.state.visibility[agency.name]['visible'];
         }
 
         // default to true
@@ -43,17 +47,21 @@ class LocalStorage {
     }
 
     isRouteVisible(agency, route) {
-        if (agency.name in this.visibility &&
-            route.id in this.visibility[agency.name]['routes']) {
-            return this.visibility[agency.name]['routes'][route.id];
+        if (agency.name in this.state.visibility &&
+            route.id in this.state.visibility[agency.name]['routes']) {
+            return this.state.visibility[agency.name]['routes'][route.id];
         }
 
         // default to false
         return false;
     }
 
+    isFirstRun() {
+        return this.state.is_first_run;
+    }
+
     updateVisibility(agencies) {
-        this.visibility = agencies.reduce((acc, agency) => {
+        this.state.visibility = agencies.reduce((acc, agency) => {
             let route_keys = Object.keys(agency.routes).reduce((acc2, key) => {
                 let route = agency.routes[key];
 
@@ -66,7 +74,33 @@ class LocalStorage {
             return acc;
         }, {});
 
-        localStorage.setItem('visibility', JSON.stringify(this.visibility));
+        this.saveState();
+    }
+
+    initialState() {
+        return {
+            is_first_run: true,
+            visibility: {}
+        }
+    }
+
+    loadState(v) {
+        let state = JSON.parse(v);
+        console.log(`state=${v}`);
+        console.log(`state=${state}`);
+        console.log(`${Object.keys(state)}`);
+
+        // validate and if fails reset
+        if (!('is_first_run' in state)) {
+            console.log(`resettings`);
+            state = this.initialState();
+        }
+
+        return state;
+    }
+
+    saveState() {
+        localStorage.setItem('state', JSON.stringify(this.state));
     }
 }
 
