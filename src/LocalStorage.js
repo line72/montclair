@@ -48,8 +48,8 @@ class LocalStorage {
             return this.visibility[agency.name]['routes'][route.id];
         }
 
-        // default to true
-        return true;
+        // default to false
+        return false;
     }
 
     updateVisibility(agencies) {
