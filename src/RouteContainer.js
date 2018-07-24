@@ -39,7 +39,9 @@ class RouteContainer extends Component {
         });
 
         this.storage = new LocalStorage();
-        this.bounds = null;
+        this.initialViewport = this.storage.state.viewport;
+        this.bounds = this.storage.state.bounds;
+        this.has_fetched_routes = false;
 
         this.state = {
             agencies: agencies
@@ -47,6 +49,7 @@ class RouteContainer extends Component {
 
 
         this.getRoutes().then((results) => {
+            this.has_fetched_routes = true;
             // setup a timer to fetch the vehicles
             this.getVehicles();
             setInterval(() => {this.getVehicles();}, 10000);
@@ -82,6 +85,9 @@ class RouteContainer extends Component {
     }
 
     getVehicles() {
+        if (!this.has_fetched_routes)
+            return Promise.resolve({});
+
         return axios.all(this.state.agencies.map((a, index) => {
             // if an Agency isn't visible, don't update it
             if (!a.visible) {
@@ -154,6 +160,16 @@ class RouteContainer extends Component {
 
     onBoundsChanged = (bounds) => {
         this.bounds = bounds;
+
+        // save the state
+        this.storage.updateBounds(bounds);
+
+        // reload the vehicles
+        this.getVehicles();
+    }
+
+    onViewportChanged = (viewport) => {
+        this.storage.updateViewport(viewport);
     }
 
     render() {
@@ -199,7 +215,13 @@ class RouteContainer extends Component {
 
                 <div className="">
                     <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
-                    <BaseMap onBoundsChanged={this.onBoundsChanged}>{routes}</BaseMap>
+                    <BaseMap
+                        initialViewport={this.initialViewport}
+                        onBoundsChanged={this.onBoundsChanged}
+                        onViewportChanged={this.onViewportChanged}
+                        >
+                        {routes}
+                    </BaseMap>
                 </div>
             </div>
             ]
