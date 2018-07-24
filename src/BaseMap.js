@@ -39,6 +39,7 @@ class BaseMap extends React.Component {
         let configuration = new Configuration();
 
         this.state = {
+            initial_viewport: true,
             center: configuration.center,
             zoom: 13,
             tile: tiles.stamen_toner
@@ -51,12 +52,42 @@ class BaseMap extends React.Component {
         }
     }
 
+    onViewportChanged = (viewport) => {
+        if (this.props.onViewportChanged) {
+            this.props.onViewportChanged(viewport);
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        // we only want to use the viewport
+        //  on initialization
+        if (this.state.initial_viewport && prevProps.initialViewport) {
+            this.setState({initial_viewport: false});
+        }
+    }
+
     render() {
-        const position = this.state.center;
+        let extra_props = {};
+        if (this.props.initialViewport && this.state.initial_viewport != null) {
+            extra_props = {
+                viewport: this.props.initialViewport
+            };
+        } else {
+            extra_props = {
+                center: this.state.center,
+                zoom: this.state.zoom
+            };
+        }
 
         return (
             <div className="map-container">
-                <BoundsMap center={position} zoom={this.state.zoom} zoomControl={false} onBoundsChanged={this.onBoundsChanged}>
+                <BoundsMap
+                    zoomControl={false}
+                    onBoundsChanged={this.onBoundsChanged}
+                    onViewportDidChange={this.onViewportChanged}
+                    {...extra_props}
+                    >
+
                     <TileLayer
                         attribution={this.state.tile.attribution}
                         url={this.state.tile.url}

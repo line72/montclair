@@ -80,26 +80,35 @@ class LocalStorage {
         this.saveState();
     }
 
+    updateBounds(bounds) {
+        this.state.bounds = bounds;
+        this.saveState();
+    }
+
+    updateViewport(viewport) {
+        this.state.viewport = viewport;
+        this.saveState();
+    }
+
     initialState() {
         return {
             is_first_run: true,
+            bounds: null,
+            viewport: null,
             visibility: {}
         }
     }
 
     loadState(v) {
+        let initial_state = this.initialState();
         let state = JSON.parse(v);
-        console.log(`state=${v}`);
-        console.log(`state=${state}`);
-        console.log(`${Object.keys(state)}`);
 
-        // validate and if fails reset
-        if (!('is_first_run' in state)) {
-            console.log(`resettings`);
-            state = this.initialState();
-        }
+        let combined = {
+            ...initial_state,
+            ...state
+        };
 
-        return state;
+        return combined;
     }
 
     saveState() {
