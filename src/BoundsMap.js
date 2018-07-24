@@ -31,8 +31,14 @@ class BoundsMap extends Map {
     onViewportChanged = () => {
         //super.onViewportChanged();
 
+        let viewport = {center: this.leafletElement.getCenter(),
+                        zoom: this.leafletElement.getZoom()};
+
         if (this.props.onBoundsChanged) {
             this.props.onBoundsChanged(this.leafletElement.getBounds());
+        }
+        if (this.props.onViewportDidChange) {
+            this.props.onViewportDidChange(viewport);
         }
     }
 }
