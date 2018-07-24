@@ -25,6 +25,17 @@
     <noscript>
       You need to enable JavaScript to run this app.
     </noscript>
+    <script>
+      window.addEventListener('beforeinstallprompt', event => {
+          event.preventDefault();
+          var button = document.querySelector('button');
+          button.removeAttribute('hidden');
+          button.addEventListener('click', () => {
+              event.prompt();
+              button.setAttribute('disabled', true);
+          });
+      });
+    </script>
     <div id="root"></div>
   </body>
 </html>
