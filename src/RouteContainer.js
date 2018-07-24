@@ -40,6 +40,7 @@ class RouteContainer extends Component {
 
         this.storage = new LocalStorage();
         this.bounds = null;
+        this.has_fetched_routes = false;
 
         this.state = {
             agencies: agencies
@@ -47,6 +48,7 @@ class RouteContainer extends Component {
 
 
         this.getRoutes().then((results) => {
+            this.has_fetched_routes = true;
             // setup a timer to fetch the vehicles
             this.getVehicles();
             setInterval(() => {this.getVehicles();}, 10000);
@@ -82,6 +84,9 @@ class RouteContainer extends Component {
     }
 
     getVehicles() {
+        if (!this.has_fetched_routes)
+            return Promise.resolve({});
+
         return axios.all(this.state.agencies.map((a, index) => {
             // if an Agency isn't visible, don't update it
             if (!a.visible) {
@@ -154,6 +159,9 @@ class RouteContainer extends Component {
 
     onBoundsChanged = (bounds) => {
         this.bounds = bounds;
+
+        // reload the vehicles
+        this.getVehicles();
     }
 
     render() {
