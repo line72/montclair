@@ -1,3 +1,6 @@
+2018-07-30  Marcus Dillavou  <line72@line72.net>
+	* ISSUE-9 - Support Progressive Web App Guidelines
+
 2018-07-24  Marcus Dillavou  <line72@line72.net>
 	* ISSUE-12 - Store the last viewport
 	* ISSUE-13 - After viewport change, reload vehicle locations

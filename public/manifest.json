@@ -1,15 +1,33 @@
 {
-  "short_name": "Montclair",
-  "name": "Montclair Bus Tracker",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    }
-  ],
-  "start_url": "./index.html",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+    "short_name": "Montclair",
+    "name": "Montclair",
+    "description": "Montclair Bus Tracker for Birmingham, AL",
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "sizes": "196x196 192x192 152x152 144x144 96x96 72x72 48x48 32x32 24x24 16x16",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "app-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "./index.html",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff",
+    "prefer_related_applications": true,
+    "related_applications": [
+        {
+	    "platform": "play",
+	    "url": "https://play.google.com/store/apps/details?id=net.line72.montclair",
+	    "id": "net.line72.montclair"
+        },
+        {
+            "platform": "itunes",
+            "url": "https://itunes.apple.com/us/app/montclair/id1418953482"
+        }
+    ]
 }

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="theme-color" content="#000000">
+    <meta name="apple-itunes-app" content="app-id=1418953482">
     <!--
       manifest.json provides metadata used when your web app is added to the
       homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
@@ -25,6 +26,25 @@
     <noscript>
       You need to enable JavaScript to run this app.
     </noscript>
+    <!-- <script> -->
+    <!--   window.addEventListener('beforeinstallprompt', event => { -->
+    <!--       event.preventDefault(); -->
+    <!--       var button = document.querySelector('button'); -->
+    <!--       button.removeAttribute('hidden'); -->
+    <!--       button.addEventListener('click', () => { -->
+    <!--           event.prompt(); -->
+    <!--           button.setAttribute('disabled', true); -->
+    <!--       }); -->
+    <!--   }); -->
+      <!-- </script> -->
+
+    <!-- fix for viewports and apple app banner -->
+    <!-- https://stackoverflow.com/questions/27125096/why-are-smart-app-banners-partially-completely-hidden-in-safari-when-i-have-view -->
+    <script>
+      window.onload = function() {
+          window.scrollTo(0, -100);
+      };
+    </script>
     <div id="root"></div>
   </body>
 </html>
