@@ -26,12 +26,18 @@ class Configuration {
             {
                 name: 'BJCTA',
                 parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
-            },
-            {
-                name: 'UAB',
-                parser: new TranslocParser(this.transloc_key, '395')
             }
         ]
+        // this.agencies = [
+        //     {
+        //         name: 'BJCTA',
+        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
+        //     },
+        //     {
+        //         name: 'UAB',
+        //         parser: new TranslocParser(this.transloc_key, '395')
+        //     }
+        // ]
 
         // // Raleigh, NC
         // this.center = [35.7740151,-78.6449387];
