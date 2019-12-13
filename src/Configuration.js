@@ -66,7 +66,7 @@ class Configuration {
         this.center = [40.469178, -106.823354];
         this.agencies = [
             {
-                name: 'Steamboat Springs',
+                name: 'Routes',
                 parser: new RouteShoutParser('', '', 'https://steamboatspringstransit.routematch.com/')
             }
         ];

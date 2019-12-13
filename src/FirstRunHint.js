@@ -24,7 +24,7 @@ class FirstRunHint extends Component {
         }
 
         return (<div className="FirstRunHint w3-hide-medium w3-hide-small" style={{display: display}}>
-                Welcome to Birmingham, AL's Real Time Bus Tracker.<br /><br />
+                Welcome to Steamboat Spring, CO's Real Time Bus Tracker.<br /><br />
                 Please select one or more routes to begin!
                 </div>);
     }
