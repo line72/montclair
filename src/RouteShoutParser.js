@@ -102,10 +102,9 @@ class RouteShoutParser {
                 });
             });
 
-            Promise.allSettled(requests).then((results) => {
-                console.log('results=', results);
+            Promise.all(requests).then((results) => {
                 const vehicle_data = results.reduce((acc, result) => {
-                    const [idx, vehicles] = result.value;
+                    const [idx, vehicles] = result;
                     acc[idx] = vehicles;
 
                     return acc;
