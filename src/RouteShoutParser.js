@@ -47,21 +47,33 @@ class RouteShoutParser {
     getRoutes() {
         // !mwd - TODO, will need to use routeshout api to
         //  get this list
-
         return new Promise((resolve, reject) => {
-            let r = this.routes.reduce((acc, route) => {
-                const [idx, name, color] = route;
-                acc[idx] = new RouteType({
-                    id: idx,
-                    number: idx,
-                    name: name,
-                    color: color
+            const requests = this.routes.map((r) => {
+                const [idx, name, color] = r;
+                const url = `/feed/landRoute/byRoute/${name}`;
+                return this.requestor2.get(url).then((response) => {
+                    // generate a list of lat/long as a polyine
+                    const polyline = this.generatePolyline(response.data);
+
+                    return new RouteType({
+                        id: idx,
+                        number: idx,
+                        name: name,
+                        color: color,
+                        polyline: polyline
+                    });
                 });
+            });
 
-                return acc;
-            }, {});
+            Promise.all(requests).then((results) => {
+                const route_data = results.reduce((acc, result) => {
+                    acc[result.id] = result;
 
-            resolve(r);
+                    return acc;
+                }, {});
+
+                resolve(route_data);
+            });
         });
     }
 
@@ -111,6 +123,14 @@ class RouteShoutParser {
                 }, {});
 
                 resolve(vehicle_data);
+            });
+        });
+    }
+
+    generatePolyline(data) {
+        return data.data.map((r) => {
+            return r.points.map((p) => {
+                return [p.latitude, p.longitude];
             });
         });
     }
