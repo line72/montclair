@@ -36,7 +36,7 @@ class RouteShoutParser {
             [8, 'Regional', 'C55A00'],
             [9, 'Yellow CMC', 'FFFF00'],
             [10, 'Yellow Hilltop', 'FFFF00'],
-            [11, 'Yello On-Call 2019', 'FEE543']
+            [11, 'Yellow On-Call 2019', 'FEE543']
         ];
 
         this.requestor2 = axios.create({
