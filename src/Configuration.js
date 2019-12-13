@@ -14,20 +14,21 @@
 
 import AvailtecParser from './AvailtecParser';
 import TranslocParser from './TranslocParser';
+import RouteShoutParser from './RouteShoutParser';
 
 class Configuration {
     constructor() {
         this.transloc_key = '';
 
-        // Birmingham, AL
-        this.center = [33.5084801, -86.8006611];
+        // // Birmingham, AL
+        // this.center = [33.5084801, -86.8006611];
 
-        this.agencies = [
-            {
-                name: 'BJCTA',
-                parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
-            }
-        ]
+        // this.agencies = [
+        //     {
+        //         name: 'BJCTA',
+        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
+        //     }
+        // ]
         // this.agencies = [
         //     {
         //         name: 'BJCTA',
@@ -60,6 +61,15 @@ class Configuration {
         //         parser: new AvailtecParser('http://connect.ridetherapid.org/InfoPoint')
         //     },
         // ]
+
+        // Steamboat Sprints, CO
+        this.center = [40.469178, -106.823354];
+        this.agencies = [
+            {
+                name: 'Steamboat Springs',
+                parser: new RouteShoutParser('', '', 'https://steamboatspringstransit.routematch.com/')
+            }
+        ];
     }
 }
 
