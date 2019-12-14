@@ -95,7 +95,7 @@ class AgencyList extends Component {
                 {/* Top menu on small screens */}
                 <header className="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
                     <span className="AgencyList-bar-item">
-                        Birmingham Transit
+                        Steamboat Transit
                     </span>
                     <span className="w3-button w3-right" onClick={() => this.onOpen()}>
                         <i className="fa fa-bars"></i>
