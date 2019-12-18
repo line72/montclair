@@ -67,7 +67,22 @@ class Configuration {
         this.agencies = [
             {
                 name: 'Steamboat Springs',
-                parser: new RouteShoutParser('', '', 'https://steamboatspringstransit.routematch.com/')
+                parser: new RouteShoutParser('', '',
+                                             'https://steamboatspringstransit.routematch.com/',
+                                             [
+                                                 [1, 'Blue', 'Blue Line', '2F54E8'],
+                                                 [2, 'Green', 'Green Line', '53EB05'],
+                                                 [3, 'Night Condos', 'Night Line Condos 19%2F20', 'FC75E5'],
+                                                 [4, 'Night Winter', 'Night Line Summer', 'F00089'],
+                                                 [5, 'Orange', 'Orange Line', 'ED7D31'],
+                                                 [6, 'Purple', 'Purple Line', '8000F6'],
+                                                 [7, 'Red', 'Red Line', 'FF0000'],
+                                                 [8, 'Regional', 'Regional Shuttle', 'C55A00'],
+                                                 [9, 'Yellow CMC', 'Yellow Line to CMC', 'FFFF00'],
+                                                 [10, 'Yellow Hilltop', 'Yellow Hilltop', 'FFFF00'],
+                                                 [11, 'Yellow On-Call', 'Yellow On-Call 2019', 'FEE543']
+                                             ]
+                                            )
             }
         ];
     }
