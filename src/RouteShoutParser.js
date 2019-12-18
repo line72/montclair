@@ -84,7 +84,6 @@ class RouteShoutParser {
 
                 const url = `/feed/vehicle/byRoutes/${idx}?timeHorizon=30&timeSensitive=true`;
                 return this.requestor2.get(url).then((response) => {
-                    console.log('vehicle response', response);
                     let vehicles = response.data.data.map((v) => {
                         const status = (deviation) => {
                             if (deviation < 0) {
