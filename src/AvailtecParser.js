@@ -41,7 +41,7 @@ class AvailtecParser {
         });
     }
 
-    getVehicles(bounds) {
+    getVehicles(bounds, visible_routes) {
         let url = this.url + '/rest/Routes/GetVisibleRoutes';
 
         return axios.get(url).then((response) => {
