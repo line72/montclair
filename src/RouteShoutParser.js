@@ -28,13 +28,13 @@ class RouteShoutParser {
         this.routes = [
             [1, 'Blue Line', '2F54E8'],
             [2, 'Green Line', '53EB05'],
-            [3, 'Night Condos', 'FC75E5'],
-            [4, 'Night Line Winter 2018-19', 'F00089'],
+            [3, 'Night Line Condos 19%2F20', 'FC75E5'],
+            [4, 'Night Line Summer', 'F00089'],
             [5, 'Orange Line', 'ED7D31'],
             [6, 'Purple Line', '8000F6'],
             [7, 'Red Line', 'FF0000'],
-            [8, 'Regional', 'C55A00'],
-            [9, 'Yellow CMC', 'FFFF00'],
+            [8, 'Regional Shuttle', 'C55A00'],
+            [9, 'Yellow Line to CMC', 'FFFF00'],
             [10, 'Yellow Hilltop', 'FFFF00'],
             [11, 'Yellow On-Call 2019', 'FEE543']
         ];
@@ -77,10 +77,13 @@ class RouteShoutParser {
         });
     }
 
-    getVehicles(bounds) {
+    getVehicles(bounds, visible_routes) {
         return new Promise((resolve, reject) => {
-            const requests = this.routes.map((r) => {
-                const [idx, name, color] = r;
+            const requests = visible_routes.map((r) => {
+                const idx = r.id;
+                const name = r.name;
+                const color = r.color;
+
                 const url = `/feed/vehicle/byRoutes/${name}?timeHorizon=30&timeSensitive=true`;
                 return this.requestor2.get(url).then((response) => {
                     console.log('vehicle response', response);

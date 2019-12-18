@@ -69,7 +69,7 @@ class TranslocParser {
         });
     }
 
-    getVehicles(bounds) {
+    getVehicles(bounds, visible_routes) {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
 
         if (bounds != null) {

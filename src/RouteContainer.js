@@ -95,8 +95,13 @@ class RouteContainer extends Component {
                         routes: a.routes};
             }
 
+            // get a list of visible routes
+            const visible_routes = Object.keys(a.routes).map((k) => {
+                return a.routes[k];
+            }).filter(r => r.visible);
+
             // update our agency
-            return a.parser.getVehicles(this.bounds).then((vehicle_map) => {
+            return a.parser.getVehicles(this.bounds, visible_routes).then((vehicle_map) => {
                 let routes = Object.keys(vehicle_map).reduce((acc, route_id) => {
                     if (a.routes[route_id] && a.routes[route_id].visible) {
                         let vehicles = vehicle_map[route_id];
