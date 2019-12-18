@@ -26,7 +26,7 @@ class Configuration {
         this.agencies = [
             {
                 name: 'BJCTA',
-                parser: new AvailtecParser('https:realtimebjcta.availtec.com/InfoPoint')
+                parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
             }
         ]
         // this.agencies = [
