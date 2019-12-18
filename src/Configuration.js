@@ -20,15 +20,15 @@ class Configuration {
     constructor() {
         this.transloc_key = '';
 
-        // // Birmingham, AL
-        // this.center = [33.5084801, -86.8006611];
+        // Birmingham, AL
+        this.center = [33.5084801, -86.8006611];
 
-        // this.agencies = [
-        //     {
-        //         name: 'BJCTA',
-        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
-        //     }
-        // ]
+        this.agencies = [
+            {
+                name: 'BJCTA',
+                parser: new AvailtecParser('https:realtimebjcta.availtec.com/InfoPoint')
+            }
+        ]
         // this.agencies = [
         //     {
         //         name: 'BJCTA',
@@ -62,29 +62,29 @@ class Configuration {
         //     },
         // ]
 
-        // Steamboat Sprints, CO
-        this.center = [40.469178, -106.823354];
-        this.agencies = [
-            {
-                name: 'Steamboat Springs',
-                parser: new RouteShoutParser('', '',
-                                             'https://steamboatspringstransit.routematch.com/',
-                                             [
-                                                 [1, 'Blue', 'Blue Line', '2F54E8'],
-                                                 [2, 'Green', 'Green Line', '53EB05'],
-                                                 [3, 'Night Condos', 'Night Line Condos 19%2F20', 'FC75E5'],
-                                                 [4, 'Night Winter', 'Night Line Summer', 'F00089'],
-                                                 [5, 'Orange', 'Orange Line', 'ED7D31'],
-                                                 [6, 'Purple', 'Purple Line', '8000F6'],
-                                                 [7, 'Red', 'Red Line', 'FF0000'],
-                                                 [8, 'Regional', 'Regional Shuttle', 'C55A00'],
-                                                 [9, 'Yellow CMC', 'Yellow Line to CMC', 'FFFF00'],
-                                                 [10, 'Yellow Hilltop', 'Yellow Hilltop', 'FFFF00'],
-                                                 [11, 'Yellow On-Call', 'Yellow On-Call 2019', 'FEE543']
-                                             ]
-                                            )
-            }
-        ];
+        // // Steamboat Sprints, CO
+        // this.center = [40.469178, -106.823354];
+        // this.agencies = [
+        //     {
+        //         name: 'Steamboat Springs',
+        //         parser: new RouteShoutParser('', '',
+        //                                      'https://steamboatspringstransit.routematch.com/',
+        //                                      [
+        //                                          [1, 'Blue', 'Blue Line', '2F54E8'],
+        //                                          [2, 'Green', 'Green Line', '53EB05'],
+        //                                          [3, 'Night Condos', 'Night Line Condos 19%2F20', 'FC75E5'],
+        //                                          [4, 'Night Winter', 'Night Line Summer', 'F00089'],
+        //                                          [5, 'Orange', 'Orange Line', 'ED7D31'],
+        //                                          [6, 'Purple', 'Purple Line', '8000F6'],
+        //                                          [7, 'Red', 'Red Line', 'FF0000'],
+        //                                          [8, 'Regional', 'Regional Shuttle', 'C55A00'],
+        //                                          [9, 'Yellow CMC', 'Yellow Line to CMC', 'FFFF00'],
+        //                                          [10, 'Yellow Hilltop', 'Yellow Hilltop', 'FFFF00'],
+        //                                          [11, 'Yellow On-Call', 'Yellow On-Call 2019', 'FEE543']
+        //                                      ]
+        //                                     )
+        //     }
+        // ];
     }
 }
 
