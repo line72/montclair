@@ -29,7 +29,4 @@ jobs:
         with:
           args: ${{ env.REPO }}-${{ env.VER }}.tar.gz
         env:
-          REPO: $(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)
-          VER: $(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
