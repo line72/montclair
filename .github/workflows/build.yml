@@ -10,7 +10,7 @@ jobs:
 
       - name: Create ENV
         run: |
-          echo "$GITHUB_EVENT_PATH"
+          cat "$GITHUB_EVENT_PATH"
           echo "::set-env name=REPO::$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)"
           echo "::set-env name=VER::$(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)"
         
