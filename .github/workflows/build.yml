@@ -1,5 +1,5 @@
 name: Build Release
-on: [release]
+on: [release,push]
 jobs:
   build-release:
     name: Build and Upload a release
