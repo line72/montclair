@@ -7,16 +7,18 @@ jobs:
     steps:
       - name: Pull Source
         uses: actions/checkout@v2
-      
+
+      - name: Create ENV
+        run: |
+          echo "::set-env name=REPO::$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)"
+          echo "::set-env name=VER::$(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)"
+        
       - name: Build
         run: |
           npm install
           npm run-script build
 
       - name: Package
-        env:
-          REPO: $(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)
-          VER: $(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)
         run: |
           pushd build
           tar zcvf ../${REPO}-${VER}.tar.gz .
@@ -25,7 +27,7 @@ jobs:
       - name: Upload release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: ${REPO}-${VER}.tar.gz
+          args: ${{ REPO }}-${{ VER }}.tar.gz
         env:
           REPO: $(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)
           VER: $(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)
