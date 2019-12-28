@@ -27,7 +27,7 @@ jobs:
       - name: Upload release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: ${{ REPO }}-${{ VER }}.tar.gz
+          args: ${{ env.REPO }}-${{ env.VER }}.tar.gz
         env:
           REPO: $(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)
           VER: $(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)
