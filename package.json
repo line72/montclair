@@ -1,6 +1,6 @@
 {
   "name": "montclair",
-  "version": "1.2.1-ISSUE-28-4",
+  "version": "1.2.1-ISSUE-28-5",
   "private": true,
   "dependencies": {
     "react": "^16.2.0",

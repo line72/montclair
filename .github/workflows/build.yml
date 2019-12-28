@@ -1,5 +1,5 @@
 name: Build Release
-on: [release,push]
+on: release
 jobs:
   build-release:
     name: Build and Upload a release
@@ -10,8 +10,6 @@ jobs:
 
       - name: Create ENV
         run: |
-          cat "$GITHUB_EVENT_PATH"
-          echo ""
           echo "::set-env name=REPO::$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)"
           echo "::set-env name=VER::$(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)"
         
