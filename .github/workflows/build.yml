@@ -1,0 +1,34 @@
+name: Build Release
+on: [release]
+jobs:
+  build-release:
+    name: Build and Upload a release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Source
+      - uses: actions/checkout@v2
+      
+      - name: Build
+        run: |
+          npm install
+          npm run-script build
+
+      - name: Package
+        env:
+          REPO: $(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)
+          VER: $(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)
+        run: |
+          pushd build
+          tar zcvf ../${REPO}-${VER}.tar.gz .
+          popd
+
+      - name: Upload release
+        env:
+          REPO: $(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)
+          VER: $(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: ${REPO}-${VER}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
