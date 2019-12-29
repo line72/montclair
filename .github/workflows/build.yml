@@ -1,5 +1,10 @@
 name: Build Release
-on: release
+
+on:
+  push:
+    tags:
+      - '*'
+      
 jobs:
   build-release:
     name: Build and Upload a release
@@ -11,7 +16,6 @@ jobs:
       - name: Create ENV
         run: |
           echo "::set-env name=REPO::$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)"
-          echo "::set-env name=VER::$(jq --raw-output '.release.tag_name' $GITHUB_EVENT_PATH)"
         
       - name: Build
         run: |
@@ -21,12 +25,22 @@ jobs:
       - name: Package
         run: |
           pushd build
-          tar zcvf ../${REPO}-${VER}.tar.gz .
+          tar zcvf ../${REPO}-${{ github.ref }}.tar.gz .
           popd
 
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          
       - name: Upload release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: ${{ env.REPO }}-${{ env.VER }}.tar.gz
+          args: ${{ env.REPO }}-${{ github.ref }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
