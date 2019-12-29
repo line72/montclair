@@ -40,8 +40,13 @@ jobs:
           prerelease: false
           
       - name: Upload release
-        uses: JasonEtco/upload-to-release@master
+        uses: PeerXu/upload-asset@v1
         with:
-          args: ${{ env.REPO }}-${{ env.VER }}.tar.gz application/gzip
+          file: ${{ env.REPO }}-${{ env.VER }}.tar.gz
+          os: linux
+          arch: amd64
+          with_tag: true
+          with_sha1: true
+          suffix: .tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
