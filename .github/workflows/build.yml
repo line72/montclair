@@ -16,6 +16,7 @@ jobs:
       - name: Create ENV
         run: |
           echo "::set-env name=REPO::$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2-)"
+          echo "::set-env name=VER::$(echo $GITHUB_REF | cut -d '/' -f 3-)"
         
       - name: Build
         run: |
@@ -25,7 +26,7 @@ jobs:
       - name: Package
         run: |
           pushd build
-          tar zcvf ../${REPO}-${{ github.ref }}.tar.gz .
+          tar zcvf ../${{ env.REPO }}-${{ env.VER }}.tar.gz .
           popd
 
       - name: Create Release
@@ -33,14 +34,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ env.VER }}
+          release_name: Release ${{ env.VER }}
           draft: false
           prerelease: false
           
       - name: Upload release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: ${{ env.REPO }}-${{ github.ref }}.tar.gz
+          args: ${{ env.REPO }}-${{ env.VER }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
