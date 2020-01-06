@@ -19,8 +19,8 @@ import RouteType from './RouteType';
 import VehicleType from './VehicleType';
 
 class TranslocParser {
-    constructor(key, agency_id) {
-        this.url = 'https://transloc-api-1-2.p.mashape.com/';
+    constructor(key, agency_id, url) {
+        this.url = url || 'https://transloc-api-1-2.p.mashape.com/';
         this.key = key;
         this.agency_id = agency_id;
 
