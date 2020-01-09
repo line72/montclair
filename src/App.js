@@ -14,6 +14,7 @@
 
 import React, { Component } from 'react';
 import RouteContainer from './RouteContainer';
+import DeprecationNotice from './DeprecationNotice';
 
 import './App.css';
 import './w3.css';
@@ -21,10 +22,28 @@ import 'leaflet/dist/leaflet.css';
 import 'font-awesome/css/font-awesome.min.css';
 
 class App extends Component {
+    constructor() {
+        super();
+
+        this.state = {
+            deprecationNoticeVisible: true
+        };
+    }
+
+    onDeprecationClosed = () => {
+        console.log('onDeprecationClosed');
+
+        this.setState({
+            deprecationNoticeVisible: false
+        });
+    }
+
     render() {
         return (
             <div className="App">
-                <RouteContainer />
+              <DeprecationNotice visible={this.state.deprecationNoticeVisible}
+                                 onClose={() => this.onDeprecationClosed()}/>
+              <RouteContainer />
             </div>
         );
     }
