@@ -26,8 +26,8 @@ import './w3.css';
 import './RouteContainer.css';
 
 class RouteContainer extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         let configuration = new Configuration();
 
@@ -38,7 +38,7 @@ class RouteContainer extends Component {
                     routes: {}};
         });
 
-        this.storage = new LocalStorage();
+        this.storage = props.storage;
         this.initialViewport = this.storage.state.viewport;
         this.bounds = this.storage.state.bounds;
         this.has_fetched_routes = false;

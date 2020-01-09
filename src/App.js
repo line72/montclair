@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import RouteContainer from './RouteContainer';
 import DeprecationNotice from './DeprecationNotice';
+import LocalStorage from './LocalStorage';
 
 import './App.css';
 import './w3.css';
@@ -28,6 +29,8 @@ class App extends Component {
         this.state = {
             deprecationNoticeVisible: true
         };
+
+        this.storage = new LocalStorage();
     }
 
     onDeprecationClosed = () => {
@@ -43,7 +46,7 @@ class App extends Component {
             <div className="App">
               <DeprecationNotice visible={this.state.deprecationNoticeVisible}
                                  onClose={() => this.onDeprecationClosed()}/>
-              <RouteContainer />
+              <RouteContainer storage={this.storage}/>
             </div>
         );
     }
