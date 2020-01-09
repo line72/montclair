@@ -37,11 +37,11 @@ class DeprecationNotice extends Component {
                         &times;
                       </span>
                       <center>
-                        <h3>Montclair has become '<a href="https://birmingham.gotransitapp.com">Go Birmingham</a>'!</h3>
+                        <h3>Montclair has become Go Birmingham!</h3>
                       </center>
                     </header>
                     <div className="w3-container">
-                      <p>Montclair will no longer receive updates. To continue getting new updates, please use the new <a href="https://birmingham.gotransitapp.com">Go Birmingham App</a>. It's the same app you love, but with a new name.</p>
+                      <p>Montclair will no longer receive updates. To continue getting new updates, please use the new <a href="https://birmingham.gotransitapp.com">Go Birmingham</a> app. It's the same app you love, but with a new name.</p>
                       <div className="w3-center">
                         <div className="w3-bar">
                           <a className="w3-button w3-black w3-hover-black w3-round"
