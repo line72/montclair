@@ -60,6 +60,15 @@ class LocalStorage {
         return this.state.is_first_run;
     }
 
+    showDeprecationWarning() {
+        return !this.state.hide_deprecation;
+    }
+
+    setShowDeprecationWarning(hide_deprecation) {
+        this.state.hide_deprecation = !!hide_deprecation;
+        this.saveState();
+    }
+
     updateVisibility(agencies) {
         this.state.visibility = agencies.reduce((acc, agency) => {
             let route_keys = Object.keys(agency.routes).reduce((acc2, key) => {

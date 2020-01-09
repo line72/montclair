@@ -20,7 +20,6 @@ import Route from './Route';
 import BaseMap from './BaseMap';
 import AgencyList from './AgencyList';
 import FirstRunHint from './FirstRunHint';
-import LocalStorage from './LocalStorage';
 
 import './w3.css';
 import './RouteContainer.css';

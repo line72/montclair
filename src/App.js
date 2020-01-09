@@ -26,15 +26,17 @@ class App extends Component {
     constructor() {
         super();
 
+        this.storage = new LocalStorage();
+
         this.state = {
-            deprecationNoticeVisible: true
+            deprecationNoticeVisible: this.storage.showDeprecationWarning()
         };
 
-        this.storage = new LocalStorage();
     }
 
-    onDeprecationClosed = () => {
-        console.log('onDeprecationClosed');
+    onDeprecationClosed = (disableNotice) => {
+        // update storage
+        this.storage.setShowDeprecationWarning(disableNotice);
 
         this.setState({
             deprecationNoticeVisible: false
@@ -45,7 +47,7 @@ class App extends Component {
         return (
             <div className="App">
               <DeprecationNotice visible={this.state.deprecationNoticeVisible}
-                                 onClose={() => this.onDeprecationClosed()}/>
+                                 onClose={this.onDeprecationClosed}/>
               <RouteContainer storage={this.storage}/>
             </div>
         );
