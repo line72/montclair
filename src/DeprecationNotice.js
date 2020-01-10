@@ -71,7 +71,7 @@ class DeprecationNotice extends Component {
                              }>
                           </a>
                           <a className="w3-button w3-ripple"
-                             href='https://play.google.com/store/apps/details?id=net.line72.montclair'
+                             href='https://play.google.com/store/apps/details?id=com.gotransitapp.birmingham'
                              style={
                                  {
                                      display: "inline-block",
