@@ -18,9 +18,11 @@ import axios from 'axios';
 import Configuration from './Configuration';
 import Route from './Route';
 import BaseMap from './BaseMap';
+import StopOverlay from './StopOverlay';
 import AgencyList from './AgencyList';
 import FirstRunHint from './FirstRunHint';
 import LocalStorage from './LocalStorage';
+import StopOverlayType from './StopOverlayType';
 
 import './w3.css';
 import './RouteContainer.css';
@@ -42,9 +44,11 @@ class RouteContainer extends Component {
         this.initialViewport = this.storage.state.viewport;
         this.bounds = this.storage.state.bounds;
         this.has_fetched_routes = false;
+        this.arrivalTimerID = null;
 
         this.state = {
-            agencies: agencies
+            agencies: agencies,
+            stopOverlay: new StopOverlayType({}),
         };
 
 
@@ -248,6 +252,56 @@ class RouteContainer extends Component {
         this.storage.updateViewport(viewport);
     }
 
+    onStopClicked = ({agency, id, name}) => {
+        clearInterval(this.arrivalTimerID);
+
+        this.setState({
+            stopOverlay: new StopOverlayType({
+                agency: agency,
+                id: id,
+                name: name,
+                fetching: true,
+                visible: true
+            })
+        });
+
+        const fetchArrivals = (agency, stop_id, name) => {
+            agency.parser.getArrivalsFor(stop_id, agency.routes)
+                .then((arrivals) => {
+                    console.log('arrivals', arrivals);
+                    this.setState({
+                        stopOverlay: new StopOverlayType({
+                            agency: agency,
+                            id: id,
+                            name: name,
+                            arrivals: arrivals,
+                            fetching: false,
+                            visible: true
+                        })
+                    });
+                });
+        };
+
+        // initial fetch
+        fetchArrivals(agency, id, name);
+
+        // start a timer
+        this.arrivalTimerID = setInterval(fetchArrivals(agency, id, name), 20000);
+    }
+
+    onStopOverlayClosed = () => {
+        // clear the timer
+        clearInterval(this.arrivalTimerID);
+        this.arrivalTimerID = null;
+
+        // kill the overlay state
+        this.setState((state) => {
+            return {
+                stopOverlay: new StopOverlayType({})
+            };
+        });
+    }
+
     render() {
         let routes_list = this.state.agencies.map((agency) => {
             if (!agency.visible) {
@@ -271,6 +325,7 @@ class RouteContainer extends Component {
                            color={route.color}
                            vehicles={route.vehicles}
                            stops={route.stops}
+                           onStopClicked={(props) => this.onStopClicked(props)}
                            />
                 );
             });
@@ -301,7 +356,13 @@ class RouteContainer extends Component {
                         {routes}
                     </BaseMap>
                 </div>
-            </div>
+            </div>,
+            <StopOverlay visible={this.state.stopOverlay.visible}
+                         name={this.state.stopOverlay.name}
+                         arrivals={this.state.stopOverlay.arrivals}
+                         fetching={this.state.stopOverlay.fetching}
+                         onClose={() => {this.onStopOverlayClosed()}}
+            />
             ]
         );
     }

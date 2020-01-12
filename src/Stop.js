@@ -68,6 +68,7 @@ class Stop extends Component {
     render() {
         return (
             <CircleMarker
+              onclick={() => this.props.onClick({agency: this.props.agency, id: this.props.id, name: this.props.name})}
               center={this.props.position}
               radius={7}
               stroke={true}
@@ -78,28 +79,6 @@ class Stop extends Component {
               fillColor={'#dedede'}
               fillOpacity={1.0}
             >
-              <Popup className="Stop-popup"
-                     onOpen={() => this.onOpen() }
-                     onClose={() => this.onClose() }
-              >
-                <div>
-                  <h2 className="Stop-header">{this.props.name}</h2>
-                  <div className="Stop-table">
-                    <table className="w3-table w3-striped w3-bordered">
-                      <thead>
-                        <tr>
-                          <td colSpan={3}>
-                            Next Departures
-                          </td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {this.renderArrivals()}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </Popup>
             </CircleMarker>
         );
     }

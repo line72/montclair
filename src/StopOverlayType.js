@@ -12,14 +12,15 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import moment from 'moment';
-
-class ArrivalType {
-    constructor({route, direction, arrival}) {
-        this.route = route;
-        this.direction = direction;
-        this.arrival = moment(arrival);
+class StopOverlayType {
+    constructor({agency, id, name, arrivals, fetching, visible}) {
+        this.agency = agency;
+        this.id = id;
+        this.name = name || "";
+        this.arrivals = arrivals || [];
+        this.fetching = !!fetching;
+        this.visible = !!visible;
     }
 }
 
-export default ArrivalType;
+export default StopOverlayType;

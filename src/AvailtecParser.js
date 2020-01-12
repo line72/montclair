@@ -68,10 +68,11 @@ class AvailtecParser {
     /**
      * Get the arrivals for a stop
      *
-     * @param stopId -> The id of the stop
-     * @return Promise -> [ArrivalType] in sorted order
+     * @param stopId -> String : The id of the stop
+     * @param routes -> map(RouteType) : The dictionary of routes
+     * @return Promise -> [ArrivalType] : in sorted order
      */
-    getArrivalsFor(stopId) {
+    getArrivalsFor(stopId, routes) {
         let url = this.url + `/rest/StopDepartures/Get/${stopId}`;
 
         return axios.get(url).then((response) => {
@@ -79,7 +80,7 @@ class AvailtecParser {
                 return i.RouteDirections.flatMap((rd) => {
                     return rd.Departures.map((d) => {
                         return new ArrivalType({
-                            route_id: rd.RouteId,
+                            route: routes[rd.RouteId],
                             direction: rd.Direction,
                             arrival: d.EDT
                         });

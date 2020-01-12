@@ -1,0 +1,32 @@
+.StopOverlay {
+
+}
+
+@media only screen and (max-width: 600px) {
+    h3 {
+	max-height: 36px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+    }
+    
+    .StopOverlay-content {
+	height: 90vh;
+    }
+
+    .StopOverlay-table {
+	max-height: calc(90vh - 100px);
+	overflow-y: auto;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    .StopOverlay-content {
+	max-width: 500px;
+    }
+
+    .StopOverlay-table {
+	max-width: 500px;
+	max-height: calc(90vh - 200px);
+	overflow-y: auto;
+    }
+}
