@@ -164,7 +164,7 @@ class RouteContainer extends Component {
         });
 
         // assync pull down the stops if visible
-        if (visible && route.stops.length == 0) {
+        if (visible && route.stops.length === 0) {
             agency.parser.getStopsFor(route).then((stops) => {
                 this.setState((state) => {
                     const agencies = update(state.agencies, {[i]: {routes: {[route.id]: {stops: {$set: stops}}}}});
@@ -216,6 +216,7 @@ class RouteContainer extends Component {
                            selected={route.selected}
                            color={route.color}
                            vehicles={route.vehicles}
+                           stops={route.stops}
                            />
                 );
             });

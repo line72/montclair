@@ -49,10 +49,10 @@ class AvailtecParser {
      * @return [StopType] -> Returns a list of StopTypes
      */
     getStopsFor(route) {
-        let url = this.url + `/rest/RouteDetails/Get/${route.id}`
+        let url = this.url + `/rest/RouteDetails/Get/${route.id}`;
 
         return axios.get(url).then((response) => {
-            let stops = response.data.RouteStops.map((stop) => {
+            let stops = response.data.Stops.map((stop) => {
                 return new StopType({
                     id: stop.StopId,
                     name: stop.Name,
