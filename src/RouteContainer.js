@@ -153,10 +153,28 @@ class RouteContainer extends Component {
 
     toggleRoute(agency, route) {
         let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
-        const agencies = update(this.state.agencies, {[i]: {routes: {[route.id]: {visible: {$set: !route.visible}}}}});
-        this.setState({
-            agencies: agencies
+
+        const visible = !route.visible;
+
+        const agencies = update(this.state.agencies, {[i]: {routes: {[route.id]: {visible: {$set: visible}}}}});
+        this.setState((state) => {
+            return {
+                agencies: agencies
+            };
         });
+
+        // assync pull down the stops if visible
+        if (visible && route.stops.length == 0) {
+            agency.parser.getStopsFor(route).then((stops) => {
+                this.setState((state) => {
+                    const agencies = update(state.agencies, {[i]: {routes: {[route.id]: {stops: {$set: stops}}}}});
+                    return {
+                        agencies: agencies
+                    };
+                });
+            });
+        }
+
 
         // !mwd - we pass agencies, not this.agencies
         //  since our state update hasn't happened yet!

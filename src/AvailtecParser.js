@@ -46,26 +46,21 @@ class AvailtecParser {
      * Get the stops for a specific route.
      *
      * @route (RouteType) -> The route to get the stops for
-     * @return RouteType -> Returns a new RouteType object
-     *  with the stops filled in.
+     * @return [StopType] -> Returns a list of StopTypes
      */
     getStopsFor(route) {
-        let url = this.url + `/rest/Routes/Get/{route.id}`
+        let url = this.url + `/rest/RouteDetails/Get/${route.id}`
 
         return axios.get(url).then((response) => {
-            let stops = response.data.Stops.map((stop) => {
-                return StopType({
+            let stops = response.data.RouteStops.map((stop) => {
+                return new StopType({
                     id: stop.StopId,
                     name: stop.Name,
                     position: [stop.Latitude, stop.Longitude]
                 });
             });
 
-            // !mwd - copy the RouteType then fill in the stops
-            let copy = Object.assign({}, route);
-            copy.stops = stops;
-
-            return copy;
+            return stops;
         });
     }
 
