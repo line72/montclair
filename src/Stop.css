@@ -1,0 +1,21 @@
+.Stop {
+
+}
+
+.Stop-popup {
+    min-width: 250px;
+}
+
+.Stop-table {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.Stop-header {
+    font-weight: bold;
+}
+
+thead td {
+    font-weight: bold;
+    font-size: medium;
+}

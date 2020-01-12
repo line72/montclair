@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { GeoJSON } from 'react-leaflet';
 import Bus from './Bus';
-
+import Stop from './Stop';
 
 class Route extends Component {
     constructor(props) {
@@ -77,17 +77,35 @@ class Route extends Component {
 
         });
 
+        let stops = this.props.stops.map((stop, index) => {
+            return (
+                <Stop key={stop.id}
+                      agency={this.props.agency}
+                      id={stop.id}
+                      name={stop.name}
+                      position={stop.position}
+                      onClick={this.props.onStopClicked}
+                />
+            );
+        });
+
         if (this.state.geojson != null) {
             return (
                 <div>
-                    <GeoJSON
-                        data={this.state.geojson}
-                        style={style} />
-                    {buses}
+                  <GeoJSON
+                    data={this.state.geojson}
+                    style={style} />
+                  {buses}
+                  {stops}
                 </div>
             );
         } else {
-            return (<div>{buses}</div>);
+            return (
+                <div>
+                  {buses}
+                  {stops}
+                </div>
+            );
         }
     }
 }

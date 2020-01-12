@@ -15,6 +15,8 @@
 import axios from 'axios';
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
+import StopType from './StopType';
+import ArrivalType from './ArrivalType';
 
 class AvailtecParser {
     constructor(url) {
@@ -38,6 +40,64 @@ class AvailtecParser {
             }, {});
 
             return routes;
+        });
+    }
+
+    /**
+     * Get the stops for a specific route.
+     *
+     * @param route -> (RouteType) : The route to get the stops for
+     * @return Promise -> [StopType] : Returns a list of StopTypes
+     */
+    getStopsFor(route) {
+        let url = this.url + `/rest/RouteDetails/Get/${route.id}`;
+
+        return axios.get(url).then((response) => {
+            let stops = response.data.Stops.map((stop) => {
+                return new StopType({
+                    id: stop.StopId,
+                    name: stop.Name,
+                    position: [stop.Latitude, stop.Longitude]
+                });
+            });
+
+            return stops;
+        });
+    }
+
+    /**
+     * Get the arrivals for a stop
+     *
+     * @param stopId -> String : The id of the stop
+     * @param routes -> map(RouteType) : The dictionary of routes
+     * @return Promise -> [ArrivalType] : in sorted order
+     */
+    getArrivalsFor(stopId, routes) {
+        let url = this.url + `/rest/StopDepartures/Get/${stopId}`;
+
+        return axios.get(url).then((response) => {
+            let arrivals = response.data.flatMap((i) => {
+                return i.RouteDirections.flatMap((rd) => {
+                    return rd.Departures.map((d) => {
+                        return new ArrivalType({
+                            route: routes[rd.RouteId],
+                            direction: rd.Direction,
+                            arrival: d.EDT
+                        });
+                    });
+                });
+            });
+
+            // sort based on arrival time
+            return arrivals.sort((a, b) => {
+                if (a.arrival.isBefore(b.arrival)) {
+                    return -1;
+                } else if (a.arrival.isSame(b.arrival)) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            });
         });
     }
 
