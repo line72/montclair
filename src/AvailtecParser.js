@@ -15,6 +15,7 @@
 import axios from 'axios';
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
+import StopType from './StopType';
 
 class AvailtecParser {
     constructor(url) {
@@ -38,6 +39,33 @@ class AvailtecParser {
             }, {});
 
             return routes;
+        });
+    }
+
+    /**
+     * Get the stops for a specific route.
+     *
+     * @route (RouteType) -> The route to get the stops for
+     * @return RouteType -> Returns a new RouteType object
+     *  with the stops filled in.
+     */
+    getStopsFor(route) {
+        let url = this.url + `/rest/Routes/Get/{route.id}`
+
+        return axios.get(url).then((response) => {
+            let stops = response.data.Stops.map((stop) => {
+                return StopType({
+                    id: stop.StopId,
+                    name: stop.Name,
+                    position: [stop.Latitude, stop.Longitude]
+                });
+            });
+
+            // !mwd - copy the RouteType then fill in the stops
+            let copy = Object.assign({}, route);
+            copy.stops = stops;
+
+            return copy;
         });
     }
 
