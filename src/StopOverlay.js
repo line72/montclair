@@ -66,7 +66,7 @@ class StopOverlay extends Component {
                       <thead>
                         <tr>
                           <td colSpan={3}>
-                            Next Departures
+                            Next Arrivals
                           </td>
                         </tr>
                       </thead>
