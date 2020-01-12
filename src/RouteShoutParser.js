@@ -79,10 +79,24 @@ class RouteShoutParser {
     /**
      * Get the stops for a specific route.
      *
-     * @route (RouteType) -> The route to get the stops for
-     * @return [StopType] -> Returns a list of StopTypes
+     * @param route -> (RouteType) : The route to get the stops for
+     * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
+        // !mwd - TODO: implement
+        return new Promise((resolve, reject) => {
+            resolve([]);
+        });
+    }
+
+    /**
+     * Get the arrivals for a stop
+     *
+     * @param stopId -> String : The id of the stop
+     * @param routes -> map(RouteType) : The dictionary of routes
+     * @return Promise -> [ArrivalType] : in sorted order
+     */
+    getArrivalsFor(stopId, routes) {
         // !mwd - TODO: implement
         return new Promise((resolve, reject) => {
             resolve([]);

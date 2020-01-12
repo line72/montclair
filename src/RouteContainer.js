@@ -336,35 +336,35 @@ class RouteContainer extends Component {
         let first_run = this.storage.isFirstRun();
 
         return ([
-                <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
+            <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
             <div key="main" className="w3-main RouteContainer-main">
-                {/* Push content down on small screens */}
-                <div className="w3-hide-large RouteContainer-header-margin">
-                </div>
+              {/* Push content down on small screens */}
+              <div className="w3-hide-large RouteContainer-header-margin">
+              </div>
 
-                <div className="w3-hide-medium w3-hide-small RouteContainer-header">
-                    <h1 className="RouteContainer-h1">Birmingham Transit</h1>
-                </div>
+              <div className="w3-hide-medium w3-hide-small RouteContainer-header">
+                <h1 className="RouteContainer-h1">Birmingham Transit</h1>
+              </div>
 
-                <div className="">
-                    <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
-                    <BaseMap
-                        initialViewport={this.initialViewport}
-                        onBoundsChanged={this.onBoundsChanged}
-                        onViewportChanged={this.onViewportChanged}
-                        >
-                        {routes}
-                    </BaseMap>
-                </div>
+              <div className="">
+                <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
+                <BaseMap
+                  initialViewport={this.initialViewport}
+                  onBoundsChanged={this.onBoundsChanged}
+                  onViewportChanged={this.onViewportChanged}
+                >
+                  {routes}
+                </BaseMap>
+              </div>
             </div>,
-            <StopOverlay visible={this.state.stopOverlay.visible}
+            <StopOverlay key="stop-overlay"
+                         visible={this.state.stopOverlay.visible}
                          name={this.state.stopOverlay.name}
                          arrivals={this.state.stopOverlay.arrivals}
                          fetching={this.state.stopOverlay.fetching}
                          onClose={() => {this.onStopOverlayClosed()}}
             />
-            ]
-        );
+        ]);
     }
 }
 

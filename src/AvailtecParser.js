@@ -46,8 +46,8 @@ class AvailtecParser {
     /**
      * Get the stops for a specific route.
      *
-     * @route (RouteType) -> The route to get the stops for
-     * @return [StopType] -> Returns a list of StopTypes
+     * @param route -> (RouteType) : The route to get the stops for
+     * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
         let url = this.url + `/rest/RouteDetails/Get/${route.id}`;
