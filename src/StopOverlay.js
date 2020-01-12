@@ -18,15 +18,33 @@ import './StopOverlay.css';
 
 class StopOverlay extends Component {
     renderArrivals() {
-        return this.props.arrivals.map((a, i) => {
+        if (this.props.fetching) {
             return (
-                <tr key={i}>
-                  <td>{a.arrival.fromNow()}</td>
-                  <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.id}</td>
-                  <td>{a.direction}</td>
+                <tr key="Loading">
+                  <td colSpan={3} className="w3-center">
+                    <i className="fa fa-spinner fa-pulse w3-xxlarge"></i>
+                  </td>
                 </tr>
             );
-        });
+        } else if (this.props.arrivals.length === 0) {
+            return (
+                <tr key="No arrivals">
+                  <td colSpan={3}>
+                    No Upcoming Arrivals
+                  </td>
+                </tr>
+            );
+        } else {
+            return this.props.arrivals.map((a, i) => {
+                return (
+                    <tr key={i}>
+                      <td>{a.arrival.fromNow()}</td>
+                      <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.id}</td>
+                      <td>{a.direction}</td>
+                    </tr>
+                );
+            });
+        }
     }
 
     render() {
