@@ -18,53 +18,6 @@ import { CircleMarker, Popup } from 'react-leaflet';
 import './Stop.css';
 
 class Stop extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            arrivals: []
-        };
-        this.timerID = null;
-    }
-
-    onOpen() {
-        clearInterval(this.timerID);
-
-        // kick of initial version
-        this.getArrivals();
-
-        // set up an update timer
-        this.timerID = setInterval(
-            () => this.getArrivals(),
-            20000
-        );
-    }
-
-    onClose() {
-        clearInterval(this.timerID);
-        this.timerID = null;
-    }
-
-    getArrivals() {
-        this.props.agency.parser.getArrivalsFor(this.props.id)
-            .then((arrivals) => {
-                console.log('arrivals', arrivals);
-                this.setState({arrivals: arrivals});
-            });
-    }
-
-    renderArrivals() {
-        return this.state.arrivals.map((a, i) => {
-            return (
-                <tr key={i}>
-                  <td>{a.arrival.fromNow()}</td>
-                  <td>{a.route_id}</td>
-                  <td>{a.direction}</td>
-                </tr>
-            );
-        });
-    }
-
     render() {
         return (
             <CircleMarker
