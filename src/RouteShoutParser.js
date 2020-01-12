@@ -76,6 +76,19 @@ class RouteShoutParser {
         });
     }
 
+    /**
+     * Get the stops for a specific route.
+     *
+     * @route (RouteType) -> The route to get the stops for
+     * @return [StopType] -> Returns a list of StopTypes
+     */
+    getStopsFor(route) {
+        // !mwd - TODO: implement
+        return new Promise((resolve, reject) => {
+            resolve([]);
+        });
+    }
+
     getVehicles(bounds, visible_routes) {
         return new Promise((resolve, reject) => {
             const requests = visible_routes.map((r) => {

@@ -69,6 +69,19 @@ class TranslocParser {
         });
     }
 
+    /**
+     * Get the stops for a specific route.
+     *
+     * @route (RouteType) -> The route to get the stops for
+     * @return [StopType] -> Returns a list of StopTypes
+     */
+    getStopsFor(route) {
+        // !mwd - TODO: implement
+        return new Promise((resolve, reject) => {
+            resolve([]);
+        });
+    }
+
     getVehicles(bounds, visible_routes) {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
 
