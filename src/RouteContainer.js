@@ -94,10 +94,6 @@ class RouteContainer extends Component {
         }
 
         axios.all(this.state.agencies.flatMap((a, index) => {
-            if (!a.visible) {
-                return null;
-            }
-
             // get a list of visible routes
             const visible_routes = Object.keys(a.routes).map((k) => {
                 return a.routes[k];
@@ -220,7 +216,7 @@ class RouteContainer extends Component {
             };
         });
 
-        // assync pull down the stops if visible
+        // async pull down the stops if visible
         if (visible && route.stops.length === 0) {
             agency.parser.getStopsFor(route).then((stops) => {
                 this.setState((state) => {
