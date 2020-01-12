@@ -50,6 +50,10 @@ class RouteContainer extends Component {
 
         this.getRoutes().then((results) => {
             this.has_fetched_routes = true;
+
+            // get the stops for any visible routes
+            this.getStops();
+
             // setup a timer to fetch the vehicles
             this.getVehicles();
             setInterval(() => {this.getVehicles();}, 10000);
@@ -82,6 +86,59 @@ class RouteContainer extends Component {
                 return routes;
             });
         }));
+    }
+
+    getStops() {
+        if (!this.has_fetched_routes) {
+            return;
+        }
+
+        axios.all(this.state.agencies.flatMap((a, index) => {
+            if (!a.visible) {
+                return null;
+            }
+
+            // get a list of visible routes
+            const visible_routes = Object.keys(a.routes).map((k) => {
+                return a.routes[k];
+            }).filter(r => r.visible);
+
+            return visible_routes.map((r) => {
+                return a.parser.getStopsFor(r).then((stops) => {
+                    return {
+                        agency_id: a.name,
+                        route_id: r.id,
+                        stops: stops
+                    };
+                });
+            });
+        })).then((results) => {
+            // results are a list of:
+            // {
+            //    agency_id: abc,
+            //    route_id: xyz,
+            //    stops: [StopType]
+            // }
+            // or null
+
+            this.setState((state) => {
+                const updatedAgencies = results.reduce((acc, result) => {
+                    if (result === null) {
+                        return acc;
+                    }
+                    let i = state.agencies.findIndex((e) => {return e.name === result.agency_id});
+                    return update(acc,
+                                  {[i]:
+                                   {routes:
+                                    {[result.route_id]:
+                                     {stops: {$set: result.stops}}}}});
+                }, state.agencies);
+
+                return {
+                    agencies: updatedAgencies
+                };
+            });
+        });
     }
 
     getVehicles() {
