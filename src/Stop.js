@@ -13,7 +13,9 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import { CircleMarker } from 'react-leaflet';
+import { CircleMarker, Popup } from 'react-leaflet';
+
+import './Stop.css';
 
 class Stop extends Component {
     render() {
@@ -29,6 +31,16 @@ class Stop extends Component {
               fillColor={'#dedede'}
               fillOpacity={1.0}
             >
+              <Popup>
+                <table className="Stop-table">
+                  <tbody>
+                    <tr>
+                      <td className="Stop-header">Stop:</td>
+                      <td>{this.props.name}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </Popup>
             </CircleMarker>
         );
     }
