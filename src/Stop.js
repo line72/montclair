@@ -59,6 +59,7 @@ class Stop extends Component {
                 <tr key={i}>
                   <td>{a.arrival.fromNow()}</td>
                   <td>{a.route_id}</td>
+                  <td>{a.direction}</td>
                 </tr>
             );
         });
@@ -77,24 +78,26 @@ class Stop extends Component {
               fillColor={'#dedede'}
               fillOpacity={1.0}
             >
-              <Popup
-                onOpen={() => this.onOpen() }
-                onClose={() => this.onClose() }
+              <Popup className="Stop-popup"
+                     onOpen={() => this.onOpen() }
+                     onClose={() => this.onClose() }
               >
                 <div>
                   <h2 className="Stop-header">{this.props.name}</h2>
-                  <table className="Stop-table">
-                    <thead>
-                      <tr>
-                        <td colSpan={2}>
-                          Next Departures
-                        </td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {this.renderArrivals()}
-                    </tbody>
-                  </table>
+                  <div className="Stop-table">
+                    <table className="w3-table w3-striped w3-bordered">
+                      <thead>
+                        <tr>
+                          <td colSpan={3}>
+                            Next Departures
+                          </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {this.renderArrivals()}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </Popup>
             </CircleMarker>

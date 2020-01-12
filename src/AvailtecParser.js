@@ -75,19 +75,27 @@ class AvailtecParser {
         let url = this.url + `/rest/StopDepartures/Get/${stopId}`;
 
         return axios.get(url).then((response) => {
-            console.log(response.data);
             let arrivals = response.data.flatMap((i) => {
                 return i.RouteDirections.flatMap((rd) => {
                     return rd.Departures.map((d) => {
                         return new ArrivalType({
                             route_id: rd.RouteId,
                             direction: rd.Direction,
-                            arrival: d.ETA
+                            arrival: d.EDT
                         });
                     });
                 });
             });
             // !mwd - TODO sort based on ETA
+            return arrivals.sort((a, b) => {
+                if (a.arrival.isBefore(b.arrival)) {
+                    return -1;
+                } else if (a.arrival.isSame(b.arrival)) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            });
 
             return arrivals;
         });
