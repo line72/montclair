@@ -86,7 +86,8 @@ class AvailtecParser {
                     });
                 });
             });
-            // !mwd - TODO sort based on ETA
+
+            // sort based on arrival time
             return arrivals.sort((a, b) => {
                 if (a.arrival.isBefore(b.arrival)) {
                     return -1;
@@ -96,8 +97,6 @@ class AvailtecParser {
                     return 1;
                 }
             });
-
-            return arrivals;
         });
     }
 
