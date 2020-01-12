@@ -268,7 +268,6 @@ class RouteContainer extends Component {
         const fetchArrivals = (agency, stop_id, name) => {
             agency.parser.getArrivalsFor(stop_id, agency.routes)
                 .then((arrivals) => {
-                    console.log('arrivals', arrivals);
                     this.setState({
                         stopOverlay: new StopOverlayType({
                             agency: agency,
@@ -286,7 +285,7 @@ class RouteContainer extends Component {
         fetchArrivals(agency, id, name);
 
         // start a timer
-        this.arrivalTimerID = setInterval(fetchArrivals(agency, id, name), 20000);
+        this.arrivalTimerID = setInterval(() => {fetchArrivals(agency, id, name);}, 20000);
     }
 
     onStopOverlayClosed = () => {
