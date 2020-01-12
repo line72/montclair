@@ -18,6 +18,52 @@ import { CircleMarker, Popup } from 'react-leaflet';
 import './Stop.css';
 
 class Stop extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            arrivals: []
+        };
+        this.timerID = null;
+    }
+
+    onOpen() {
+        clearInterval(this.timerID);
+
+        // kick of initial version
+        this.getArrivals();
+
+        // set up an update timer
+        this.timerID = setInterval(
+            () => this.getArrivals(),
+            20000
+        );
+    }
+
+    onClose() {
+        clearInterval(this.timerID);
+        this.timerID = null;
+    }
+
+    getArrivals() {
+        this.props.agency.parser.getArrivalsFor(this.props.id)
+            .then((arrivals) => {
+                console.log('arrivals', arrivals);
+                this.setState({arrivals: arrivals});
+            });
+    }
+
+    renderArrivals() {
+        return this.state.arrivals.map((a, i) => {
+            return (
+                <tr key={i}>
+                  <td>{a.arrival.fromNow()}</td>
+                  <td>{a.route_id}</td>
+                </tr>
+            );
+        });
+    }
+
     render() {
         return (
             <CircleMarker
@@ -31,15 +77,25 @@ class Stop extends Component {
               fillColor={'#dedede'}
               fillOpacity={1.0}
             >
-              <Popup>
-                <table className="Stop-table">
-                  <tbody>
-                    <tr>
-                      <td className="Stop-header">Stop:</td>
-                      <td>{this.props.name}</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <Popup
+                onOpen={() => this.onOpen() }
+                onClose={() => this.onClose() }
+              >
+                <div>
+                  <h2 className="Stop-header">{this.props.name}</h2>
+                  <table className="Stop-table">
+                    <thead>
+                      <tr>
+                        <td colSpan={2}>
+                          Next Departures
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.renderArrivals()}
+                    </tbody>
+                  </table>
+                </div>
               </Popup>
             </CircleMarker>
         );

@@ -16,6 +16,7 @@ import axios from 'axios';
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
 import StopType from './StopType';
+import ArrivalType from './ArrivalType';
 
 class AvailtecParser {
     constructor(url) {
@@ -61,6 +62,34 @@ class AvailtecParser {
             });
 
             return stops;
+        });
+    }
+
+    /**
+     * Get the arrivals for a stop
+     *
+     * @param stopId -> The id of the stop
+     * @return Promise -> [ArrivalType] in sorted order
+     */
+    getArrivalsFor(stopId) {
+        let url = this.url + `/rest/StopDepartures/Get/${stopId}`;
+
+        return axios.get(url).then((response) => {
+            console.log(response.data);
+            let arrivals = response.data.flatMap((i) => {
+                return i.RouteDirections.flatMap((rd) => {
+                    return rd.Departures.map((d) => {
+                        return new ArrivalType({
+                            route_id: rd.RouteId,
+                            direction: rd.Direction,
+                            arrival: d.ETA
+                        });
+                    });
+                });
+            });
+            // !mwd - TODO sort based on ETA
+
+            return arrivals;
         });
     }
 

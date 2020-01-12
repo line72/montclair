@@ -262,6 +262,7 @@ class RouteContainer extends Component {
 
                 return (
                     <Route key={route.id}
+                           agency={agency}
                            route={route}
                            id={route.id}
                            number={route.number}

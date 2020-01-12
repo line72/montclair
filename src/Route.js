@@ -80,6 +80,7 @@ class Route extends Component {
         let stops = this.props.stops.map((stop, index) => {
             return (
                 <Stop key={stop.id}
+                      agency={this.props.agency}
                       id={stop.id}
                       name={stop.name}
                       position={stop.position}
