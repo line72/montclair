@@ -13,7 +13,7 @@
  *******************************************/
 
 import React, { Component } from 'react';
-import { CircleMarker, Popup } from 'react-leaflet';
+import { CircleMarker } from 'react-leaflet';
 
 import './Stop.css';
 
