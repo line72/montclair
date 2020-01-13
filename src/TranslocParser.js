@@ -17,6 +17,7 @@ import polyUtil from 'polyline-encoded';
 
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
+import StopType from './StopType';
 
 class TranslocParser {
     constructor(key, agency_id, url) {
@@ -76,9 +77,19 @@ class TranslocParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        // !mwd - TODO: implement
-        return new Promise((resolve, reject) => {
-            resolve([]);
+        const url = '/stops.json';
+        return this.requestor.get(url, {params: {agencies: this.agency_id}}).then((response) => {
+            // Step 1: Filter stops to only this route
+            // Step 2: Convert to StopType
+            return response.data.data.filter((stop) => {
+                return stop.routes.includes(route.id);
+            }).map((stop) => {
+                return new StopType({
+                    id: stop.stop_id,
+                    name: stop.name,
+                    position: [stop.location.lat, stop.location.lng]
+                });
+            });
         });
     }
 
