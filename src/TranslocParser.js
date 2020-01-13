@@ -17,6 +17,8 @@ import polyUtil from 'polyline-encoded';
 
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
+import StopType from './StopType';
+import ArrivalType from './ArrivalType';
 
 class TranslocParser {
     constructor(key, agency_id, url) {
@@ -76,9 +78,19 @@ class TranslocParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        // !mwd - TODO: implement
-        return new Promise((resolve, reject) => {
-            resolve([]);
+        const url = '/stops.json';
+        return this.requestor.get(url, {params: {agencies: this.agency_id}}).then((response) => {
+            // Step 1: Filter stops to only this route
+            // Step 2: Convert to StopType
+            return response.data.data.filter((stop) => {
+                return stop.routes.includes(route.id);
+            }).map((stop) => {
+                return new StopType({
+                    id: stop.stop_id,
+                    name: stop.name,
+                    position: [stop.location.lat, stop.location.lng]
+                });
+            });
         });
     }
 
@@ -90,10 +102,33 @@ class TranslocParser {
      * @return Promise -> [ArrivalType] : in sorted order
      */
     getArrivalsFor(stopId, routes) {
-        // !mwd - TODO: implement
-        return new Promise((resolve, reject) => {
-            resolve([]);
-        });
+        const url = '/arrival-estimates.json'
+        return this.requestor.get(url, {params: {agencies: this.agency_id, stops: stopId}})
+            .then((response) => {
+                // !mwd - there should ONLY be one item in the list
+                //  because we have only requested a single stopId.
+                // We could potentially do some filtering, but maybe later...
+                const arrivals = response.data.data.flatMap((stop) => {
+                    return stop.arrivals.map((arrival) => {
+                        return new ArrivalType({
+                            route: routes[arrival.route_id],
+                            direction: '',
+                            arrival: arrival.arrival_at
+                        });
+                    });
+                });
+
+                // sort based on arrival time
+                return arrivals.sort((a, b) => {
+                    if (a.arrival.isBefore(b.arrival)) {
+                        return -1;
+                    } else if (a.arrival.isSame(b.arrival)) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
+            });
     }
 
     getVehicles(bounds, visible_routes) {
