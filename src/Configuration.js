@@ -28,7 +28,17 @@ class Configuration {
                 name: 'BJCTA',
                 parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
             }
-        ]
+        ];
+
+        // // example showing hiding the route numbers in the agency list (defaults to false)
+        // this.agencies = [
+        //     {
+        //         name: 'BJCTA',
+        //         hideRouteNumber: true,
+        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
+        //     }
+        // ];
+
         // this.agencies = [
         //     {
         //         name: 'BJCTA',

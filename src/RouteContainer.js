@@ -37,6 +37,7 @@ class RouteContainer extends Component {
             return {name: a.name,
                     visible: true,
                     parser: a.parser,
+                    hideRouteNumber: !!a.hideRouteNumber,
                     routes: {}};
         });
 
