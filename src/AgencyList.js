@@ -45,7 +45,7 @@ class AgencyList extends Component {
                         <span
                             key={route.id}
                             className="AgencyList-route-name" title={route.number + " " + route.name}>
-                            {route.number + " " + route.name}
+                          {agency.hideRouteNumber ? route.name : route.number + " " + route.name}
                         </span>
                         <button className={is_checked + " w3-button"}
                                 onClick={() => this.props.onRouteClick(agency, route) }
