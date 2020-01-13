@@ -17,6 +17,7 @@ import axios from 'axios';
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
 import StopType from './StopType';
+import ArrivalType from './ArrivalType';
 
 class RouteShout2Parser {
     constructor(url, agency_id, key) {
@@ -96,10 +97,30 @@ class RouteShout2Parser {
      * @return Promise -> [ArrivalType] : in sorted order
      */
     getArrivalsFor(stopId, routes) {
-        // !mwd - TODO: implement
-        return new Promise((resolve, reject) => {
-            resolve([]);
-        });
+        const url = '/rs.stops.getTimes';
+        return this.requestor.get(url, {params: {key: this.key,
+                                                 agency: this.agency_id,
+                                                 stop: stopId}})
+            .then((response) => {
+                let arrivals = response.data.response.map((i) => {
+                    return new ArrivalType({
+                        route: routes[i.route],
+                        direction: i.direction,
+                        arrival: i.etaDepartTime
+                    });
+                });
+
+                // sort based on arrival time
+                return arrivals.sort((a, b) => {
+                    if (a.arrival.isBefore(b.arrival)) {
+                        return -1;
+                    } else if (a.arrival.isSame(b.arrival)) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
+            });
     }
 
     getVehicles(bounds, visible_routes) {
