@@ -39,7 +39,7 @@ class StopOverlay extends Component {
                 return (
                     <tr key={i}>
                       <td>{a.arrival.fromNow()}</td>
-                      <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.id}</td>
+                      <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.number}</td>
                       <td>{a.direction}</td>
                     </tr>
                 );
