@@ -133,27 +133,26 @@ class RouteShout2Parser {
                                                      timeHorizon: 30}})
                 .then((response) => {
                     let vehicles = response.data.response.map((v) => {
-                        const status = (deviation) => {
-                            if (deviation < 0) {
-                                return 'EARLY';
-                            }
-                            else if (deviation < 10) {
-                                return 'ON TIME';
-                            } else {
-                                return 'LATE';
-                            }
-                        };
-                        const deviation = v.s || 0;
+                        // const status = (deviation) => {
+                        //     if (deviation < 0) {
+                        //         return 'EARLY';
+                        //     }
+                        //     else if (deviation < 10) {
+                        //         return 'ON TIME';
+                        //     } else {
+                        //         return 'LATE';
+                        //     }
+                        // };
+                        // const deviation = v.s || 0;
 
                         //!mwd - I am not sure I got all these variables, correct
                         //  they are quite cryptic...
                         return new VehicleType({
                             id: v.vId,
                             position: [v.la, v.lo],
-                            destination: v.mD,
+                            destination: v.d,
+                            on_board: '',
                             heading: v.h,
-                            deviation: deviation,
-                            op_status: status(deviation),
                             route_id: r.id,
                             color: r.color
                         });
