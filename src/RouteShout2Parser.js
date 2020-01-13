@@ -16,6 +16,7 @@ import axios from 'axios';
 
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
+import StopType from './StopType';
 
 class RouteShout2Parser {
     constructor(url, agency_id, key) {
@@ -29,7 +30,6 @@ class RouteShout2Parser {
     }
 
     getRoutes() {
-        console.log('getRoutes');
         const url = '/rs.routes.getList';
 
         return this.requestor.get(url, {params: {key: this.key, agency: this.agency_id}})
@@ -43,7 +43,6 @@ class RouteShout2Parser {
                         route: route.id
                     }}).then((response2) => {
                         const polyline = this.generatePolyline(response2.data);
-                        console.log('polyline=', polyline);
 
                         return new RouteType({
                             id: route.id,
@@ -72,10 +71,21 @@ class RouteShout2Parser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        // !mwd - TODO: implement
-        return new Promise((resolve, reject) => {
-            resolve([]);
-        });
+        const url = '/rs.stops.getList';
+        return this.requestor.get(url, {params: {key: this.key,
+                                                 agency: this.agency_id,
+                                                 route: route.id}})
+            .then((response) => {
+                let stops = response.data.response.map((stop) => {
+                    return new StopType({
+                        id: stop.id,
+                        name: stop.n,
+                        position: [stop.la, stop.lo]
+                    });
+                });
+
+                return stops;
+            });
     }
 
     /**
@@ -113,10 +123,9 @@ class RouteShout2Parser {
                             }
                         };
                         const deviation = v.s || 0;
-                        console.log('deviation=', deviation);
-                        console.log('heading', v.h);
-                        console.log('color', r.color);
 
+                        //!mwd - I am not sure I got all these variables, correct
+                        //  they are quite cryptic...
                         return new VehicleType({
                             id: v.vId,
                             position: [v.la, v.lo],
