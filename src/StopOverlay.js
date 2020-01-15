@@ -13,6 +13,7 @@
  *******************************************/
 
 import React, { Component } from 'react';
+import moment from 'moment';
 
 import './StopOverlay.css';
 
@@ -36,9 +37,10 @@ class StopOverlay extends Component {
             );
         } else {
             return this.props.arrivals.map((a, i) => {
+                const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
                 return (
                     <tr key={i}>
-                      <td>{a.arrival.fromNow()}</td>
+                      <td>{arrival}</td>
                       <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.number}</td>
                       <td>{a.direction}</td>
                     </tr>
