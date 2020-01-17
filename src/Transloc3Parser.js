@@ -81,24 +81,33 @@ class Transloc3Parser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        return new Promise((resolve, reject) => {
-            resolve([]);
-        });
+        const url = '/stops.json';
+        return this.requestor.get(url, {params: {agencies: this.agency_id,
+                                                 include_routes: true}})
+            .then((response) => {
+                // Step 1: Turn the Stops into a map based on id for quick cache lookup
+                // Step 2: Filter stops to only this route
+                // Step 3: Convert to StopType
 
-        // const url = '/stops.json';
-        // return this.requestor.get(url, {params: {agencies: this.agency_id}}).then((response) => {
-        //     // Step 1: Filter stops to only this route
-        //     // Step 2: Convert to StopType
-        //     return response.data.data.filter((stop) => {
-        //         return stop.routes.includes(route.id);
-        //     }).map((stop) => {
-        //         return new StopType({
-        //             id: stop.stop_id,
-        //             name: stop.name,
-        //             position: [stop.location.lat, stop.location.lng]
-        //         });
-        //     });
-        // });
+                const stop_map = response.data.stops.reduce((acc, stop) => {
+                    acc[stop.id] = stop;
+                    return acc;
+                }, {});
+
+                return response.data.routes.filter((r) => {
+                    return r.id === route.id;
+                }).flatMap((r) => {
+                    return r.stops.map((stop_id) => {
+                        const stop = stop_map[stop_id];
+
+                        return new StopType({
+                            id: stop.id,
+                            name: stop.name,
+                            position: [stop.position[0], stop.position[1]]
+                        });
+                    });
+                });
+            });
     }
 
     /**
