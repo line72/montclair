@@ -14,6 +14,7 @@
 
 import axios from 'axios';
 import polyUtil from 'polyline-encoded';
+import moment from 'moment';
 
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
@@ -118,36 +119,34 @@ class Transloc3Parser {
      * @return Promise -> [ArrivalType] : in sorted order
      */
     getArrivalsFor(stopId, routes) {
-        return new Promise((resolve, reject) => {
-            resolve([]);
-        });
-        // const url = '/arrival-estimates.json'
-        // return this.requestor.get(url, {params: {agencies: this.agency_id, stops: stopId}})
-        //     .then((response) => {
-        //         // !mwd - there should ONLY be one item in the list
-        //         //  because we have only requested a single stopId.
-        //         // We could potentially do some filtering, but maybe later...
-        //         const arrivals = response.data.data.flatMap((stop) => {
-        //             return stop.arrivals.map((arrival) => {
-        //                 return new ArrivalType({
-        //                     route: routes[arrival.route_id],
-        //                     direction: '',
-        //                     arrival: arrival.arrival_at
-        //                 });
-        //             });
-        //         });
+        const url = '/vehicle_statuses.json'
+        return this.requestor.get(url, {params: {agencies: this.agency_id,
+                                                 include_arrivals: true,
+                                                 schedules: true,
+                                                 arrival_stop: stopId}})
+            .then((response) => {
+                // !mwd - there should ONLY be one item in the list
+                //  because we have only requested a single stopId.
+                // We could potentially do some filtering, but maybe later...
+                const arrivals = response.data.arrivals.map((arrival) => {
+                    return new ArrivalType({
+                        route: routes[arrival.route_id],
+                        direction: arrival.headsign,
+                        arrival: moment.unix(arrival.timestamp)
+                    });
+                });
 
-        //         // sort based on arrival time
-        //         return arrivals.sort((a, b) => {
-        //             if (a.arrival.isBefore(b.arrival)) {
-        //                 return -1;
-        //             } else if (a.arrival.isSame(b.arrival)) {
-        //                 return 0;
-        //             } else {
-        //                 return 1;
-        //             }
-        //         });
-        //     });
+                // sort based on arrival time
+                return arrivals.sort((a, b) => {
+                    if (a.arrival.isBefore(b.arrival)) {
+                        return -1;
+                    } else if (a.arrival.isSame(b.arrival)) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
+            });
     }
 
     getVehicles(bounds, visible_routes) {
