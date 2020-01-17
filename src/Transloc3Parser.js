@@ -22,7 +22,6 @@ import ArrivalType from './ArrivalType';
 
 class Transloc3Parser {
     constructor(agency_id, url) {
-        console.log('Transloc3');
         this.url = url || 'https://feed.transloc.com/3/';
         this.agency_id = agency_id;
 
@@ -33,18 +32,17 @@ class Transloc3Parser {
 
     getRoutes() {
         // first get the segments so we can build our route paths
-        let url = `/segments.json?agencies=${this.agency_id}`;
-        return this.requestor.get(url).then((response) => {
+        let url = '/segments.json';
+        return this.requestor.get(url, {params: {agencies: this.agency_id}}).then((response) => {
             let segments = response.data;
 
-            let url = `/routes.json?agencies=${this.agency_id}`;
+            let url = '/routes.json';
 
-            return this.requestor.get(url).then((response) => {
+            return this.requestor.get(url, {params: {agencies: this.agency_id}}).then((response) => {
                 let route_data = response.data.routes;
 
                 // parse it
                 let routes = route_data.reduce((acc, route) => {
-                    console.log('reducing', route);
                     // build out the segments
                     const route_segment = segments.routes.find(s => s.id === route.id);
 
@@ -60,7 +58,6 @@ class Transloc3Parser {
                         }
                     });
 
-                    console.log('new RouteType', route.id);
                     acc[route.id] = new RouteType({
                         id: route.id,
                         number: route.short_name,
@@ -145,44 +142,39 @@ class Transloc3Parser {
     }
 
     getVehicles(bounds, visible_routes) {
-        return new Promise((resolve, reject) => {
-            resolve({});
-        });
-        // let url = `/vehicles.json?agencies=${this.agency_id}`;
+        let url = '/vehicle_statuses.json';
+        return this.requestor.get(url, {params: {agencies: this.agency_id,
+                                                 include_arrivals: false}})
+            .then((response) => {
+                const vehicle_data = response.data.vehicles;
 
-        // if (bounds != null) {
-        //     // filter vehicles not within the bounds
-        //     // !mwd - we expand the search region a little bit
-        //     //  so that vehicles don't jump in and out of the screen
-        //     let epsilon = 0.008;
-        //     let bottomLeft = [bounds["_southWest"]["lat"] - epsilon, bounds["_southWest"]["lng"] - epsilon];
-        //     let topRight = [bounds["_northEast"]["lat"] + epsilon, bounds["_northEast"]["lng"] + epsilon];
+                // filter based on the visible routes
+                const visible_route_ids = visible_routes.map(x => x.id);
 
-        //     url=`${url}&geo_area=${bottomLeft[0]},${bottomLeft[1]}|${topRight[0]},${topRight[1]}`;
-        // }
+                return vehicle_data.reduce((acc, vehicle) => {
+                    // skip no visible routes
+                    if (!visible_route_ids.includes(vehicle.route_id)) {
+                        return acc;
+                    }
 
-        // return this.requestor.get(url).then((response) => {
-        //     let vehicle_data = response.data.data[this.agency_id] || []
+                    let v = new VehicleType({
+                        id: vehicle.id,
+                        position: [vehicle.position[0], vehicle.position[1]],
+                        heading: vehicle.heading,
+                        destination: '',
+                        on_board: '',
+                        route_id: vehicle.route_id
+                    });
 
-        //     return vehicle_data.reduce((acc, vehicle) => {
-        //         let v = new VehicleType({
-        //             id: vehicle.vehicle_id,
-        //             position: [vehicle.location.lat, vehicle.location.lng],
-        //             heading: vehicle.heading,
-        //             destination: '',
-        //             on_board: vehicle.passenger_load || '',
-        //             route_id: vehicle.route_id
-        //         });
+                    if (v.route_id in acc) {
+                        acc[v.route_id].push(v);
+                    } else {
+                        acc[v.route_id] = [v];
+                    }
 
-        //         if (v.route_id in acc) {
-        //             acc[v.route_id].push(v);
-        //         } else {
-        //             acc[v.route_id] = [v];
-        //         }
-
-        //         return acc;
-        //     }, {});
-        // });
+                    return acc;
+                }, {});
+            });
     }
 }
 
