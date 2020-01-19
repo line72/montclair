@@ -304,9 +304,6 @@ class RouteContainer extends Component {
 
     render() {
         let routes_list = this.state.agencies.map((agency) => {
-            if (!agency.visible) {
-                return [];
-            }
             return Object.keys(agency.routes).map((key) => {
                 let route = agency.routes[key];
 
