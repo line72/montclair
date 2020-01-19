@@ -21,7 +21,7 @@
     "immutability-helper": "^2.9.1",
     "leaflet": "^1.6.0",
     "polyline-encoded": "0.0.8",
-    "react-leaflet": "^1.8.1",
+    "react-leaflet": "^2.6.1",
     "render-if": "^0.1.1"
   },
   "browserslist": {
