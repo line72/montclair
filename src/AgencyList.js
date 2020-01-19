@@ -36,7 +36,19 @@ class AgencyList extends Component {
         }
 
         const agencies = this.props.agencies.map((agency, index) => {
-            let routes = Object.keys(agency.routes).map((key, index) => {
+            let r = Object.keys(agency.routes);
+            r = r.sort((a, b) => {
+                const aId = parseInt(agency.routes[a].number, 10) || agency.routes[a].number;
+                const bId = parseInt(agency.routes[b].number, 10) || agency.routes[b].number;
+
+                if (aId < bId) {
+                    return -1;
+                } else if (aId > bId) {
+                    return 1;
+                }
+                return 0;
+            });
+            let routes = r.map((key) => {
                 let route = agency.routes[key];
                 let is_checked = (agency.visible && route.visible) ? "AgencyList-checked" : "AgencyList-unchecked";
 
