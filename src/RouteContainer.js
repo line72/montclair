@@ -16,16 +16,15 @@ import React, { Component } from 'react';
 import update from 'immutability-helper';
 import axios from 'axios';
 import Configuration from './Configuration';
-import Route from './Route';
-import BaseMap from './BaseMap';
 import StopOverlay from './StopOverlay';
-import AgencyList from './AgencyList';
-import FirstRunHint from './FirstRunHint';
 import LocalStorage from './LocalStorage';
 import StopOverlayType from './StopOverlayType';
+import ExploreContainer from './ExploreContainer';
 
 import './w3.css';
 import './RouteContainer.css';
+
+const MODE = Object.freeze({"EXPLORE": 1, "STOP": 2});
 
 class RouteContainer extends Component {
     constructor() {
@@ -48,6 +47,7 @@ class RouteContainer extends Component {
         this.arrivalTimerID = null;
 
         this.state = {
+            mode: MODE.EXPLORE,
             agencies: agencies,
             stopOverlay: new StopOverlayType({}),
         };
@@ -196,7 +196,7 @@ class RouteContainer extends Component {
         });
     }
 
-    toggleAgency(agency) {
+    toggleAgency = (agency) => {
         let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
         const agencies = update(this.state.agencies, {[i]: {visible: {$set: !agency.visible}}});
 
@@ -209,7 +209,7 @@ class RouteContainer extends Component {
         this.storage.updateVisibility(agencies);
     }
 
-    toggleRoute(agency, route) {
+    toggleRoute = (agency, route) => {
         let i = this.state.agencies.findIndex((e) => {return e.name === agency.name});
 
         const visible = !route.visible;
@@ -303,65 +303,78 @@ class RouteContainer extends Component {
     }
 
     render() {
-        let routes_list = this.state.agencies.map((agency) => {
-            return Object.keys(agency.routes).map((key) => {
-                let route = agency.routes[key];
-
-                if (!route.visible) {
-                    return (null);
-                }
-
-                return (
-                    <Route key={route.id}
-                           agency={agency}
-                           route={route}
-                           id={route.id}
-                           number={route.number}
-                           name={route.name}
-                           selected={route.selected}
-                           color={route.color}
-                           vehicles={route.vehicles}
-                           stops={route.stops}
-                           onStopClicked={(props) => this.onStopClicked(props)}
-                           />
-                );
-            });
-        });
-        // flatten
-        let routes = Array.prototype.concat.apply([], routes_list);
-
-        let first_run = this.storage.isFirstRun();
-
-        return ([
-            <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
-            <div key="main" className="w3-main RouteContainer-main">
-              {/* Push content down on small screens */}
-              <div className="w3-hide-large RouteContainer-header-margin">
-              </div>
-
-              <div className="w3-hide-medium w3-hide-small RouteContainer-header">
-                <h1 className="RouteContainer-h1">Birmingham Transit</h1>
-              </div>
-
-              <div className="">
-                <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
-                <BaseMap
-                  initialViewport={this.initialViewport}
-                  onBoundsChanged={this.onBoundsChanged}
-                  onViewportChanged={this.onViewportChanged}
-                >
-                  {routes}
-                </BaseMap>
-              </div>
-            </div>,
-            <StopOverlay key="stop-overlay"
-                         visible={this.state.stopOverlay.visible}
-                         name={this.state.stopOverlay.name}
-                         arrivals={this.state.stopOverlay.arrivals}
-                         fetching={this.state.stopOverlay.fetching}
-                         onClose={() => {this.onStopOverlayClosed()}}
+        return (
+            <ExploreContainer
+              agencies={this.state.agencies}
+              isFirstRun={this.storage.isFirstRun()}
+              onStopClicked={this.onStopClicked}
+              togggleAgency={this.toggleAgency}
+              toggleRoute={this.toggleRoute}
+              initialViewport={this.initialViewport}
+              onBoundsChanged={this.onBoundsChanged}
+              onViewportChanged={this.onViewportChanged}
             />
-        ]);
+        );
+
+        // let routes_list = this.state.agencies.map((agency) => {
+        //     return Object.keys(agency.routes).map((key) => {
+        //         let route = agency.routes[key];
+
+        //         if (!route.visible) {
+        //             return (null);
+        //         }
+
+        //         return (
+        //             <Route key={route.id}
+        //                    agency={agency}
+        //                    route={route}
+        //                    id={route.id}
+        //                    number={route.number}
+        //                    name={route.name}
+        //                    selected={route.selected}
+        //                    color={route.color}
+        //                    vehicles={route.vehicles}
+        //                    stops={route.stops}
+        //                    onStopClicked={(props) => this.onStopClicked(props)}
+        //                    />
+        //         );
+        //     });
+        // });
+        // // flatten
+        // let routes = Array.prototype.concat.apply([], routes_list);
+
+        // let first_run = this.storage.isFirstRun();
+
+        // return ([
+        //     <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
+        //     <div key="main" className="w3-main RouteContainer-main">
+        //       {/* Push content down on small screens */}
+        //       <div className="w3-hide-large RouteContainer-header-margin">
+        //       </div>
+
+        //       <div className="w3-hide-medium w3-hide-small RouteContainer-header">
+        //         <h1 className="RouteContainer-h1">Birmingham Transit</h1>
+        //       </div>
+
+        //       <div className="">
+        //         <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
+        //         <BaseMap
+        //           initialViewport={this.initialViewport}
+        //           onBoundsChanged={this.onBoundsChanged}
+        //           onViewportChanged={this.onViewportChanged}
+        //         >
+        //           {routes}
+        //         </BaseMap>
+        //       </div>
+        //     </div>,
+        //     <StopOverlay key="stop-overlay"
+        //                  visible={this.state.stopOverlay.visible}
+        //                  name={this.state.stopOverlay.name}
+        //                  arrivals={this.state.stopOverlay.arrivals}
+        //                  fetching={this.state.stopOverlay.fetching}
+        //                  onClose={() => {this.onStopOverlayClosed()}}
+        //     />
+        // ]);
     }
 }
 
