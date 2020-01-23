@@ -16,9 +16,9 @@ import React, { Component } from 'react';
 import update from 'immutability-helper';
 import axios from 'axios';
 import Configuration from './Configuration';
-import StopOverlay from './StopOverlay';
-import LocalStorage from './LocalStorage';
 import StopOverlayType from './StopOverlayType';
+import LocalStorage from './LocalStorage';
+import StopEstimatesContainer from './StopEstimatesContainer';
 import ExploreContainer from './ExploreContainer';
 
 import './w3.css';
@@ -303,78 +303,27 @@ class RouteContainer extends Component {
     }
 
     render() {
-        return (
-            <ExploreContainer
-              agencies={this.state.agencies}
-              isFirstRun={this.storage.isFirstRun()}
-              onStopClicked={this.onStopClicked}
-              togggleAgency={this.toggleAgency}
-              toggleRoute={this.toggleRoute}
-              initialViewport={this.initialViewport}
-              onBoundsChanged={this.onBoundsChanged}
-              onViewportChanged={this.onViewportChanged}
-            />
-        );
-
-        // let routes_list = this.state.agencies.map((agency) => {
-        //     return Object.keys(agency.routes).map((key) => {
-        //         let route = agency.routes[key];
-
-        //         if (!route.visible) {
-        //             return (null);
-        //         }
-
-        //         return (
-        //             <Route key={route.id}
-        //                    agency={agency}
-        //                    route={route}
-        //                    id={route.id}
-        //                    number={route.number}
-        //                    name={route.name}
-        //                    selected={route.selected}
-        //                    color={route.color}
-        //                    vehicles={route.vehicles}
-        //                    stops={route.stops}
-        //                    onStopClicked={(props) => this.onStopClicked(props)}
-        //                    />
-        //         );
-        //     });
-        // });
-        // // flatten
-        // let routes = Array.prototype.concat.apply([], routes_list);
-
-        // let first_run = this.storage.isFirstRun();
-
-        // return ([
-        //     <AgencyList key="agency-list" isFirstRun={first_run} agencies={this.state.agencies} onAgencyClick={(agency) => this.toggleAgency(agency) } onRouteClick={(agency, route) => this.toggleRoute(agency, route) } />,
-        //     <div key="main" className="w3-main RouteContainer-main">
-        //       {/* Push content down on small screens */}
-        //       <div className="w3-hide-large RouteContainer-header-margin">
-        //       </div>
-
-        //       <div className="w3-hide-medium w3-hide-small RouteContainer-header">
-        //         <h1 className="RouteContainer-h1">Birmingham Transit</h1>
-        //       </div>
-
-        //       <div className="">
-        //         <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
-        //         <BaseMap
-        //           initialViewport={this.initialViewport}
-        //           onBoundsChanged={this.onBoundsChanged}
-        //           onViewportChanged={this.onViewportChanged}
-        //         >
-        //           {routes}
-        //         </BaseMap>
-        //       </div>
-        //     </div>,
-        //     <StopOverlay key="stop-overlay"
-        //                  visible={this.state.stopOverlay.visible}
-        //                  name={this.state.stopOverlay.name}
-        //                  arrivals={this.state.stopOverlay.arrivals}
-        //                  fetching={this.state.stopOverlay.fetching}
-        //                  onClose={() => {this.onStopOverlayClosed()}}
-        //     />
-        // ]);
+        if (this.state.stopOverlay.visible) {
+            return (
+                <StopEstimatesContainer
+                  stopOverlay={this.state.stopOverlay}
+                  onClose={this.onStopOverlayClosed}
+                />
+            );
+        } else {
+            return (
+                <ExploreContainer
+                  agencies={this.state.agencies}
+                  isFirstRun={this.storage.isFirstRun()}
+                  onStopClicked={this.onStopClicked}
+                  togggleAgency={this.toggleAgency}
+                  toggleRoute={this.toggleRoute}
+                  initialViewport={this.initialViewport}
+                  onBoundsChanged={this.onBoundsChanged}
+                  onViewportChanged={this.onViewportChanged}
+                />
+            );
+        }
     }
 }
 
