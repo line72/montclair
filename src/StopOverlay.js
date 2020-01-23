@@ -12,7 +12,7 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import React, { Component } from 'react';
+import React, { createRef, Component } from 'react';
 import moment from 'moment';
 import { CircleMarker } from 'react-leaflet';
 
@@ -21,7 +21,26 @@ import BaseMap from './BaseMap';
 import './StopOverlay.css';
 
 class StopOverlay extends Component {
+    constructor(props) {
+        super(props);
+
+        this.mapRef = createRef();
+        this.state = {
+            selected: null
+        };
+    }
+
+    getMap = () => {
+        if (this.mapRef.current) {
+            return this.mapRef.current.getRef();
+        }
+        return null;
+    }
+
     onEstimateClicked = (stop, arrival) => {
+        /* hi-light */
+        this.setState({selected: arrival});
+
         if (this.props.onSelected) {
             this.props.onSelected(stop, arrival);
         }
@@ -47,8 +66,11 @@ class StopOverlay extends Component {
         } else {
             return this.props.arrivals.map((a, i) => {
                 const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
+                const selected = this.state.selected && this.state.selected.tripId === a.tripId && this.state.selected.route.id == a.route.id;
                 return (
-                    <tr key={i} onClick={() => this.onEstimateClicked(this.props.stop, a)}>
+                    <tr key={i}
+                        className={selected ? 'w3-blue-gray' : ''}
+                        onClick={() => this.onEstimateClicked(this.props.stop, a)}>
                       <td>{arrival}</td>
                       <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.number}</td>
                       <td>{a.direction}</td>
@@ -63,11 +85,12 @@ class StopOverlay extends Component {
         if (this.props.visible) {
             style = {display: 'block'};
         }
-
         return (
             <div className="StopOverlay" style={style}>
               <div className="StopOverlay-map">
-                <BaseMap>
+                <BaseMap
+                  ref={this.mapRef}
+                >
                   <CircleMarker
                     center={this.props.stop.position}
                     radius={7}

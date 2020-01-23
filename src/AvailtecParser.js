@@ -83,7 +83,8 @@ class AvailtecParser {
                             route: routes[rd.RouteId],
                             direction: rd.Direction,
                             arrival: d.EDT || d.ETA,
-                            vehicleId: d.Trip.BlockFareboxId
+                            vehicleId: d.Trip.BlockFareboxId,
+                            tripId: d.Trip.TripId
                         });
                     });
                 });

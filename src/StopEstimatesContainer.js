@@ -12,7 +12,7 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import React, { Component } from 'react';
+import React, { createRef, Component } from 'react';
 
 import StopOverlay from './StopOverlay';
 import Bus from './Bus';
@@ -26,6 +26,7 @@ class StopEstimatesContainer extends Component {
             selectedArrival: this.props.stopOverlay.arrivals[0] || null,
             selectedVehicle: null
         };
+        this.ref = createRef();
         this.updateTimer = setInterval(() => { this.update();}, 10000);
         this.update();
     }
@@ -46,6 +47,12 @@ class StopEstimatesContainer extends Component {
             // get the vehicle
             this.state.stopOverlay.agency.parser.getVehicle(this.state.selectedArrival.route, this.state.selectedArrival.vehicleId)
                 .then((vehicle) => {
+                    if (this.ref.current && this.ref.current.getMap()) {
+                        this.ref.current.getMap().leafletElement.fitBounds([
+                            this.state.stopOverlay.stop.position,
+                            vehicle.position
+                        ], {padding: [30, 30]});
+                    }
                     this.setState({selectedVehicle: vehicle});
                 });
         }
@@ -55,7 +62,6 @@ class StopEstimatesContainer extends Component {
     fetchArrivals = (agency, stop_id) => {
         agency.parser.getArrivalsFor(stop_id, agency.routes)
             .then((arrivals) => {
-                console.log('got arrivals', arrivals);
                 this.setState((state) => {
                     return {
                         stopOverlay: {...state.stopOverlay,
@@ -69,12 +75,20 @@ class StopEstimatesContainer extends Component {
     }
 
     onArrivalSelected = (stop, arrival) => {
-        this.setState({
-            selectedArrival: arrival
+        this.setState((state) => {
+            return {
+                selectedArrival: arrival
+            };
         });
         // get the vehicle
         this.state.stopOverlay.agency.parser.getVehicle(arrival.route, arrival.vehicleId)
             .then((vehicle) => {
+                if (this.ref.current && this.ref.current.getMap()) {
+                    this.ref.current.getMap().leafletElement.fitBounds([
+                        this.state.stopOverlay.stop.position,
+                        vehicle.position
+                    ], {padding: [30, 30]});
+                }
                 this.setState({selectedVehicle: vehicle});
             });
     }
@@ -98,7 +112,8 @@ class StopEstimatesContainer extends Component {
 
     render() {
         return (
-            <StopOverlay key="stop-overlay"
+            <StopOverlay ref={this.ref}
+                         key="stop-overlay"
                          visible={this.state.stopOverlay.visible}
                          stop={this.state.stopOverlay.stop}
                          name={this.state.stopOverlay.name}
