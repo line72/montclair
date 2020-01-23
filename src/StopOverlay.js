@@ -14,15 +14,16 @@
 
 import React, { Component } from 'react';
 import moment from 'moment';
+import { CircleMarker } from 'react-leaflet';
 
 import BaseMap from './BaseMap';
 
 import './StopOverlay.css';
 
 class StopOverlay extends Component {
-    onEstimateClicked = (arrival) => {
+    onEstimateClicked = (stop, arrival) => {
         if (this.props.onSelected) {
-            this.props.onSelected(arrival);
+            this.props.onSelected(stop, arrival);
         }
     }
 
@@ -47,7 +48,7 @@ class StopOverlay extends Component {
             return this.props.arrivals.map((a, i) => {
                 const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
                 return (
-                    <tr key={i} onClick={() => this.onEstimateClicked(a)}>
+                    <tr key={i} onClick={() => this.onEstimateClicked(this.props.stop, a)}>
                       <td>{arrival}</td>
                       <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.number}</td>
                       <td>{a.direction}</td>
@@ -66,7 +67,21 @@ class StopOverlay extends Component {
         return (
             <div className="StopOverlay" style={style}>
               <div className="StopOverlay-map">
-                <BaseMap />
+                <BaseMap>
+                  <CircleMarker
+                    center={this.props.stop.position}
+                    radius={7}
+                    stroke={true}
+                    color={'#000000'}
+                    weight={2}
+                    opacity={1.0}
+                    fill={true}
+                    fillColor={'#dedede'}
+                    fillOpacity={1.0}
+                  >
+                  </CircleMarker>
+                  {this.props.children}
+                 </BaseMap>
               </div>
               <div className="StopOverlay-content">
                 <div className="w3-center StopOverlay-estimates"><br />

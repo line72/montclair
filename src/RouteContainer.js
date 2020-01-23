@@ -253,12 +253,13 @@ class RouteContainer extends Component {
         this.storage.updateViewport(viewport);
     }
 
-    onStopClicked = ({agency, id, name}) => {
+    onStopClicked = ({agency, id, name}, stop) => {
         clearInterval(this.arrivalTimerID);
 
         this.setState({
             stopOverlay: new StopOverlayType({
                 agency: agency,
+                stop: stop,
                 id: id,
                 name: name,
                 fetching: true,
@@ -272,6 +273,7 @@ class RouteContainer extends Component {
                     this.setState({
                         stopOverlay: new StopOverlayType({
                             agency: agency,
+                            stop: stop,
                             id: id,
                             name: name,
                             arrivals: arrivals,

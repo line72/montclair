@@ -84,7 +84,7 @@ class Route extends Component {
                       id={stop.id}
                       name={stop.name}
                       position={stop.position}
-                      onClick={this.props.onStopClicked}
+                      onClick={(props) => this.props.onStopClicked(props, stop)}
                 />
             );
         });

@@ -13,8 +13,9 @@
  *******************************************/
 
 class StopOverlayType {
-    constructor({agency, id, name, arrivals, fetching, visible}) {
+    constructor({agency, stop, id, name, arrivals, fetching, visible}) {
         this.agency = agency;
+        this.stop = stop;
         this.id = id;
         this.name = name || "";
         this.arrivals = arrivals || [];

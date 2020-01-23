@@ -82,7 +82,8 @@ class AvailtecParser {
                         return new ArrivalType({
                             route: routes[rd.RouteId],
                             direction: rd.Direction,
-                            arrival: d.EDT || d.ETA
+                            arrival: d.EDT || d.ETA,
+                            vehicleId: d.Trip.BlockFareboxId
                         });
                     });
                 });
@@ -131,6 +132,37 @@ class AvailtecParser {
             return vehicles;
         });
     }
+
+    /**
+     * Get a specific vehicle on a specific route
+     *
+     * @param route -> RouteType : The route
+     * @param vehicleId -> String : The id of the vehicle, this matches the Trip's BlockFareboxId
+     * @return Promise -> VehicleType | nil : The vehicle if found
+     */
+    getVehicle(route, vehicleId) {
+        console.log('getting', route, vehicleId);
+        let url = this.url + '/rest/Vehicles/GetAllVehiclesForRoute';
+
+        return axios.get(url, {params: {routeId: route.id}}).then((response) => {
+            return response.data.find((e) => {
+                console.log('e=', e.BlockFareboxId);
+                return e.BlockFareboxId === vehicleId;
+            });
+        }).then((result) => {
+            console.log('result=', result);
+            if (result) {
+                const r = {
+                    RouteId: route.id,
+                    Color: route.color
+                };
+                return this.parseVehicle(r, result);
+            } else {
+                return result;
+            }
+        });
+    }
+
     parseVehicle(route, vehicle) {
         return new VehicleType({
             id: vehicle.VehicleId,

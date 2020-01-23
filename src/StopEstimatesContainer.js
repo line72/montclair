@@ -15,33 +15,62 @@
 import React, { Component } from 'react';
 
 import StopOverlay from './StopOverlay';
+import Bus from './Bus';
 
 class StopEstimatesContainer extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            selectedArrival: this.props.stopOverlay.arrivals[0] || null
+            selectedArrival: this.props.stopOverlay.arrivals[0] || null,
+            selectedVehicle: null
         };
     }
 
-    onArrivalSelected = (arrival) => {
-        console.log('onArrivalSelected', arrival);
+    onArrivalSelected = (stop, arrival) => {
+        console.log('onArrivalSelected', stop, arrival);
         this.setState({
             selectedArrival: arrival
         });
+        // get the vehicle
+        this.props.stopOverlay.agency.parser.getVehicle(arrival.route, arrival.vehicleId)
+            .then((vehicle) => {
+                console.log('vehicle=', vehicle);
+                this.setState({selectedVehicle: vehicle});
+            });
+    }
+
+    renderVehicle = () => {
+        if (this.state.selectedVehicle) {
+            return (
+                <Bus
+                  position={this.state.selectedVehicle.position}
+                  color={this.state.selectedVehicle.color}
+                  heading={this.state.selectedVehicle.heading}
+                  route_name=""
+                  onOpen={() => {}}
+                  onClose={() => {}}
+                />
+            );
+        } else {
+            return null;
+        }
     }
 
     render() {
         return (
             <StopOverlay key="stop-overlay"
                          visible={this.props.stopOverlay.visible}
+                         stop={this.props.stopOverlay.stop}
                          name={this.props.stopOverlay.name}
                          arrivals={this.props.stopOverlay.arrivals}
                          fetching={this.props.stopOverlay.fetching}
+                         vehicle={this.state.selectedVehicle}
                          onSelected={this.onArrivalSelected}
                          onClose={() => {this.props.onClose()}}
-            />
+            >
+              {this.renderVehicle()}
+            </StopOverlay>
         );
     }
 }

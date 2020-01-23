@@ -40,7 +40,7 @@ class ExploreContainer extends Component {
                            color={route.color}
                            vehicles={route.vehicles}
                            stops={route.stops}
-                           onStopClicked={(props) => this.props.onStopClicked(props)}
+                           onStopClicked={(props, stop) => this.props.onStopClicked(props, stop)}
                            />
                 );
             });
