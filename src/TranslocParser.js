@@ -113,7 +113,9 @@ class TranslocParser {
                         return new ArrivalType({
                             route: routes[arrival.route_id],
                             direction: '',
-                            arrival: arrival.arrival_at
+                            arrival: arrival.arrival_at,
+                            vehicleId: arrival.vehicle_id,
+                            tripId: `${arrival.route_id}_${arrival.vehicle_id}`
                         });
                     });
                 });
@@ -177,9 +179,30 @@ class TranslocParser {
      * @return Promise -> VehicleType | nil : The vehicle if found
      */
     getVehicle(route, vehicleId) {
-        return new Promise((resolve, reject) => {
-            resolve(null);
-        });
+        let url = '/vehicles.json';
+
+        return this.requestor.get(url, {params: {agencies: this.agency_id,
+                                                 routes: route.id}})
+            .then((result) => {
+                let vehicle_data = result.data.data[this.agency_id] || [];
+
+                return vehicle_data.find((e) => {
+                    return e.vehicle_id === vehicleId;
+                });
+            }).then((result) => {
+                if (result) {
+                    return new VehicleType({
+                        id: result.vehicle_id,
+                        position: [result.location.lat, result.location.lng],
+                        heading: result.heading,
+                        destination: '',
+                        on_board: result.passenger_load || '',
+                        route_id: result.route_id
+                    });
+                } else {
+                    return result;
+                }
+            });
     }
 }
 
