@@ -168,6 +168,20 @@ class TranslocParser {
             }, {});
         });
     }
+
+    /**
+     * Get a specific vehicle on a specific route
+     *
+     * @param route -> RouteType : The route
+     * @param vehicleId -> String : The id of the vehicle, this matches the Trip's BlockFareboxId
+     * @return Promise -> VehicleType | nil : The vehicle if found
+     */
+    getVehicle(route, vehicleId) {
+        return new Promise((resolve, reject) => {
+            resolve(null);
+        });
+    }
 }
+
 
 export default TranslocParser;
