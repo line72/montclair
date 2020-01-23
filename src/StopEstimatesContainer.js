@@ -25,17 +25,33 @@ class StopEstimatesContainer extends Component {
             selectedArrival: this.props.stopOverlay.arrivals[0] || null,
             selectedVehicle: null
         };
+        this.updateTimer = setInterval(() => { this.update();}, 10000);
+    }
+
+    componentWillUnmount() {
+        if (this.updateTimer) {
+            clearInterval(this.updateTimer);
+        }
+        this.updateTimer = null;
+    }
+
+    update = () => {
+        if (this.state.selectedArrival) {
+            // get the vehicle
+            this.props.stopOverlay.agency.parser.getVehicle(this.state.selectedArrival.route, this.state.selectedArrival.vehicleId)
+                .then((vehicle) => {
+                    this.setState({selectedVehicle: vehicle});
+                });
+        }
     }
 
     onArrivalSelected = (stop, arrival) => {
-        console.log('onArrivalSelected', stop, arrival);
         this.setState({
             selectedArrival: arrival
         });
         // get the vehicle
         this.props.stopOverlay.agency.parser.getVehicle(arrival.route, arrival.vehicleId)
             .then((vehicle) => {
-                console.log('vehicle=', vehicle);
                 this.setState({selectedVehicle: vehicle});
             });
     }
