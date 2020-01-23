@@ -76,7 +76,7 @@ class StopOverlay extends Component {
         } else {
             return this.props.arrivals.map((a, i) => {
                 const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
-                const selected = this.state.selected && this.state.selected.tripId === a.tripId && this.state.selected.route.id === a.route.id && this.state.selected.vehicleId == a.vehicleId;
+                const selected = this.state.selected && this.state.selected.tripId === a.tripId && this.state.selected.route.id === a.route.id && this.state.selected.vehicleId === a.vehicleId;
                 return (
                     <tr key={i}
                         className={selected ? 'w3-blue-gray' : ''}
