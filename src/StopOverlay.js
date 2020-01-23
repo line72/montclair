@@ -66,7 +66,7 @@ class StopOverlay extends Component {
         } else {
             return this.props.arrivals.map((a, i) => {
                 const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
-                const selected = this.state.selected && this.state.selected.tripId === a.tripId && this.state.selected.route.id == a.route.id;
+                const selected = this.state.selected && this.state.selected.tripId === a.tripId && this.state.selected.route.id === a.route.id;
                 return (
                     <tr key={i}
                         className={selected ? 'w3-blue-gray' : ''}
@@ -92,6 +92,7 @@ class StopOverlay extends Component {
                   ref={this.mapRef}
                   showAttribution={false}
                 >
+                  {this.props.children}
                   <CircleMarker
                     center={this.props.stop.position}
                     radius={7}
@@ -104,8 +105,7 @@ class StopOverlay extends Component {
                     fillOpacity={1.0}
                   >
                   </CircleMarker>
-                  {this.props.children}
-                 </BaseMap>
+                </BaseMap>
               </div>
               <div className="StopOverlay-content">
                 <div className="w3-center StopOverlay-estimates"><br />

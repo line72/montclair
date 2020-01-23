@@ -15,7 +15,7 @@
 import React, { createRef, Component } from 'react';
 
 import StopOverlay from './StopOverlay';
-import Bus from './Bus';
+import Route from './Route';
 
 class StopEstimatesContainer extends Component {
     constructor(props) {
@@ -47,7 +47,7 @@ class StopEstimatesContainer extends Component {
             // get the vehicle
             this.state.stopOverlay.agency.parser.getVehicle(this.state.selectedArrival.route, this.state.selectedArrival.vehicleId)
                 .then((vehicle) => {
-                    if (this.ref.current && this.ref.current.getMap()) {
+                    if (vehicle && this.state.stopOverlay.stop && this.ref.current && this.ref.current.getMap()) {
                         this.ref.current.getMap().leafletElement.fitBounds([
                             this.state.stopOverlay.stop.position,
                             vehicle.position
@@ -83,7 +83,7 @@ class StopEstimatesContainer extends Component {
         // get the vehicle
         this.state.stopOverlay.agency.parser.getVehicle(arrival.route, arrival.vehicleId)
             .then((vehicle) => {
-                if (this.ref.current && this.ref.current.getMap()) {
+                if (vehicle && this.state.stopOverlay.stop && this.ref.current && this.ref.current.getMap()) {
                     this.ref.current.getMap().leafletElement.fitBounds([
                         this.state.stopOverlay.stop.position,
                         vehicle.position
@@ -95,15 +95,21 @@ class StopEstimatesContainer extends Component {
 
     renderVehicle = () => {
         if (this.state.selectedVehicle) {
+            const route = this.state.stopOverlay.agency.routes[this.state.selectedVehicle.route_id];
+            const agency = this.state.stopOverlay.agency;
             return (
-                <Bus
-                  position={this.state.selectedVehicle.position}
-                  color={this.state.selectedVehicle.color}
-                  heading={this.state.selectedVehicle.heading}
-                  route_name=""
-                  onOpen={() => {}}
-                  onClose={() => {}}
-                />
+                <Route key={route.id}
+                       agency={agency}
+                       route={route}
+                       id={route.id}
+                       number={route.number}
+                       name={route.name}
+                       selected={true}
+                       color={route.color}
+                       vehicles={[this.state.selectedVehicle]}
+                       stops={[]}
+                       onStopClicked={(props, stop) => {}}
+                  />
             );
         } else {
             return null;
