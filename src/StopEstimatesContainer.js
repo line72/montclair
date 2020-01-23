@@ -31,6 +31,15 @@ class StopEstimatesContainer extends Component {
         this.update();
     }
 
+    componentDidMount() {
+        // zoom in on the stop
+        if (!this.state.selectedVehicle) {
+            if (this.state.stopOverlay.stop && this.ref.current && this.ref.current.getMap()) {
+                this.ref.current.getMap().leafletElement.setView(this.state.stopOverlay.stop.position);
+            }
+        }
+    }
+
     componentWillUnmount() {
         if (this.updateTimer) {
             clearInterval(this.updateTimer);
@@ -126,6 +135,7 @@ class StopEstimatesContainer extends Component {
                          arrivals={this.state.stopOverlay.arrivals}
                          fetching={this.state.stopOverlay.fetching}
                          vehicle={this.state.selectedVehicle}
+                         initialViewport={this.props.initialViewport}
                          onSelected={this.onArrivalSelected}
                          onClose={() => {this.props.onClose()}}
             >

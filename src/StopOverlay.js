@@ -14,7 +14,8 @@
 
 import React, { createRef, Component } from 'react';
 import moment from 'moment';
-import { CircleMarker } from 'react-leaflet';
+import { Marker } from 'react-leaflet';
+import L from 'leaflet';
 
 import BaseMap from './BaseMap';
 
@@ -28,6 +29,15 @@ class StopOverlay extends Component {
         this.state = {
             selected: null
         };
+
+        this.icon = new L.Icon({
+            iconUrl: "/marker-icon.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            shadowUrl: "/marker-shadow.png",
+            shadowSize: [41, 41],
+            shadowAnchor: [15, 41]
+        });
     }
 
     getMap = () => {
@@ -91,20 +101,14 @@ class StopOverlay extends Component {
                 <BaseMap
                   ref={this.mapRef}
                   showAttribution={false}
+                  initialViewport={this.props.initialViewport}
                 >
                   {this.props.children}
-                  <CircleMarker
-                    center={this.props.stop.position}
-                    radius={7}
-                    stroke={true}
-                    color={'#000000'}
-                    weight={2}
-                    opacity={1.0}
-                    fill={true}
-                    fillColor={'#dedede'}
-                    fillOpacity={1.0}
+                  <Marker
+                    position={this.props.stop.position}
+                    icon={this.icon}
                   >
-                  </CircleMarker>
+                  </Marker>
                 </BaseMap>
               </div>
               <div className="StopOverlay-content">

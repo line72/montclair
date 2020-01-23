@@ -42,6 +42,7 @@ class RouteContainer extends Component {
 
         this.storage = new LocalStorage();
         this.initialViewport = this.storage.state.viewport;
+        this.currentViewport = this.initialViewport;
         this.bounds = this.storage.state.bounds;
         this.has_fetched_routes = false;
 
@@ -249,6 +250,7 @@ class RouteContainer extends Component {
     }
 
     onViewportChanged = (viewport) => {
+        this.currentViewport = viewport;
         this.storage.updateViewport(viewport);
     }
 
@@ -282,6 +284,7 @@ class RouteContainer extends Component {
                 <StopEstimatesContainer
                   stopOverlay={this.state.stopOverlay}
                   onClose={this.onStopOverlayClosed}
+                  initialViewport={this.currentViewport}
                 />
             );
         } else {
