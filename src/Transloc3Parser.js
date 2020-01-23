@@ -202,7 +202,7 @@ class Transloc3Parser {
                 const vehicle_data = response.data.vehicles;
 
                 return vehicle_data.find((e) => {
-                    return e.id == vehicleId;
+                    return e.id === vehicleId;
                 });
             }).then((result) => {
                 if (result) {
