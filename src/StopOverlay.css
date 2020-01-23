@@ -50,8 +50,8 @@
         left: 0px;
         top: 0px;
 	width: 500px;
-        height: 100vw;
-        max-height: 100vw;
+        height: 100vh;
+        max-height: 100vh;
     }
 
     .StopOverlay-table {
