@@ -44,12 +44,11 @@ class RouteContainer extends Component {
         this.initialViewport = this.storage.state.viewport;
         this.bounds = this.storage.state.bounds;
         this.has_fetched_routes = false;
-        this.arrivalTimerID = null;
 
         this.state = {
             mode: MODE.EXPLORE,
             agencies: agencies,
-            stopOverlay: new StopOverlayType({}),
+            stopOverlay: new StopOverlayType({})
         };
 
 
@@ -254,9 +253,8 @@ class RouteContainer extends Component {
     }
 
     onStopClicked = ({agency, id, name}, stop) => {
-        clearInterval(this.arrivalTimerID);
-
         this.setState({
+            mode: MODE.STOP,
             stopOverlay: new StopOverlayType({
                 agency: agency,
                 stop: stop,
@@ -266,46 +264,20 @@ class RouteContainer extends Component {
                 visible: true
             })
         });
-
-        const fetchArrivals = (agency, stop_id, name) => {
-            agency.parser.getArrivalsFor(stop_id, agency.routes)
-                .then((arrivals) => {
-                    this.setState({
-                        stopOverlay: new StopOverlayType({
-                            agency: agency,
-                            stop: stop,
-                            id: id,
-                            name: name,
-                            arrivals: arrivals,
-                            fetching: false,
-                            visible: true
-                        })
-                    });
-                });
-        };
-
-        // initial fetch
-        fetchArrivals(agency, id, name);
-
-        // start a timer
-        this.arrivalTimerID = setInterval(() => {fetchArrivals(agency, id, name);}, 20000);
     }
 
     onStopOverlayClosed = () => {
-        // clear the timer
-        clearInterval(this.arrivalTimerID);
-        this.arrivalTimerID = null;
-
         // kill the overlay state
         this.setState((state) => {
             return {
+                mode: MODE.EXPLORE,
                 stopOverlay: new StopOverlayType({})
             };
         });
     }
 
     render() {
-        if (this.state.stopOverlay.visible) {
+        if (this.state.mode === MODE.STOP) {
             return (
                 <StopEstimatesContainer
                   stopOverlay={this.state.stopOverlay}

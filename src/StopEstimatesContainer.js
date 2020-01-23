@@ -22,10 +22,12 @@ class StopEstimatesContainer extends Component {
         super(props);
 
         this.state = {
+            stopOverlay: this.props.stopOverlay,
             selectedArrival: this.props.stopOverlay.arrivals[0] || null,
             selectedVehicle: null
         };
         this.updateTimer = setInterval(() => { this.update();}, 10000);
+        this.update();
     }
 
     componentWillUnmount() {
@@ -36,13 +38,34 @@ class StopEstimatesContainer extends Component {
     }
 
     update = () => {
+        // fetch new arrivals
+        this.fetchArrivals(this.state.stopOverlay.agency, this.state.stopOverlay.id);
+
+        // fetch vehicle postion
         if (this.state.selectedArrival) {
             // get the vehicle
-            this.props.stopOverlay.agency.parser.getVehicle(this.state.selectedArrival.route, this.state.selectedArrival.vehicleId)
+            this.state.stopOverlay.agency.parser.getVehicle(this.state.selectedArrival.route, this.state.selectedArrival.vehicleId)
                 .then((vehicle) => {
                     this.setState({selectedVehicle: vehicle});
                 });
         }
+
+    }
+
+    fetchArrivals = (agency, stop_id) => {
+        agency.parser.getArrivalsFor(stop_id, agency.routes)
+            .then((arrivals) => {
+                console.log('got arrivals', arrivals);
+                this.setState((state) => {
+                    return {
+                        stopOverlay: {...state.stopOverlay,
+                                      arrivals: arrivals,
+                                      fetching: false,
+                                      visible: true
+                                     }
+                    };
+                });
+            });
     }
 
     onArrivalSelected = (stop, arrival) => {
@@ -50,7 +73,7 @@ class StopEstimatesContainer extends Component {
             selectedArrival: arrival
         });
         // get the vehicle
-        this.props.stopOverlay.agency.parser.getVehicle(arrival.route, arrival.vehicleId)
+        this.state.stopOverlay.agency.parser.getVehicle(arrival.route, arrival.vehicleId)
             .then((vehicle) => {
                 this.setState({selectedVehicle: vehicle});
             });
@@ -76,11 +99,11 @@ class StopEstimatesContainer extends Component {
     render() {
         return (
             <StopOverlay key="stop-overlay"
-                         visible={this.props.stopOverlay.visible}
-                         stop={this.props.stopOverlay.stop}
-                         name={this.props.stopOverlay.name}
-                         arrivals={this.props.stopOverlay.arrivals}
-                         fetching={this.props.stopOverlay.fetching}
+                         visible={this.state.stopOverlay.visible}
+                         stop={this.state.stopOverlay.stop}
+                         name={this.state.stopOverlay.name}
+                         arrivals={this.state.stopOverlay.arrivals}
+                         fetching={this.state.stopOverlay.fetching}
                          vehicle={this.state.selectedVehicle}
                          onSelected={this.onArrivalSelected}
                          onClose={() => {this.props.onClose()}}
