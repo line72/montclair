@@ -95,7 +95,7 @@ class BaseMap extends React.Component {
                     >
 
                     <TileLayer
-                        attribution={this.state.tile.attribution}
+                        attribution={this.props.showAttribution ? this.state.tile.attribution : ''}
                         url={this.state.tile.url}
                         subdomains={this.state.tile.subdomains}
                         />

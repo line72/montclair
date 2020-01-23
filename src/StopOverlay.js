@@ -90,6 +90,7 @@ class StopOverlay extends Component {
               <div className="StopOverlay-map">
                 <BaseMap
                   ref={this.mapRef}
+                  showAttribution={false}
                 >
                   <CircleMarker
                     center={this.props.stop.position}

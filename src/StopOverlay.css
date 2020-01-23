@@ -9,12 +9,24 @@
 
     }
 
+    .StopOverlay-map {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100vw;
+        height: 50vh;
+    }
+    
     .StopOverlay-content {
-	height: 90vh;
+        position: absolute;
+        left: 0px;
+        top: 50vh;
+        width: 100vw;
+	height: 50vh;
     }
 
     .StopOverlay-table {
-	max-height: calc(90vh - 100px);
+	max-height: calc(50vh - 80px);
 	overflow-y: auto;
     }
 }
