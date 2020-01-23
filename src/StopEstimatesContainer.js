@@ -17,6 +17,21 @@ import React, { Component } from 'react';
 import StopOverlay from './StopOverlay';
 
 class StopEstimatesContainer extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            selectedArrival: this.props.stopOverlay.arrivals[0] || null
+        };
+    }
+
+    onArrivalSelected = (arrival) => {
+        console.log('onArrivalSelected', arrival);
+        this.setState({
+            selectedArrival: arrival
+        });
+    }
+
     render() {
         return (
             <StopOverlay key="stop-overlay"
@@ -24,6 +39,7 @@ class StopEstimatesContainer extends Component {
                          name={this.props.stopOverlay.name}
                          arrivals={this.props.stopOverlay.arrivals}
                          fetching={this.props.stopOverlay.fetching}
+                         onSelected={this.onArrivalSelected}
                          onClose={() => {this.props.onClose()}}
             />
         );

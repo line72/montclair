@@ -15,9 +15,17 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 
+import BaseMap from './BaseMap';
+
 import './StopOverlay.css';
 
 class StopOverlay extends Component {
+    onEstimateClicked = (arrival) => {
+        if (this.props.onSelected) {
+            this.props.onSelected(arrival);
+        }
+    }
+
     renderArrivals() {
         if (this.props.fetching) {
             return (
@@ -39,7 +47,7 @@ class StopOverlay extends Component {
             return this.props.arrivals.map((a, i) => {
                 const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
                 return (
-                    <tr key={i}>
+                    <tr key={i} onClick={() => this.onEstimateClicked(a)}>
                       <td>{arrival}</td>
                       <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.number}</td>
                       <td>{a.direction}</td>
@@ -56,9 +64,12 @@ class StopOverlay extends Component {
         }
 
         return (
-            <div className="w3-modal StopOverlay-modal" style={style}>
-              <div className="w3-modal-content w3-card-4 w3-animate-bottom StopOverlay-content">
-                <div className="w3-center"><br />
+            <div className="StopOverlay" style={style}>
+              <div className="StopOverlay-map">
+                <BaseMap />
+              </div>
+              <div className="StopOverlay-content">
+                <div className="w3-center StopOverlay-estimates"><br />
                   <span onClick={() => this.props.onClose()}
                         className="w3-button w3-xlarge w3-hover-red w3-display-topright"
                         title="Close Modal">&times;</span>

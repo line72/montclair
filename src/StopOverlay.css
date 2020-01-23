@@ -1,7 +1,3 @@
-.StopOverlay {
-
-}
-
 @media only screen and (max-width: 600px) {
     h3 {
 	max-height: 36px;
@@ -9,6 +5,10 @@
 	text-overflow: ellipsis;
     }
     
+    .StopOverlay {
+
+    }
+
     .StopOverlay-content {
 	height: 90vh;
     }
@@ -20,13 +20,31 @@
 }
 
 @media only screen and (min-width: 600px) {
+    .StopOverlay {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .StopOverlay-map {
+        position: absolute;
+        left: 500px;
+        top: 0px;
+        width: calc(100vw - 500px);
+        height: 100vh;
+    }
+    
     .StopOverlay-content {
-	max-width: 500px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+	width: 500px;
+        height: 100vw;
+        max-height: 100vw;
     }
 
     .StopOverlay-table {
-	max-width: 500px;
-	max-height: calc(90vh - 200px);
+	/*max-width: 500px;*/
+	max-height: calc(100vh - 80px);
 	overflow-y: auto;
     }
 }
