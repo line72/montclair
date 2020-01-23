@@ -287,7 +287,7 @@ class RouteContainer extends Component {
                 <StopEstimatesContainer
                   stopOverlay={this.state.stopOverlay}
                   onClose={this.onStopOverlayClosed}
-                  initialViewport={this.currentViewport}
+                  initialViewport={this.initialViewport}
                 />
             );
         } else {
