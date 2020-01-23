@@ -142,16 +142,13 @@ class AvailtecParser {
      * @return Promise -> VehicleType | nil : The vehicle if found
      */
     getVehicle(route, vehicleId) {
-        console.log('getting', route, vehicleId);
         let url = this.url + '/rest/Vehicles/GetAllVehiclesForRoute';
 
         return axios.get(url, {params: {routeId: route.id}}).then((response) => {
             return response.data.find((e) => {
-                console.log('e=', e.BlockFareboxId);
                 return e.BlockFareboxId === vehicleId;
             });
         }).then((result) => {
-            console.log('result=', result);
             if (result) {
                 const r = {
                     RouteId: route.id,
