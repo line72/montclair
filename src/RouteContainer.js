@@ -255,6 +255,9 @@ class RouteContainer extends Component {
     }
 
     onStopClicked = ({agency, id, name}, stop) => {
+        // update the viewport
+        this.initialViewport = this.currentViewport;
+
         this.setState({
             mode: MODE.STOP,
             stopOverlay: new StopOverlayType({
