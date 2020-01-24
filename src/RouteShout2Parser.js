@@ -213,10 +213,6 @@ class RouteShout2Parser {
                     return result;
                 }
             });
-
-        return new Promise((resolve, reject) => {
-            resolve(null);
-        });
     }
 
     generatePolyline(data) {
