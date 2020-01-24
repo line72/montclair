@@ -22,7 +22,7 @@ class About extends Component {
             <div className="w3-panel w3-light-grey">
               <hr />
               <p>© 2020 Marcus Dillavou</p>
-              <p><a href="https://gotransitapp.com" target="_blank">Go Transit</a></p>
+              <p><a href="https://gotransitapp.com">Go Transit</a></p>
               <p>Version: {packageJson.version}</p>
             </div>
         );
