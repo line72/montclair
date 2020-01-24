@@ -53,16 +53,24 @@ class StopEstimatesContainer extends Component {
 
         // fetch vehicle postion
         if (this.state.selectedArrival) {
+            const selectedArrival = this.state.selectedArrival;
             // get the vehicle
             this.state.stopOverlay.agency.parser.getVehicle(this.state.selectedArrival.route, this.state.selectedArrival.vehicleId)
                 .then((vehicle) => {
-                    if (vehicle && this.state.stopOverlay.stop && this.ref.current && this.ref.current.getMap()) {
-                        this.ref.current.getMap().leafletElement.fitBounds([
-                            this.state.stopOverlay.stop.position,
-                            vehicle.position
-                        ], {padding: [30, 30]});
+                    // !mwd - avoid concurrency issues. It is possible that while
+                    //  we were fetching, the user already selected a different
+                    //  arrival, so only actually set this state if the arrivals
+                    //  still match
+                    if (this.state.selectedArrival === selectedArrival) {
+                        if (vehicle && this.state.stopOverlay.stop && this.ref.current && this.ref.current.getMap()) {
+                            this.ref.current.getMap().leafletElement.fitBounds([
+                                this.state.stopOverlay.stop.position,
+                                vehicle.position
+                            ], {padding: [30, 30]});
+                        }
+
+                        this.setState({selectedVehicle: vehicle});
                     }
-                    this.setState({selectedVehicle: vehicle});
                 });
         }
 
