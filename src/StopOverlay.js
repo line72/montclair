@@ -111,7 +111,7 @@ class StopOverlay extends Component {
                   </Marker>
                 </BaseMap>
               </div>
-              <div className="StopOverlay-content">
+              <div className="StopOverlay-content w3-card-2">
                 <div className="w3-center StopOverlay-estimates"><br />
                   <span onClick={() => this.props.onClose()}
                         className="w3-button w3-xlarge w3-hover-red w3-display-topright"
