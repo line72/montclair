@@ -22,12 +22,12 @@
         left: 0px;
         top: 50vh;
         width: 100vw;
-	height: 50vh;
+        height: 50vh;
     }
 
     .StopOverlay-table {
-	max-height: calc(50vh - 80px);
-	overflow-y: auto;
+        max-height: calc(50vh - 80px);
+        overflow-y: auto;
     }
 }
 
@@ -49,14 +49,14 @@
         position: absolute;
         left: 0px;
         top: 0px;
-	width: 500px;
+        width: 500px;
         height: 100vh;
         max-height: 100vh;
     }
 
     .StopOverlay-table {
-	/*max-width: 500px;*/
-	max-height: calc(100vh - 80px);
-	overflow-y: auto;
+        /*max-width: 500px;*/
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
     }
 }
