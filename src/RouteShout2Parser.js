@@ -106,7 +106,9 @@ class RouteShout2Parser {
                     return new ArrivalType({
                         route: routes[i.route],
                         direction: i.direction,
-                        arrival: i.etaDepartTime
+                        arrival: i.etaDepartTime,
+                        vehicleId: i.vehicle,
+                        tripId: i.trip_id
                     });
                 });
 
@@ -172,6 +174,45 @@ class RouteShout2Parser {
 
             return vehicle_data;
         });
+    }
+
+
+    /**
+     * Get a specific vehicle on a specific route
+     *
+     * @param route -> RouteType : The route
+     * @param vehicleId -> String : The id of the vehicle, this matches the Trip's BlockFareboxId
+     * @return Promise -> VehicleType | nil : The vehicle if found
+     */
+    getVehicle(route, vehicleId) {
+        //!mwd - if the vehicle is currently serving a different route,
+        //  we won't be able to find it!
+        const url = '/rs.vehicle.getListByRoutes';
+        return this.requestor.get(url, {params: {key: this.key,
+                                                 agency: this.agency_id,
+                                                 routes: route.id,
+                                                 timeSensitive: true,
+                                                 timeHorizon: 30}})
+            .then((response) => {
+                // find the matching vehicle id
+                return response.data.response.find((v) => {
+                    return v.vId === vehicleId;
+                });
+            }).then((result) => {
+                if (result) {
+                    return new VehicleType({
+                        id: result.vId,
+                        position: [result.la, result.lo],
+                        destination: result.d,
+                        on_board: '',
+                        heading: result.h,
+                        route_id: route.id,
+                        color: route.color
+                    });
+                } else {
+                    return result;
+                }
+            });
     }
 
     generatePolyline(data) {

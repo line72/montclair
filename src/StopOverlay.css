@@ -1,32 +1,62 @@
-.StopOverlay {
-
-}
-
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 800px) {
     h3 {
 	max-height: 36px;
 	overflow: hidden;
 	text-overflow: ellipsis;
     }
     
+    .StopOverlay {
+
+    }
+
+    .StopOverlay-map {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100vw;
+        height: 50vh;
+    }
+    
     .StopOverlay-content {
-	height: 90vh;
+        position: absolute;
+        left: 0px;
+        top: 50vh;
+        width: 100vw;
+        height: 50vh;
     }
 
     .StopOverlay-table {
-	max-height: calc(90vh - 100px);
-	overflow-y: auto;
+        max-height: calc(50vh - 80px);
+        overflow-y: auto;
     }
 }
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 800px) {
+    .StopOverlay {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .StopOverlay-map {
+        position: absolute;
+        left: 500px;
+        top: 0px;
+        width: calc(100vw - 500px);
+        height: 100vh;
+    }
+    
     .StopOverlay-content {
-	max-width: 500px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 500px;
+        height: 100vh;
+        max-height: 100vh;
     }
 
     .StopOverlay-table {
-	max-width: 500px;
-	max-height: calc(90vh - 200px);
-	overflow-y: auto;
+        /*max-width: 500px;*/
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
     }
 }

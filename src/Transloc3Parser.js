@@ -132,7 +132,9 @@ class Transloc3Parser {
                     return new ArrivalType({
                         route: routes[arrival.route_id],
                         direction: arrival.headsign,
-                        arrival: moment.unix(arrival.timestamp)
+                        arrival: moment.unix(arrival.timestamp),
+                        vehicleId: arrival.vehicle_id,
+                        tripId: arrival.trip_id
                     });
                 });
 
@@ -182,6 +184,39 @@ class Transloc3Parser {
 
                     return acc;
                 }, {});
+            });
+    }
+
+    /**
+     * Get a specific vehicle on a specific route
+     *
+     * @param route -> RouteType : The route
+     * @param vehicleId -> String : The id of the vehicle, this matches the Trip's BlockFareboxId
+     * @return Promise -> VehicleType | nil : The vehicle if found
+     */
+    getVehicle(route, vehicleId) {
+        let url = '/vehicle_statuses.json';
+        return this.requestor.get(url, {params: {agencies: this.agency_id,
+                                                 include_arrivals: false}})
+            .then((response) => {
+                const vehicle_data = response.data.vehicles;
+
+                return vehicle_data.find((e) => {
+                    return e.id === vehicleId;
+                });
+            }).then((result) => {
+                if (result) {
+                    return new VehicleType({
+                        id: result.id,
+                        position: [result.position[0], result.position[1]],
+                        heading: result.heading,
+                        destination: '',
+                        on_board: '',
+                        route_id: result.route_id
+                    });
+                } else {
+                    return result;
+                }
             });
     }
 }

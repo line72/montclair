@@ -23,7 +23,7 @@ class Route extends Component {
 
         this.state = {
             geojson: null,
-            selected: false
+            selected: this.props.selected || false
         };
 
         // fetch the kml
@@ -84,7 +84,7 @@ class Route extends Component {
                       id={stop.id}
                       name={stop.name}
                       position={stop.position}
-                      onClick={this.props.onStopClicked}
+                      onClick={(props) => this.props.onStopClicked(props, stop)}
                 />
             );
         });
@@ -97,6 +97,7 @@ class Route extends Component {
                     style={style} />
                   {buses}
                   {stops}
+                  {this.props.children}
                 </div>
             );
         } else {

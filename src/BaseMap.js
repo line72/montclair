@@ -12,7 +12,7 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import React from 'react';
+import React, { createRef } from 'react';
 import { TileLayer } from 'react-leaflet';
 import Configuration from './Configuration';
 import BoundsMap from './BoundsMap';
@@ -37,6 +37,7 @@ class BaseMap extends React.Component {
         }
 
         let configuration = new Configuration();
+        this.mapRef = createRef();
 
         this.state = {
             initial_viewport: true,
@@ -44,6 +45,10 @@ class BaseMap extends React.Component {
             zoom: 13,
             tile: tiles.stamen_toner
         };
+    }
+
+    getRef = () => {
+        return this.mapRef.current;
     }
 
     onBoundsChanged = (bounds) => {
@@ -82,6 +87,7 @@ class BaseMap extends React.Component {
         return (
             <div className="map-container">
                 <BoundsMap
+                    ref={this.mapRef}
                     zoomControl={false}
                     onBoundsChanged={this.onBoundsChanged}
                     onViewportDidChange={this.onViewportChanged}
@@ -89,7 +95,7 @@ class BaseMap extends React.Component {
                     >
 
                     <TileLayer
-                        attribution={this.state.tile.attribution}
+                        attribution={this.props.showAttribution ? this.state.tile.attribution : ''}
                         url={this.state.tile.url}
                         subdomains={this.state.tile.subdomains}
                         />

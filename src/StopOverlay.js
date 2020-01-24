@@ -12,12 +12,50 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import React, { Component } from 'react';
+import React, { createRef, Component } from 'react';
 import moment from 'moment';
+import { Marker } from 'react-leaflet';
+import L from 'leaflet';
+
+import BaseMap from './BaseMap';
 
 import './StopOverlay.css';
 
 class StopOverlay extends Component {
+    constructor(props) {
+        super(props);
+
+        this.mapRef = createRef();
+        this.state = {
+            selected: null
+        };
+
+        this.icon = new L.Icon({
+            iconUrl: "/marker-icon.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            shadowUrl: "/marker-shadow.png",
+            shadowSize: [41, 41],
+            shadowAnchor: [15, 41]
+        });
+    }
+
+    getMap = () => {
+        if (this.mapRef.current) {
+            return this.mapRef.current.getRef();
+        }
+        return null;
+    }
+
+    onEstimateClicked = (stop, arrival) => {
+        /* hi-light */
+        this.setState({selected: arrival});
+
+        if (this.props.onSelected) {
+            this.props.onSelected(stop, arrival);
+        }
+    }
+
     renderArrivals() {
         if (this.props.fetching) {
             return (
@@ -38,8 +76,11 @@ class StopOverlay extends Component {
         } else {
             return this.props.arrivals.map((a, i) => {
                 const arrival = (a.arrival.diff(moment()) > 1000 * 60 * 60) ? a.arrival.format('LT') : a.arrival.fromNow();
+                const selected = this.state.selected && this.state.selected.tripId === a.tripId && this.state.selected.route.id === a.route.id && this.state.selected.vehicleId === a.vehicleId;
                 return (
-                    <tr key={i}>
+                    <tr key={i}
+                        className={selected ? 'w3-blue-gray' : ''}
+                        onClick={() => this.onEstimateClicked(this.props.stop, a)}>
                       <td>{arrival}</td>
                       <td className="w3-tag" style={{backgroundColor: `#${a.route.color}`}}>{a.route.number}</td>
                       <td>{a.direction}</td>
@@ -54,11 +95,24 @@ class StopOverlay extends Component {
         if (this.props.visible) {
             style = {display: 'block'};
         }
-
         return (
-            <div className="w3-modal StopOverlay-modal" style={style}>
-              <div className="w3-modal-content w3-card-4 w3-animate-bottom StopOverlay-content">
-                <div className="w3-center"><br />
+            <div className="StopOverlay" style={style}>
+              <div className="StopOverlay-map">
+                <BaseMap
+                  ref={this.mapRef}
+                  showAttribution={false}
+                  initialViewport={this.props.initialViewport}
+                >
+                  {this.props.children}
+                  <Marker
+                    position={this.props.stop.position}
+                    icon={this.icon}
+                  >
+                  </Marker>
+                </BaseMap>
+              </div>
+              <div className="StopOverlay-content w3-card-2">
+                <div className="w3-center StopOverlay-estimates"><br />
                   <span onClick={() => this.props.onClose()}
                         className="w3-button w3-xlarge w3-hover-red w3-display-topright"
                         title="Close Modal">&times;</span>

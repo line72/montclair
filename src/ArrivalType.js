@@ -15,10 +15,12 @@
 import moment from 'moment';
 
 class ArrivalType {
-    constructor({route, direction, arrival}) {
+    constructor({route, direction, arrival, vehicleId, tripId}) {
         this.route = route;
         this.direction = direction;
         this.arrival = moment(arrival);
+        this.vehicleId = vehicleId;
+        this.tripId = tripId;
     }
 }
 
