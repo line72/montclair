@@ -14,6 +14,8 @@
 
 import React, { Component } from 'react';
 
+import About from './About';
+
 import './AgencyList.css';
 import './images/checked.svg';
 
@@ -98,6 +100,8 @@ class AgencyList extends Component {
                     <div className="w3-padding-64 w3-large w3-text-grey">
                         {agencies}
                     </div>
+
+                  <About />
                 </nav>
 
                 {/* Top menu on small screens */}
