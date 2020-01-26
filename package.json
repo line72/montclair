@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@mapbox/togeojson": "^0.16.0",
-    "axios": "^0.18.1",
+    "axios": "^0.19.2",
     "font-awesome": "^4.7.0",
     "immutability-helper": "^2.9.1",
     "leaflet": "^1.6.0",
