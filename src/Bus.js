@@ -15,24 +15,42 @@
 import React, { Component } from 'react';
 import renderIf from 'render-if';
 import { Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+
+import BusIcon from './BusIcon';
 
 import './Bus.css';
 
 class Bus extends Component {
-    render() {
-        const url = `https://realtimebjcta.availtec.com/InfoPoint/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
+    constructor(props) {
+        super(props);
 
-        let icon = L.icon({
-            iconUrl: url,
-            iconSize: [39, 50],
-            iconAnchor: [20, 50],
-            popupAnchor: [0, -50]
-        });
+        this.state = {
+            icon: null,
+            color: this.props.color,
+            heading: this.props.heading
+        };
+    }
+
+    render() {
+        if (!this.state.icon || this.state.color !== this.props.color || this.state.heading !== this.props.heading) {
+            const busIcon = new BusIcon(this.props.color, this.props.heading);
+            busIcon.build()
+                .then((icon) => {
+                    this.setState({
+                        color: this.props.color,
+                        heading: this.props.heading,
+                        icon: icon
+                    });
+                });
+        }
+
+        if (!this.state.icon) {
+            return null;
+        }
 
         return (
             <Marker position={this.props.position}
-                    icon={icon}>
+                    icon={this.state.icon ? this.state.icon : ''}>
                 <Popup onOpen={this.props.onOpen}
                        onClose={this.props.onClose}>
                     <table className="Bus-table">
