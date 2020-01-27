@@ -43,14 +43,6 @@ class Bus extends Component {
                     });
                 });
         }
-        // const url = `https://realtimebjcta.availtec.com/InfoPoint/IconFactory.ashx?library=busIcons\\mobile&colortype=hex&color=${this.props.color}&bearing=${this.props.heading}`;
-
-        // let icon = L.icon({
-        //     iconUrl: url,
-        //     iconSize: [39, 50],
-        //     iconAnchor: [20, 50],
-        //     popupAnchor: [0, -50]
-        // });
 
         if (!this.state.icon) {
             return null;

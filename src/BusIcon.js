@@ -26,14 +26,11 @@ class BusIcon {
             .then((svg) => {
                 // load the svg
                 let xml = new DOMParser().parseFromString(svg.data, 'image/svg+xml');
-                console.log('xml=', xml);
-
                 // update the attributes //
 
                 // 1. the gradient
                 // stop1
                 let stop1 = xml.querySelector('#stop958');
-                console.log('stop1', stop1, this.color);
                 stop1.style.stopColor = '#' + this.color;
                 // stop2
                 let stop2 = xml.querySelector('#stop960');
@@ -59,16 +56,14 @@ class BusIcon {
                 bearing.setAttribute('transform', `rotate(${this.heading}, 250, 190)`);
 
                 let serialized = new XMLSerializer().serializeToString(xml);
-                console.log(serialized);
                 const url = 'data:image/svg+xml;base64,' + btoa(serialized);
-                console.log('url=', url);
 
                 // return a leaflet icon
                 return L.icon({
                     iconUrl: url,
-                    iconSize: [50, 50],
-                    iconAnchor: [25, 50],
-                    popupAnchor: [0, -50]
+                    iconSize: [60, 60],
+                    iconAnchor: [30, 60],
+                    popupAnchor: [0, -60]
                 })
             });
     }
