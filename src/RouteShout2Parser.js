@@ -30,6 +30,11 @@ class RouteShout2Parser {
         });
     }
 
+    /**
+     * Get the routes.
+     *
+     * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
+     */
     getRoutes() {
         const url = '/rs.routes.getList';
 
@@ -125,6 +130,13 @@ class RouteShout2Parser {
             });
     }
 
+    /**
+     * Get the vehicles for an area or a list of routes
+     *
+     * @param bounds -> ([LatLng]) : The leaflef bounds of the map
+     * @param visible_routes -> ([RouteType]) : The list of routes
+     * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
+     */
     getVehicles(bounds, visible_routes) {
         const requests = visible_routes.map((r) => {
             const url = '/rs.vehicle.getListByRoutes';

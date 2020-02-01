@@ -23,6 +23,11 @@ class AvailtecParser {
         this.url = url
     }
 
+    /**
+     * Get the routes.
+     *
+     * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
+     */
     getRoutes() {
         let url = this.url + '/rest/Routes/GetVisibleRoutes';
 
@@ -103,6 +108,13 @@ class AvailtecParser {
         });
     }
 
+    /**
+     * Get the vehicles for an area or a list of routes
+     *
+     * @param bounds -> ([LatLng]) : The leaflef bounds of the map
+     * @param visible_routes -> ([RouteType]) : The list of routes
+     * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
+     */
     getVehicles(bounds, visible_routes) {
         let url = this.url + '/rest/Routes/GetVisibleRoutes';
 

@@ -32,6 +32,11 @@ class TranslocParser {
         });
     }
 
+    /**
+     * Get the routes.
+     *
+     * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
+     */
     getRoutes() {
         // first get the segments so we can build our route paths
         let url = `/segments.json?agencies=${this.agency_id}`;
@@ -133,6 +138,13 @@ class TranslocParser {
             });
     }
 
+    /**
+     * Get the vehicles for an area or a list of routes
+     *
+     * @param bounds -> ([LatLng]) : The leaflef bounds of the map
+     * @param visible_routes -> ([RouteType]) : The list of routes
+     * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
+     */
     getVehicles(bounds, visible_routes) {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
 

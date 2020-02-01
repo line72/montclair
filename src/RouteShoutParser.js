@@ -43,6 +43,11 @@ class RouteShoutParser {
         });
     }
 
+    /**
+     * Get the routes.
+     *
+     * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
+     */
     getRoutes() {
         // !mwd - TODO, will need to use routeshout api to
         //  get this list
@@ -103,6 +108,13 @@ class RouteShoutParser {
         });
     }
 
+    /**
+     * Get the vehicles for an area or a list of routes
+     *
+     * @param bounds -> ([LatLng]) : The leaflef bounds of the map
+     * @param visible_routes -> ([RouteType]) : The list of routes
+     * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
+     */
     getVehicles(bounds, visible_routes) {
         return new Promise((resolve, reject) => {
             const requests = visible_routes.map((r) => {
