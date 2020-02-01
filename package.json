@@ -9,9 +9,9 @@
     "react-scripts": "^3.3.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
@@ -21,8 +21,10 @@
     "immutability-helper": "^2.9.1",
     "leaflet": "^1.6.0",
     "polyline-encoded": "0.0.8",
+    "react-app-rewired": "^2.1.5",
     "react-leaflet": "^2.6.1",
-    "render-if": "^0.1.1"
+    "render-if": "^0.1.1",
+    "worker-loader": "^2.0.0"
   },
   "browserslist": {
     "production": [
