@@ -14,10 +14,14 @@
 
 import JSZip from 'jszip';
 import Papa from 'papaparse';
+import PouchDB from 'pouchdb';
 
 class Parser {
-    constructor(url) {
+    constructor(name, url) {
+        this.name = name;
         this.url = url;
+        // create the database
+        this.databases = {};
 
         this.KNOWN = [
             'agency.txt',
@@ -42,17 +46,28 @@ class Parser {
                 // only worry about the files we care about
                 if (this.KNOWN.includes(zipObject.name)) {
                     console.log('ayncing', zipObject.name)
+                    // create a new database
+                    let name = zipObject.name.replace('.txt', '');
+                    console.log('name', name);
+                    const dbName = `${this.name}_${name}`;
+                    let db = new PouchDB(dbName);
+                    this.databases[dbName] = db;
+
+                    const parseFn = this.getParseFn(name);
+
                     zipObject.async('text')
                         .then((success) => {
                             // console.log('success', success);
-                            let show = 0;
+                            let idx = 0;
                             Papa.parse(success, {
+                                dynamicTyping: true,
                                 header: true,
                                 step: (row) => {
-                                    if (show < 2) {
+                                    if (idx < 1) {
                                         console.log(zipObject.name, 'parsing', row);
                                     }
-                                    show += 1;
+                                    parseFn(db, row.data, idx);
+                                    idx += 1;
                                 },
                                 complete: () => {
                                     console.log(zipObject.name, 'complete');
@@ -67,6 +82,48 @@ class Parser {
             });
             return true;
         });
+    }
+
+    getParseFn(name) {
+        console.log('getParseFn', name);
+        switch (name) {
+        case 'routes':
+            return this.parseRoutes;
+        default:
+            return ((db, data, idx) => { });
+        }
+    }
+
+    parseRoutes(db, row, idx) {
+        console.log('parseRoutes', idx);
+        const docId = `${idx}`;
+        db.get(docId)
+            .then((doc) => {
+                // update
+                return db.put({
+                    _id: docId,
+                    _rev: doc._rev,
+                    rId: row.route_id,
+                    color: row.route_color,
+                    name: row.route_short_name,
+                    description: row.route_long_name
+                });
+            })
+            .catch((err) => {
+                // new
+                return db.put({
+                    _id: docId,
+                    rId: row.route_id,
+                    color: row.route_color,
+                    name: row.route_short_name,
+                    description: row.route_long_name
+                });
+            })
+            .then((resp) => {
+                return resp;
+            }).catch((err) => {
+                console.log('Error inserting', idx, err);
+            });
     }
 }
 

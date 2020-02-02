@@ -14,8 +14,9 @@
 
 import Parser from '../gtfs/Parser';
 
-function doBuild({url}) {
-    let p = new Parser(url);
+function doBuild({name, url}) {
+    console.log('doBuild', name, url);
+    let p = new Parser(name, url);
     return p.build().then((r) => {
         console.log('r=', r);
         return {
