@@ -13,7 +13,7 @@
  *******************************************/
 
 import JSZip from 'jszip';
-import JSZipUtils from 'jszip-utils';
+import Papa from 'papaparse';
 
 class Parser {
     constructor(url) {
@@ -44,7 +44,19 @@ class Parser {
                     console.log('ayncing', zipObject.name)
                     zipObject.async('text')
                         .then((success) => {
-                            console.log('success', success);
+                            // console.log('success', success);
+                            let show = 0;
+                            Papa.parse(success, {
+                                header: true,
+                                step: (row) => {
+                                    if (show < 2) {
+                                        console.log(zipObject.name, 'parsing', row);
+                                    }
+                                    show += 1;
+                                },
+                                complete: () => {
+                                    console.log(zipObject.name, 'complete');
+                                }});
                         }, (err) => {
                             console.log('err', err);
                         });
