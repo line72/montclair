@@ -86,6 +86,12 @@ class GTFSRTParser {
                         name: row.doc.name
                     });
                 });
+            })
+            .then((routes) => {
+                return routes.reduce((acc, route) => {
+                    acc[route.id] = route;
+                    return acc;
+                }, {});
             });
     }
 
