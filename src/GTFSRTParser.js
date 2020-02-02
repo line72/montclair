@@ -12,9 +12,45 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-class GTFSRTParser {
-    constructor() {
+import GTFSWorker from './workers/gtfs-parser.worker';
 
+class GTFSRTParser {
+    constructor(name, gtfsUrl) {
+        console.log('constructor', name, gtfsUrl);
+        this.name = name;
+        this.gtfsUrl = gtfsUrl;
+
+        // create a web worker
+        console.log('GTFSRTParser');
+        this.jobId = 1;
+        this.worker = null;
+    }
+
+    /**
+     * Initialze the parser.
+     *
+     * This should be called Before calling any other method.
+     *
+     * @return Promise -> true
+     */
+    initialize() {
+        console.log('initialize');
+        return new Promise((success, failure) => {
+            this.worker = new GTFSWorker();
+            this.worker.onmessage = (e) => {
+                console.log('got result message', e);
+                success(true);
+            };
+            console.log('GTFSRTParser is posting a message');
+            this.worker.postMessage({
+                id: this.jobId++,
+                message: 'BUILD',
+                data: {
+                    name: this.name,
+                    url: this.gtfsUrl
+                }
+            });
+        });
     }
 
     /**
@@ -23,6 +59,7 @@ class GTFSRTParser {
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
     getRoutes() {
+        console.log('getRoutes', this);
         return new Promise((success, failure) => {
             success([]);
         });

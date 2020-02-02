@@ -39,49 +39,54 @@ class Parser {
 
     build() {
         return fetch(this.url, {responseType: 'arraybuffer'}).then((resp) => {
-            return JSZip.loadAsync(resp.arrayBuffer());
-        }).then((unzipped) => {
-            // just get the .txt files
-            unzipped.file(/.*\.txt$/).map((zipObject) => {
-                // only worry about the files we care about
-                if (this.KNOWN.includes(zipObject.name)) {
-                    console.log('ayncing', zipObject.name)
-                    // create a new database
-                    let name = zipObject.name.replace('.txt', '');
-                    console.log('name', name);
-                    const dbName = `${this.name}_${name}`;
-                    let db = new PouchDB(dbName);
-                    this.databases[dbName] = db;
+                return JSZip.loadAsync(resp.arrayBuffer());
+            }).then((unzipped) => {
+                // just get the .txt files
+                let promises = unzipped.file(/.*\.txt$/).map((zipObject) => {
+                    // only worry about the files we care about
+                    if (this.KNOWN.includes(zipObject.name)) {
+                        console.log('ayncing', zipObject.name)
+                        // create a new database
+                        let name = zipObject.name.replace('.txt', '');
+                        console.log('name', name);
+                        const dbName = `${this.name}_${name}`;
+                        let db = new PouchDB(dbName);
+                        this.databases[dbName] = db;
 
-                    const parseFn = this.getParseFn(name);
+                        const parseFn = this.getParseFn(name);
 
-                    zipObject.async('text')
-                        .then((success) => {
-                            // console.log('success', success);
-                            let idx = 0;
-                            Papa.parse(success, {
-                                dynamicTyping: true,
-                                header: true,
-                                step: (row) => {
-                                    if (idx < 1) {
-                                        console.log(zipObject.name, 'parsing', row);
-                                    }
-                                    parseFn(db, row.data, idx);
-                                    idx += 1;
-                                },
-                                complete: () => {
-                                    console.log(zipObject.name, 'complete');
-                                }});
-                        }, (err) => {
-                            console.log('err', err);
-                        });
-                } else {
-                    console.log('skipping', zipObject.name)
-                    return null;
-                }
+                        return zipObject.async('text')
+                            .then((success) => {
+                                // console.log('success', success);
+                                return new Promise((resolve, reject) => {
+                                    let idx = 0;
+                                    console.log('starting parser');
+                                    Papa.parse(success, {
+                                        dynamicTyping: true,
+                                        header: true,
+                                        step: (row) => {
+                                            if (idx < 1) {
+                                                console.log(zipObject.name, 'parsing', row);
+                                            }
+                                            parseFn(db, row.data, idx);
+                                            idx += 1;
+                                        },
+                                        complete: () => {
+                                            console.log(zipObject.name, 'complete');
+                                            resolve(true);
+                                        }});
+                                });
+                            }, (err) => {
+                                console.log('err', err);
+                            });
+                    } else {
+                        console.log('skipping', zipObject.name)
+                        return null;
+                    }
+                }).filter(x => !!x);
+                console.log('promises=', promises, promises[0]);
+                return Promise.all(promises);
             });
-            return true;
-        });
     }
 
     getParseFn(name) {
