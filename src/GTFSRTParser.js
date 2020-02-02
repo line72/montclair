@@ -15,6 +15,7 @@
 import PouchDB from 'pouchdb';
 
 import RouteType from './RouteType';
+import StopType from './StopType';
 import GTFSWorker from './workers/gtfs-parser.worker';
 
 class GTFSRTParser {
@@ -102,9 +103,27 @@ class GTFSRTParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        return new Promise((success, failure) => {
-            success([]);
-        });
+        // !mwd - For now, just get ALL the stops.
+        const n = this.databaseKeys['stops'];
+        if (!Object.keys(this.databases).includes(n)) {
+            this.databases[n] = new PouchDB(n);
+        }
+        let db = this.databases[n];
+
+        return db.allDocs({include_docs: true})
+            .then((results) => {
+                return results.rows.map((row) => {
+                    //console.log(row.doc);
+                    if (isNaN(row.doc.latitude) || isNaN(row.doc.longitude)) {
+                        console.log('NAN', row.doc);
+                    }
+                    return new StopType({
+                        id: row.doc.sId,
+                        name: row.doc.name,
+                        position: [row.doc.latitude, row.doc.longitude]
+                    });
+                });
+            });
     }
 
     /**

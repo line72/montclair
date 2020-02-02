@@ -99,6 +99,8 @@ class Parser {
         switch (name) {
         case 'routes':
             return this.parseRoutes;
+        case 'stops':
+            return this.parseStops;
         default:
             return ((db, data, idx) => { });
         }
@@ -133,7 +135,46 @@ class Parser {
             .then((resp) => {
                 return resp;
             }).catch((err) => {
-                console.log('Error inserting', idx, err);
+                console.log('Error inserting Route', idx, err);
+            });
+    }
+
+    parseStops(db, row, idx) {
+        if (!row.stop_id) {
+            console.warn('Invalid row', row);
+            return;
+        }
+
+        const docId = `${idx}`;
+        db.get(docId)
+            .then((doc) => {
+                // update
+                return db.put({
+                    _id: docId,
+                    _rev: doc._rev,
+                    sId: row.stop_id,
+                    code: row.stop_code,
+                    name: row.stop_name,
+                    description: row.stop_description,
+                    latitude: row.stop_lat,
+                    longitude: row.stop_lon
+                });
+            })
+            .catch((err) => {
+                return db.put({
+                    _id: docId,
+                    sId: row.stop_id,
+                    code: row.stop_code,
+                    name: row.stop_name,
+                    description: row.stop_description,
+                    latitude: row.stop_lat,
+                    longitude: row.stop_lon
+                });
+            })
+            .then((resp) => {
+                return resp;
+            }).catch((err) => {
+                console.log('Error inserting Stop', idx, err);
             });
     }
 }
