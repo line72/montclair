@@ -16,26 +16,32 @@ import Parser from '../gtfs/Parser';
 
 function doBuild({url}) {
     let p = new Parser(url);
-    let r = p.build();
-    if (r) {
+    return p.build().then((r) => {
+        console.log('r=', r);
         return {
             status: true,
             result: r
-        }
-    } else {
-        return {
-            status: false,
-            result: 'Error parsing GTFS data'
-        }
-    }
+        };
+    });
 }
 
 onmessage = function({data}) {
     console.log('onmessage', data);
     switch (data.message) {
     case 'BUILD':
-        const result = doBuild(data);
-        postMessage({id: data.id, ...result});
+        doBuild(data.data)
+            .then((result) => {
+                console.log('posting result', result);
+                postMessage({id: data.id, ...result});
+            })
+            .catch((err) => {
+                console.warn(`gtfs-parser: Error building: ${err}`);
+                postMessage({
+                    id: data.id,
+                    status: false,
+                    result: err
+                });
+            });
 
         break;
     default:
