@@ -137,6 +137,7 @@ class StopEstimatesContainer extends Component {
         return (
             <StopOverlay ref={this.ref}
                          key="stop-overlay"
+                         configuration={this.props.configuration}
                          visible={this.state.stopOverlay.visible}
                          stop={this.state.stopOverlay.stop}
                          name={this.state.stopOverlay.name}

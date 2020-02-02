@@ -100,6 +100,7 @@ class StopOverlay extends Component {
               <div className="StopOverlay-map">
                 <BaseMap
                   ref={this.mapRef}
+                  configuration={this.props.configuration}
                   showAttribution={false}
                   initialViewport={this.props.initialViewport}
                 >

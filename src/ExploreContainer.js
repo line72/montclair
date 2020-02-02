@@ -64,6 +64,7 @@ class ExploreContainer extends Component {
               <div className="">
                 <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
                 <BaseMap
+                  configuration={this.props.configuration}
                   initialViewport={this.props.initialViewport}
                   onBoundsChanged={this.props.onBoundsChanged}
                   onViewportChanged={this.props.onViewportChanged}
