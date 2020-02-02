@@ -12,6 +12,9 @@
  * Licensed Under the GPLv3
  *******************************************/
 
+import PouchDB from 'pouchdb';
+
+import RouteType from './RouteType';
 import GTFSWorker from './workers/gtfs-parser.worker';
 
 class GTFSRTParser {
@@ -19,6 +22,9 @@ class GTFSRTParser {
         console.log('constructor', name, gtfsUrl);
         this.name = name;
         this.gtfsUrl = gtfsUrl;
+
+        this.databases = {};
+        this.databaseKeys = {};
 
         // create a web worker
         console.log('GTFSRTParser');
@@ -39,6 +45,7 @@ class GTFSRTParser {
             this.worker = new GTFSWorker();
             this.worker.onmessage = (e) => {
                 console.log('got result message', e);
+                this.databaseKeys = e.data.result;
                 success(true);
             };
             console.log('GTFSRTParser is posting a message');
@@ -60,9 +67,26 @@ class GTFSRTParser {
      */
     getRoutes() {
         console.log('getRoutes', this);
-        return new Promise((success, failure) => {
-            success([]);
-        });
+        const n = this.databaseKeys['routes'];
+        if (!Object.keys(this.databases).includes(n)) {
+            this.databases[n] = new PouchDB(n);
+        }
+        let db = this.databases[n];
+        console.log('db=', db);
+
+        return db.allDocs({include_docs: true})
+            .then((results) => {
+                console.log('results', results);
+                return results.rows.map((row) => {
+                    console.log(row);
+                    return new RouteType({
+                        id: row.doc.rId,
+                        number: row.doc.number,
+                        color: row.doc.color,
+                        name: row.doc.name
+                    });
+                });
+            });
     }
 
     /**

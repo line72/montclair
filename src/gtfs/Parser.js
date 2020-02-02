@@ -25,13 +25,13 @@ class Parser {
 
         this.KNOWN = [
             'agency.txt',
-            'calendar.txt',
-            'calendar_dates.txt',
-            'fare_attributes.txt',
-            'fare_rules.txt',
+            //'calendar.txt',
+            //'calendar_dates.txt',
+            //'fare_attributes.txt',
+            //'fare_rules.txt',
             'routes.txt',
             'shapes.txt',
-            'stop_times.txt',
+            //'stop_times.txt',
             'stops.txt',
             'trips.txt'
         ];
@@ -73,7 +73,7 @@ class Parser {
                                         },
                                         complete: () => {
                                             console.log(zipObject.name, 'complete');
-                                            resolve(true);
+                                            resolve({key: name, db: dbName});
                                         }});
                                 });
                             }, (err) => {
@@ -85,7 +85,12 @@ class Parser {
                     }
                 }).filter(x => !!x);
                 console.log('promises=', promises, promises[0]);
-                return Promise.all(promises);
+                return Promise.all(promises).then((x) => {
+                    return x.reduce((acc, y) => {
+                        acc[y.key] = y.db;
+                        return acc;
+                    }, {});
+                });
             });
     }
 
@@ -109,9 +114,10 @@ class Parser {
                     _id: docId,
                     _rev: doc._rev,
                     rId: row.route_id,
+                    number: row.route_short_name,
                     color: row.route_color,
-                    name: row.route_short_name,
-                    description: row.route_long_name
+                    name: row.route_long_name,
+                    description: row.route_description
                 });
             })
             .catch((err) => {
