@@ -33,6 +33,19 @@ class TranslocParser {
     }
 
     /**
+     * Initialze the parser.
+     *
+     * This should be called Before calling any other method.
+     *
+     * @return Promise -> true
+     */
+    initialize() {
+        return new Promise((success, failure) => {
+            success(true);
+        });
+    }
+
+    /**
      * Get the routes.
      *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id

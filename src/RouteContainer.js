@@ -52,16 +52,22 @@ class RouteContainer extends Component {
             stopOverlay: new StopOverlayType({})
         };
 
+        // initialize all the parsers, then
+        // fetch the routes
+        axios.all(this.state.agencies.map((a, index) => {
+            return a.parser.initialize();
+        })).then((results) => {
+            console.log('initialization Complete:', results);
+            this.getRoutes().then((results) => {
+                this.has_fetched_routes = true;
 
-        this.getRoutes().then((results) => {
-            this.has_fetched_routes = true;
+                // get the stops for any visible routes
+                this.getStops();
 
-            // get the stops for any visible routes
-            this.getStops();
-
-            // setup a timer to fetch the vehicles
-            this.getVehicles();
-            setInterval(() => {this.getVehicles();}, 10000);
+                // setup a timer to fetch the vehicles
+                this.getVehicles();
+                setInterval(() => {this.getVehicles();}, 10000);
+            });
         });
     }
 
