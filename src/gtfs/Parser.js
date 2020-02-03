@@ -15,6 +15,8 @@
 import JSZip from 'jszip';
 import Papa from 'papaparse';
 import PouchDB from 'pouchdb';
+import PouchDBFind from 'pouchdb-find';
+PouchDB.plugin(PouchDBFind);
 
 class Parser {
     constructor(name, url) {
@@ -54,6 +56,7 @@ class Parser {
                         this.databases[dbName] = db;
 
                         const parseFn = this.getParseFn(name);
+                        parseFn.setup(db);
 
                         return zipObject.async('text')
                             .then((success) => {
@@ -68,7 +71,7 @@ class Parser {
                                             if (idx < 1) {
                                                 console.log(zipObject.name, 'parsing', row);
                                             }
-                                            parseFn(db, row.data, idx);
+                                            parseFn.parse(db, row.data, idx);
                                             idx += 1;
                                         },
                                         complete: () => {
@@ -98,12 +101,43 @@ class Parser {
         console.log('getParseFn', name);
         switch (name) {
         case 'routes':
-            return this.parseRoutes;
+            return {
+                setup: this.setupDefault,
+                parse: this.parseRoutes
+            };
         case 'stops':
-            return this.parseStops;
+            return {
+                setup: this.setupDefault,
+                parse: this.parseStops
+            };
+        case 'trips':
+            return {
+                setup: this.setupTrips,
+                parse: this.parseTrips
+            };
         default:
-            return ((db, data, idx) => { });
+            return {
+                setup: this.setupDefault,
+                parse: ((db, data, idx) => { })
+            };
         }
+    }
+
+    setupDefault(db) {
+    }
+
+    setupTrips(db) {
+        // create an index
+        db.createIndex({
+            index: {
+                fields: ['route_id']
+            }
+        });
+        db.createIndex({
+            index: {
+                fields: ['trip_id']
+            }
+        });
     }
 
     parseRoutes(db, row, idx) {
@@ -175,6 +209,43 @@ class Parser {
                 return resp;
             }).catch((err) => {
                 console.log('Error inserting Stop', idx, err);
+            });
+    }
+
+    parseTrips(db, row, idx) {
+        console.log('parseTrips');
+        if (!row.route_id) {
+            console.log('parseTrips: Missing route_id');
+            return;
+        }
+
+        const docId = `${idx}`;
+        db.get(docId)
+            .then((doc) => {
+                // update
+                return db.put({
+                    _id: docId,
+                    _rev: doc._rev,
+                    route_id: row.route_id,
+                    trip_id: row.trip_id,
+                    shape_id: row.shape_id,
+                    headsign: row.trip_headsign
+                });
+            })
+            .catch((err) => {
+                // create
+                return db.put({
+                    _id: docId,
+                    route_id: row.route_id,
+                    trip_id: row.trip_id,
+                    shape_id: row.shape_id,
+                    headsign: row.trip_headsign
+                });
+            })
+            .then((resp) => {
+                return resp;
+            }).catch((err) => {
+                console.log('Error inserting Trip', idx, err);
             });
     }
 }
