@@ -77,9 +77,9 @@ class GTFSRTParser {
 
         return db.allDocs({include_docs: true})
             .then((results) => {
-                console.log('results', results);
+                //console.log('results', results);
                 return results.rows.map((row) => {
-                    console.log(row);
+                    //console.log(row);
                     return new RouteType({
                         id: row.doc.rId,
                         number: row.doc.number,

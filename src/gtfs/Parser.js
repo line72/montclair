@@ -33,9 +33,9 @@ class Parser {
             //'fare_rules.txt',
             'routes.txt',
             //'shapes.txt',
-            //'stop_times.txt',
+            'stop_times.txt',
             'stops.txt',
-            //'trips.txt'
+            'trips.txt'
         ];
     }
 
@@ -55,84 +55,14 @@ class Parser {
                         let db = new PouchDB(dbName);
                         this.databases[dbName] = db;
 
-                        const parseFn = this.getParseFn(name);
-                        parseFn.setup(db);
-
-                        const stream = zipObject.internalStream('text');
-
-                        /**
-                         * !mwd - Create something that looks like
-                         *  what papaparser wants for a ReadableStreamStreamer/ChunkStreamer.
-                         *  Unfortunately, this isn't a documented thing, so I just had
-                         *  to figure out what it was doing internally and implement what
-                         *  it needed:
-                         * https://github.com/mholt/PapaParse/blob/master/papaparse.js#L808
-                         */
-                        function Streamer(s) {
-                            this.stream = s;
-                            this.readable = true;
-                            this.cb = {'data': null,
-                                       'end': null,
-                                       'error': null};
-
-                            this.on = function(t, cb) {
-                                this.cb[t] = cb;
-                            };
-
-                            this.removeListener = function(t, cb) {
-                                this.cb[t] = null;
-                            };
-
-                            this.read = function() {
-                                console.log('read is being called!');
-                            };
-
-                            this.pause = function() {
-                                this.stream.pause();
-                            };
-
-                            this.resume = function() {
-                                this.stream.resume();
-                            };
-
-                            this.stream.on('data', (data) => {
-                                if (this.cb.data) {
-                                    this.cb.data(data);
-                                }
-                            });
-                            this.stream.on('end', (data) => {
-                                if (this.cb.end) {
-                                    this.cb.end(data);
-                                }
-                            });
-                            this.stream.on('error', (data) => {
-                                if (this.cb.error) {
-                                    this.cb.error(data);
-                                }
-                            });
-                        };
-                        const streamer = new Streamer(stream);
-
-                        return new Promise((resolve, reject) => {
-                            let idx = 0;
-                            try {
-                                Papa.parse(streamer, {
-                                    dynamicTyping: true,
-                                    header: true,
-                                    chunk: (row) => {
-                                        console.log(zipObject.name, 'parsing', row);
-                                        parseFn.parse(db, row.data, idx);
-                                        idx += row.data.length;
-                                    },
-                                    complete: () => {
-                                        console.log(zipObject.name, 'complete');
-                                        resolve({key: name, db: dbName});
-                                    }});
-                                // start the streamer
-                                streamer.resume();
-                            } catch (e) {
-                                console.log('error creating papa:', e);
-                                reject(e);
+                        return db.info().then((result) => {
+                            if (result.doc_count == 0) {
+                                // do stuff
+                                return this.doParse(zipObject, db, dbName, name);
+                            } else {
+                                // nothing to do
+                                console.log(zipObject.name, 'already complete');
+                                return {key: name, db: dbName};
                             }
                         });
                     } else {
@@ -148,6 +78,89 @@ class Parser {
                     }, {});
                 });
             });
+    }
+
+    doParse(zipObject, db, dbName, name) {
+        const parseFn = this.getParseFn(name);
+        parseFn.setup(db);
+
+        const stream = zipObject.internalStream('text');
+
+        /**
+         * !mwd - Create something that looks like
+         *  what papaparser wants for a ReadableStreamStreamer/ChunkStreamer.
+         *  Unfortunately, this isn't a documented thing, so I just had
+         *  to figure out what it was doing internally and implement what
+         *  it needed:
+         * https://github.com/mholt/PapaParse/blob/master/papaparse.js#L808
+         */
+        function Streamer(s) {
+            this.stream = s;
+            this.readable = true;
+            this.cb = {'data': null,
+                       'end': null,
+                       'error': null};
+
+            this.on = function(t, cb) {
+                this.cb[t] = cb;
+            };
+
+            this.removeListener = function(t, cb) {
+                this.cb[t] = null;
+            };
+
+            this.read = function() {
+                console.log('read is being called!');
+            };
+
+            this.pause = function() {
+                this.stream.pause();
+            };
+
+            this.resume = function() {
+                this.stream.resume();
+            };
+
+            this.stream.on('data', (data) => {
+                if (this.cb.data) {
+                    this.cb.data(data);
+                }
+            });
+            this.stream.on('end', (data) => {
+                if (this.cb.end) {
+                    this.cb.end(data);
+                }
+            });
+            this.stream.on('error', (data) => {
+                if (this.cb.error) {
+                    this.cb.error(data);
+                }
+            });
+        };
+        const streamer = new Streamer(stream);
+
+        return new Promise((resolve, reject) => {
+            let idx = 0;
+            try {
+                Papa.parse(streamer, {
+                    dynamicTyping: true,
+                    header: true,
+                    chunk: (row) => {
+                        //console.log(zipObject.name, 'parsing', row);
+                        parseFn.parse(db, row.data, idx);
+                        idx += row.data.length;
+                    },
+                    complete: () => {
+                        console.log(zipObject.name, 'complete');
+                        resolve({key: name, db: dbName});
+                    }});
+                // start the streamer
+                streamer.resume();
+            } catch (e) {
+                console.log('error creating papa:', e);
+                reject(e);
+            }
+        });
     }
 
     getParseFn(name) {
@@ -213,150 +226,87 @@ class Parser {
     }
 
     parseRoutes(db, rows, idx) {
-        rows.map((row, i) => {
-            const docId = `${idx+i}`;
-            db.get(docId)
-                .then((doc) => {
-                    // update
-                    return db.put({
-                        _id: docId,
-                        _rev: doc._rev,
-                        rId: row.route_id,
-                        number: row.route_short_name,
-                        color: row.route_color,
-                        name: row.route_long_name,
-                        description: row.route_desc
-                    });
-                })
-                .catch((err) => {
-                    // new
-                    return db.put({
-                        _id: docId,
-                        rId: row.route_id,
-                        number: row.route_short_name,
-                        color: row.route_color,
-                        name: row.route_long_name,
-                        description: row.route_desc
-                    });
-                })
-                .then((resp) => {
-                    return resp;
-                }).catch((err) => {
-                    console.log('Error inserting Route', idx, err);
-                });
+        let docs = rows.map((row, i) => {
+            return {
+                rId: row.route_id,
+                number: row.route_short_name,
+                color: row.route_color,
+                name: row.route_long_name,
+                description: row.route_desc
+            };
         });
+
+        return db.bulkDocs(docs)
+            .catch((err) => {
+                console.log('Error inserting Routes', err);
+            });
     }
 
     parseStops(db, rows, idx) {
-        rows.map((row, i) => {
+        let docs = rows.map((row, i) => {
             if (!row.stop_id) {
                 console.warn('Invalid row', row);
-                return;
+                return null;
             }
 
-            const docId = `${idx+i}`;
-            db.get(docId)
-                .then((doc) => {
-                    // update
-                    return db.put({
-                        _id: docId,
-                        _rev: doc._rev,
-                        sId: row.stop_id,
-                        code: row.stop_code,
-                        name: row.stop_name,
-                        description: row.stop_description,
-                        latitude: row.stop_lat,
-                        longitude: row.stop_lon
-                    });
-                })
-                .catch((err) => {
-                    return db.put({
-                        _id: docId,
-                        sId: row.stop_id,
-                        code: row.stop_code,
-                        name: row.stop_name,
-                        description: row.stop_description,
-                        latitude: row.stop_lat,
-                        longitude: row.stop_lon
-                    });
-                })
-                .then((resp) => {
-                    return resp;
-                }).catch((err) => {
-                    console.log('Error inserting Stop', idx, err);
-                });
-        });
+            return {
+                sId: row.stop_id,
+                code: row.stop_code,
+                name: row.stop_name,
+                description: row.stop_description,
+                latitude: row.stop_lat,
+                longitude: row.stop_lon
+            };
+        }).filter(x => !!x);
+
+        return db.bulkDocs(docs)
+            .catch((err) => {
+                console.log('Error inserting Stops', err);
+            });
     }
 
     parseTrips(db, rows, idx) {
-        rows.map((row, i) => {
+        let docs = rows.map((row, i) => {
             if (!row.route_id) {
                 console.log('parseTrips: Missing route_id');
-                return;
+                return null;
             }
 
-            const docId = `${idx+i}`;
-            db.get(docId)
-                .then((doc) => {
-                    // update
-                    return db.put({
-                        _id: docId,
-                        _rev: doc._rev,
-                        route_id: row.route_id,
-                        trip_id: row.trip_id,
-                        shape_id: row.shape_id,
-                        headsign: row.trip_headsign
-                    });
-                })
-                .catch((err) => {
-                    // create
-                    return db.put({
-                        _id: docId,
-                        route_id: row.route_id,
-                        trip_id: row.trip_id,
-                        shape_id: row.shape_id,
-                        headsign: row.trip_headsign
-                    });
-                })
-                .then((resp) => {
-                    return resp;
-                }).catch((err) => {
-                    console.log('Error inserting Trip', idx, err);
-                });
-        });
+            return {
+                route_id: row.route_id,
+                trip_id: row.trip_id,
+                shape_id: row.shape_id,
+                headsign: row.trip_headsign
+            };
+        }).filter(x => !!x);
+
+        return db.bulkDocs(docs)
+            .catch((err) => {
+                console.log('Error inserting Trips', err);
+            });
     }
 
     parseStopTimes(db, rows, idx) {
-        rows.map((row, i) => {
+        let docs = rows.map((row, i) => {
             if (!row.trip_id) {
-                return;
+                return null;
             }
 
-            const docId = `${idx+i}`;
-            db.get(docId)
-                .then((doc) => {
-                    // update
-                    return db.put({
-                        _id: docId,
-                        _rev: doc._rev,
-                        trip_id: row.trip_id,
-                        stop_id: row.stop_id
-                    });
-                })
-                .catch((err) => {
-                    // create
-                    return db.put({
-                        _id: docId,
-                        trip_id: row.trip_id,
-                        stop_id: row.stop_id
-                    });
-                })
-                .then((resp) => {
-                    return resp;
-                }).catch((err) => {
-                    console.log('Error inserting StopTime', idx, err);
-                });
-        });
+            return {
+                trip_id: row.trip_id,
+                stop_id: row.stop_id
+            };
+        }).filter(x => !!x);
+
+        console.log('Bulk StopTimes', idx, docs.length);
+        return db.bulkDocs(docs)
+            .then((resp) => {
+                console.log('Inserted StopTimes', idx);
+                return resp;
+            })
+            .catch((err) => {
+                console.log('Error inserting StopTimes', err);
+            });
     }
 }
 
