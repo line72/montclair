@@ -26,16 +26,16 @@ class Parser {
         this.databases = {};
 
         this.KNOWN = [
-            'agency.txt',
+            //'agency.txt',
             //'calendar.txt',
             //'calendar_dates.txt',
             //'fare_attributes.txt',
             //'fare_rules.txt',
             'routes.txt',
-            'shapes.txt',
+            //'shapes.txt',
             //'stop_times.txt',
             'stops.txt',
-            'trips.txt'
+            //'trips.txt'
         ];
     }
 
@@ -58,30 +58,83 @@ class Parser {
                         const parseFn = this.getParseFn(name);
                         parseFn.setup(db);
 
-                        return zipObject.async('text')
-                            .then((success) => {
-                                // console.log('success', success);
-                                return new Promise((resolve, reject) => {
-                                    let idx = 0;
-                                    console.log('starting parser');
-                                    Papa.parse(success, {
-                                        dynamicTyping: true,
-                                        header: true,
-                                        step: (row) => {
-                                            if (idx < 1) {
-                                                console.log(zipObject.name, 'parsing', row);
-                                            }
-                                            parseFn.parse(db, row.data, idx);
-                                            idx += 1;
-                                        },
-                                        complete: () => {
-                                            console.log(zipObject.name, 'complete');
-                                            resolve({key: name, db: dbName});
-                                        }});
-                                });
-                            }, (err) => {
-                                console.log('err', err);
+                        const stream = zipObject.internalStream('text');
+
+                        /**
+                         * !mwd - Create something that looks like
+                         *  what papaparser wants for a ReadableStreamStreamer/ChunkStreamer.
+                         *  Unfortunately, this isn't a documented thing, so I just had
+                         *  to figure out what it was doing internally and implement what
+                         *  it needed:
+                         * https://github.com/mholt/PapaParse/blob/master/papaparse.js#L808
+                         */
+                        function Streamer(s) {
+                            this.stream = s;
+                            this.readable = true;
+                            this.cb = {'data': null,
+                                       'end': null,
+                                       'error': null};
+
+                            this.on = function(t, cb) {
+                                this.cb[t] = cb;
+                            };
+
+                            this.removeListener = function(t, cb) {
+                                this.cb[t] = null;
+                            };
+
+                            this.read = function() {
+                                console.log('read is being called!');
+                            };
+
+                            this.pause = function() {
+                                this.stream.pause();
+                            };
+
+                            this.resume = function() {
+                                this.stream.resume();
+                            };
+
+                            this.stream.on('data', (data) => {
+                                if (this.cb.data) {
+                                    this.cb.data(data);
+                                }
                             });
+                            this.stream.on('end', (data) => {
+                                if (this.cb.end) {
+                                    this.cb.end(data);
+                                }
+                            });
+                            this.stream.on('error', (data) => {
+                                if (this.cb.error) {
+                                    this.cb.error(data);
+                                }
+                            });
+                        };
+                        const streamer = new Streamer(stream);
+
+                        return new Promise((resolve, reject) => {
+                            let idx = 0;
+                            try {
+                                Papa.parse(streamer, {
+                                    dynamicTyping: true,
+                                    header: true,
+                                    chunk: (row) => {
+                                        console.log(zipObject.name, 'parsing', row);
+                                        parseFn.parse(db, row.data, idx);
+                                        idx += row.data.length;
+                                    },
+                                    complete: () => {
+                                        console.log(zipObject.name, 'complete');
+                                        resolve({key: name, db: dbName});
+                                    }});
+                                // start the streamer
+                                streamer.resume();
+                            } catch (e) {
+                                console.log('error creating papa:', e);
+                                reject(e);
+                            }
+                        });
                     } else {
                         console.log('skipping', zipObject.name)
                         return null;
@@ -115,6 +168,11 @@ class Parser {
                 setup: this.setupTrips,
                 parse: this.parseTrips
             };
+        case 'stop_times':
+            return {
+                setup: this.setupStopTimes,
+                parse: this.parseStopTimes
+            }
         default:
             return {
                 setup: this.setupDefault,
@@ -140,113 +198,165 @@ class Parser {
         });
     }
 
-    parseRoutes(db, row, idx) {
-        console.log('parseRoutes', idx);
-        const docId = `${idx}`;
-        db.get(docId)
-            .then((doc) => {
-                // update
-                return db.put({
-                    _id: docId,
-                    _rev: doc._rev,
-                    rId: row.route_id,
-                    number: row.route_short_name,
-                    color: row.route_color,
-                    name: row.route_long_name,
-                    description: row.route_description
-                });
-            })
-            .catch((err) => {
-                // new
-                return db.put({
-                    _id: docId,
-                    rId: row.route_id,
-                    color: row.route_color,
-                    name: row.route_short_name,
-                    description: row.route_long_name
-                });
-            })
-            .then((resp) => {
-                return resp;
-            }).catch((err) => {
-                console.log('Error inserting Route', idx, err);
-            });
+    setupStopTimes(db) {
+        // create an index
+        db.createIndex({
+            index: {
+                fields: ['trip_id']
+            }
+        });
+        db.createIndex({
+            index: {
+                fields: ['stop_id']
+            }
+        });
     }
 
-    parseStops(db, row, idx) {
-        if (!row.stop_id) {
-            console.warn('Invalid row', row);
-            return;
-        }
-
-        const docId = `${idx}`;
-        db.get(docId)
-            .then((doc) => {
-                // update
-                return db.put({
-                    _id: docId,
-                    _rev: doc._rev,
-                    sId: row.stop_id,
-                    code: row.stop_code,
-                    name: row.stop_name,
-                    description: row.stop_description,
-                    latitude: row.stop_lat,
-                    longitude: row.stop_lon
+    parseRoutes(db, rows, idx) {
+        rows.map((row, i) => {
+            const docId = `${idx+i}`;
+            db.get(docId)
+                .then((doc) => {
+                    // update
+                    return db.put({
+                        _id: docId,
+                        _rev: doc._rev,
+                        rId: row.route_id,
+                        number: row.route_short_name,
+                        color: row.route_color,
+                        name: row.route_long_name,
+                        description: row.route_desc
+                    });
+                })
+                .catch((err) => {
+                    // new
+                    return db.put({
+                        _id: docId,
+                        rId: row.route_id,
+                        number: row.route_short_name,
+                        color: row.route_color,
+                        name: row.route_long_name,
+                        description: row.route_desc
+                    });
+                })
+                .then((resp) => {
+                    return resp;
+                }).catch((err) => {
+                    console.log('Error inserting Route', idx, err);
                 });
-            })
-            .catch((err) => {
-                return db.put({
-                    _id: docId,
-                    sId: row.stop_id,
-                    code: row.stop_code,
-                    name: row.stop_name,
-                    description: row.stop_description,
-                    latitude: row.stop_lat,
-                    longitude: row.stop_lon
-                });
-            })
-            .then((resp) => {
-                return resp;
-            }).catch((err) => {
-                console.log('Error inserting Stop', idx, err);
-            });
+        });
     }
 
-    parseTrips(db, row, idx) {
-        console.log('parseTrips');
-        if (!row.route_id) {
-            console.log('parseTrips: Missing route_id');
-            return;
-        }
+    parseStops(db, rows, idx) {
+        rows.map((row, i) => {
+            if (!row.stop_id) {
+                console.warn('Invalid row', row);
+                return;
+            }
 
-        const docId = `${idx}`;
-        db.get(docId)
-            .then((doc) => {
-                // update
-                return db.put({
-                    _id: docId,
-                    _rev: doc._rev,
-                    route_id: row.route_id,
-                    trip_id: row.trip_id,
-                    shape_id: row.shape_id,
-                    headsign: row.trip_headsign
+            const docId = `${idx+i}`;
+            db.get(docId)
+                .then((doc) => {
+                    // update
+                    return db.put({
+                        _id: docId,
+                        _rev: doc._rev,
+                        sId: row.stop_id,
+                        code: row.stop_code,
+                        name: row.stop_name,
+                        description: row.stop_description,
+                        latitude: row.stop_lat,
+                        longitude: row.stop_lon
+                    });
+                })
+                .catch((err) => {
+                    return db.put({
+                        _id: docId,
+                        sId: row.stop_id,
+                        code: row.stop_code,
+                        name: row.stop_name,
+                        description: row.stop_description,
+                        latitude: row.stop_lat,
+                        longitude: row.stop_lon
+                    });
+                })
+                .then((resp) => {
+                    return resp;
+                }).catch((err) => {
+                    console.log('Error inserting Stop', idx, err);
                 });
-            })
-            .catch((err) => {
-                // create
-                return db.put({
-                    _id: docId,
-                    route_id: row.route_id,
-                    trip_id: row.trip_id,
-                    shape_id: row.shape_id,
-                    headsign: row.trip_headsign
+        });
+    }
+
+    parseTrips(db, rows, idx) {
+        rows.map((row, i) => {
+            if (!row.route_id) {
+                console.log('parseTrips: Missing route_id');
+                return;
+            }
+
+            const docId = `${idx+i}`;
+            db.get(docId)
+                .then((doc) => {
+                    // update
+                    return db.put({
+                        _id: docId,
+                        _rev: doc._rev,
+                        route_id: row.route_id,
+                        trip_id: row.trip_id,
+                        shape_id: row.shape_id,
+                        headsign: row.trip_headsign
+                    });
+                })
+                .catch((err) => {
+                    // create
+                    return db.put({
+                        _id: docId,
+                        route_id: row.route_id,
+                        trip_id: row.trip_id,
+                        shape_id: row.shape_id,
+                        headsign: row.trip_headsign
+                    });
+                })
+                .then((resp) => {
+                    return resp;
+                }).catch((err) => {
+                    console.log('Error inserting Trip', idx, err);
                 });
-            })
-            .then((resp) => {
-                return resp;
-            }).catch((err) => {
-                console.log('Error inserting Trip', idx, err);
-            });
+        });
+    }
+
+    parseStopTimes(db, rows, idx) {
+        rows.map((row, i) => {
+            if (!row.trip_id) {
+                return;
+            }
+
+            const docId = `${idx+i}`;
+            db.get(docId)
+                .then((doc) => {
+                    // update
+                    return db.put({
+                        _id: docId,
+                        _rev: doc._rev,
+                        trip_id: row.trip_id,
+                        stop_id: row.stop_id
+                    });
+                })
+                .catch((err) => {
+                    // create
+                    return db.put({
+                        _id: docId,
+                        trip_id: row.trip_id,
+                        stop_id: row.stop_id
+                    });
+                })
+                .then((resp) => {
+                    return resp;
+                }).catch((err) => {
+                    console.log('Error inserting StopTime', idx, err);
+                });
+        });
     }
 }
 
