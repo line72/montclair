@@ -82,7 +82,6 @@ class GTFSRTParser {
         }
 
         let db = openDB('routes');
-        let tripsDB = openDB('trips');
         let shapesDB = openDB('shapes');
 
         return db.allDocs({include_docs: true})
@@ -91,27 +90,12 @@ class GTFSRTParser {
                 return Promise.all(results.rows.map(async (row) => {
                     console.log('mapping', row);
 
-                    // get the trips associated with this
-                    //  route and find the unique shape_ids,
-                    //  then fetch those
-                    const trips = await tripsDB.find({
-                        selector: {route_id: row.doc.rId},
-                        fields: ['shape_id']
-                    });
-                    //console.log('got trips!', trips);
-
-                    // just get the unique shapeIds
-                    let shapesSet = new Set();
-                    for (let t of trips.docs) {
-                        shapesSet.add(t.shape_id);
-                    }
-
                     // get the shapes
                     const shapes = await shapesDB.find({
-                        selector: {shape_id: {$in: [...shapesSet]}},
+                        selector: {_id: {$in: row.doc.shapes}},
                         fields: ['points']
                     });
-                    //console.log('got shapes', shapes);
+                    console.log('got shapes', shapes);
 
                     //console.log(row);
                     return new RouteType({

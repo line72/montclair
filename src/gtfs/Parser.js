@@ -58,8 +58,13 @@ class Parser {
 
                 console.log('parsing trips');
                 const tripsObject = unzipped.file('trips.txt');
+                let tripsState = {
+                    routes: {}
+                };
                 databases['trips'] = await this.parse(tripsObject, `${dbPrefix}_trips`,
-                                                      this.setupTrips, this.parseTrips);
+                                                      this.setupTrips,
+                                                      (db, rows, idx) => this.parseTrips(tripsState, db, rows, idx),
+                                                      (db) => this.completeTrips(tripsState, db, this.databases[`${dbPrefix}_routes`]));
 
                 // !mwd - TODO: close all the database
 
@@ -179,6 +184,9 @@ class Parser {
                         if (completeFn) {
                             completeFn(db).then(() => {
                                 resolve(dbName);
+                            }).catch((err) => {
+                                console.warn('Error in complete', err);
+                                reject(err);
                             });
                         } else {
                             resolve(dbName);
@@ -193,52 +201,21 @@ class Parser {
         });
     }
 
-    // getParseFn(name) {
-    //     console.log('getParseFn', name);
-    //     switch (name) {
-    //     case 'routes':
-    //         return {
-    //             setup: this.setupDefault,
-    //             parse: this.parseRoutes
-    //         };
-    //     case 'stops':
-    //         return {
-    //             setup: this.setupDefault,
-    //             parse: this.parseStops
-    //         };
-    //     case 'trips':
-    //         return {
-    //             setup: this.setupTrips,
-    //             parse: this.parseTrips
-    //         };
-    //     case 'stop_times':
-    //         return {
-    //             setup: this.setupStopTimes,
-    //             parse: this.parseStopTimes
-    //         }
-    //     default:
-    //         return {
-    //             setup: this.setupDefault,
-    //             parse: ((db, data, idx) => { })
-    //         };
-    //     }
-    // }
-
     setupDefault(db) {
     }
 
     setupTrips(db) {
-        // create an index
-        db.createIndex({
-            index: {
-                fields: ['route_id']
-            }
-        });
-        db.createIndex({
-            index: {
-                fields: ['trip_id']
-            }
-        });
+        // // create an index
+        // db.createIndex({
+        //     index: {
+        //         fields: ['route_id']
+        //     }
+        // });
+        // db.createIndex({
+        //     index: {
+        //         fields: ['trip_id']
+        //     }
+        // });
     }
 
     setupStopTimes(db) {
@@ -314,25 +291,25 @@ class Parser {
             });
     }
 
-    parseTrips(db, rows, idx) {
-        let docs = rows.map((row, i) => {
+    parseTrips(tripsState, db, rows, idx) {
+        for (let row of rows) {
             if (!row.route_id) {
-                console.log('parseTrips: Missing route_id');
-                return null;
+                break;
             }
 
-            return {
-                route_id: row.route_id,
-                trip_id: row.trip_id,
-                shape_id: row.shape_id,
-                headsign: row.trip_headsign
-            };
-        }).filter(x => !!x);
+            if (!Object.keys(tripsState.routes).includes(row.route_id)) {
+                tripsState.routes[row.route_id] = {
+                    trips: new Set(),
+                    shapes: new Set()
+                };
+            }
+            tripsState.routes[row.route_id].trips.add(`${row.trip_id}`);
+            tripsState.routes[row.route_id].shapes.add(`${row.shape_id}`);
+        }
 
-        return db.bulkDocs(docs)
-            .catch((err) => {
-                console.log('Error inserting Trips', err);
-            });
+        return new Promise((resolve, reject) => {
+            resolve([]);
+        });
     }
 
     parseStopTimes(db, rows, idx) {
@@ -363,12 +340,13 @@ class Parser {
 
         for (let row of rows) {
             if (!row.shape_id) {
-                return null;
+                break;
             }
 
             if (shapeState.shapeId !== row.shape_id) {
                 if (shapeState.shapeId) {
                     docs.push({
+                        _id: `${shapeState.shapeId}`,
                         shape_id: shapeState.shapeId,
                         points: shapeState.points
                     });
@@ -395,6 +373,7 @@ class Parser {
 
         if (shapeState.shapeId) {
             docs.push({
+                _id: `${shapeState.shapeId}`,
                 shape_id: shapeState.shapeId,
                 points: shapeState.points
             });
@@ -407,6 +386,31 @@ class Parser {
             .catch((err) => {
                 console.log('Error inserting shapes', err);
             });
+    }
+
+    completeTrips(tripsState, _db, routesDB) {
+        console.log('completeTrips', tripsState);
+        // update all the routes
+        return routesDB.allDocs({include_docs: true}).then((results) => {
+            let docs = results.rows.map((row) => {
+                console.log('row', row);
+                const tripId = parseInt(row.id);
+                return {
+                    ...row.doc,
+                    trips: [...tripsState.routes[tripId].trips],
+                    shapes: [...tripsState.routes[tripId].shapes]
+                };
+            });
+
+            return routesDB.bulkDocs(docs)
+                .then((resp) => {
+                    console.log('Inserted trips');
+                    return resp;
+                })
+                .catch((err) => {
+                    console.log('Error inserting trips', err);
+                });
+        });
     }
 }
 
