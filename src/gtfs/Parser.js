@@ -56,6 +56,11 @@ class Parser {
                                                        (db, rows, idx) => this.parseShapes(shapeState, db, rows, idx),
                                                        (db) => this.completeShapes(shapeState, db));
 
+                console.log('parsing trips');
+                const tripsObject = unzipped.file('trips.txt');
+                databases['trips'] = await this.parse(tripsObject, `${dbPrefix}_trips`,
+                                                      this.setupTrips, this.parseTrips);
+
                 // !mwd - TODO: close all the database
 
 

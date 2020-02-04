@@ -13,10 +13,13 @@
  *******************************************/
 
 import PouchDB from 'pouchdb';
+import PouchDBFind from 'pouchdb-find';
 
 import RouteType from './RouteType';
 import StopType from './StopType';
 import GTFSWorker from './workers/gtfs-parser.worker';
+
+PouchDB.plugin(PouchDBFind);
 
 class GTFSRTParser {
     constructor(name, gtfsUrl) {
@@ -68,27 +71,61 @@ class GTFSRTParser {
      */
     getRoutes() {
         console.log('getRoutes', this);
-        const n = this.databaseKeys['routes'];
-        if (!Object.keys(this.databases).includes(n)) {
-            this.databases[n] = new PouchDB(n);
+
+        let openDB = (name) => {
+            const n = this.databaseKeys[name];
+            if (!Object.keys(this.databases).includes(n)) {
+                this.databases[n] = new PouchDB(n);
+            }
+            let db = this.databases[n];
+            return db;
         }
-        let db = this.databases[n];
-        console.log('db=', db);
+
+        let db = openDB('routes');
+        let tripsDB = openDB('trips');
+        let shapesDB = openDB('shapes');
 
         return db.allDocs({include_docs: true})
-            .then((results) => {
+            .then(async (results) => {
                 //console.log('results', results);
-                return results.rows.map((row) => {
+                return Promise.all(results.rows.map(async (row) => {
+                    console.log('mapping', row);
+
+                    // get the trips associated with this
+                    //  route and find the unique shape_ids,
+                    //  then fetch those
+                    const trips = await tripsDB.find({
+                        selector: {route_id: row.doc.rId},
+                        fields: ['shape_id']
+                    });
+                    //console.log('got trips!', trips);
+
+                    // just get the unique shapeIds
+                    let shapesSet = new Set();
+                    for (let t of trips.docs) {
+                        shapesSet.add(t.shape_id);
+                    }
+
+                    // get the shapes
+                    const shapes = await shapesDB.find({
+                        selector: {shape_id: {$in: [...shapesSet]}},
+                        fields: ['points']
+                    });
+                    //console.log('got shapes', shapes);
+
                     //console.log(row);
                     return new RouteType({
                         id: row.doc.rId,
                         number: row.doc.number,
-                        color: row.doc.color,
-                        name: row.doc.name
+                        //color: row.doc.color,
+                        color: 'ff0000',
+                        name: row.doc.name,
+                        polyline: shapes.docs.map(x => x.points)
                     });
-                });
+                }));
             })
             .then((routes) => {
+                console.log('reducing');
                 return routes.reduce((acc, route) => {
                     acc[route.id] = route;
                     return acc;
@@ -103,27 +140,31 @@ class GTFSRTParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        // !mwd - For now, just get ALL the stops.
-        const n = this.databaseKeys['stops'];
-        if (!Object.keys(this.databases).includes(n)) {
-            this.databases[n] = new PouchDB(n);
-        }
-        let db = this.databases[n];
+        return new Promise((success, failure) => {
+            success([]);
+        });
 
-        return db.allDocs({include_docs: true})
-            .then((results) => {
-                return results.rows.map((row) => {
-                    //console.log(row.doc);
-                    if (isNaN(row.doc.latitude) || isNaN(row.doc.longitude)) {
-                        console.log('NAN', row.doc);
-                    }
-                    return new StopType({
-                        id: row.doc.sId,
-                        name: row.doc.name,
-                        position: [row.doc.latitude, row.doc.longitude]
-                    });
-                });
-            });
+        // // !mwd - For now, just get ALL the stops.
+        // const n = this.databaseKeys['stops'];
+        // if (!Object.keys(this.databases).includes(n)) {
+        //     this.databases[n] = new PouchDB(n);
+        // }
+        // let db = this.databases[n];
+
+        // return db.allDocs({include_docs: true})
+        //     .then((results) => {
+        //         return results.rows.map((row) => {
+        //             //console.log(row.doc);
+        //             if (isNaN(row.doc.latitude) || isNaN(row.doc.longitude)) {
+        //                 console.log('NAN', row.doc);
+        //             }
+        //             return new StopType({
+        //                 id: row.doc.sId,
+        //                 name: row.doc.name,
+        //                 position: [row.doc.latitude, row.doc.longitude]
+        //             });
+        //         });
+        //     });
     }
 
     /**
