@@ -45,65 +45,49 @@ class Parser {
                 databases['stops'] = await this.parse(stopsObject, `${dbPrefix}_stops`,
                                                       this.setupDefault, this.parseStops);
 
+                console.log('parsing shapes');
+                const shapesObject = unzipped.file('shapes.txt');
+                let shapeState = {
+                    shapeId: null,
+                    points: []
+                };
+                databases['shapes'] = await this.parse(shapesObject, `${dbPrefix}_shapes`,
+                                                       this.setupShapes,
+                                                       (db, rows, idx) => this.parseShapes(shapeState, db, rows, idx),
+                                                       (db) => this.completeShapes(shapeState, db));
+
+                // !mwd - TODO: close all the database
+
+
                 // return the db keys
                 console.log('done', databases);
                 return databases;
             } catch (e) {
                 console.log('Parser.build: Error:', e);
+
+                // !mwd - TODO: close all the database
+
+
                 throw e;
             }
-        });
-            //     // just get the .txt files
-            //     const files = ['routes.txt', 'trips.txt', 'stops.txt'];
-            //     //let promises = unzipped.file(/.*\.txt$/).map((zipObject) => {
-            //     let promises = files.map(async (f) => {
-            //         const zipObject = unzipped.file(f);
-            //         console.log('loading', zipObject.name)
-            //         // create a new database
-            //         let name = zipObject.name.replace('.txt', '');
-            //         const dbName = `${this.name}_${name}`;
-            //         let db = new PouchDB(dbName);
-            //         this.databases[dbName] = db;
-
-            //         const result = await db.info().then(async (result) => {
-            //             if (result.doc_count == 0) {
-            //                 // do stuff
-            //                 const result = await this.doParse(zipObject, db, dbName, name);
-            //                 return result;
-            //             } else {
-            //                 // nothing to do
-            //                 console.log(zipObject.name, 'already complete');
-            //                 return {key: name, db: dbName};
-            //             }
-            //         });
-            //         console.log('got result');
-            //         return result;
-            //     }).filter(x => !!x);
-            //     console.log('promises=', promises, promises[0]);
-            //     return Promise.all(promises).then((x) => {
-            //         return x.reduce((acc, y) => {
-            //             acc[y.key] = y.db;
-            //             return acc;
-            //         }, {});
-            //     });
-            // });
+            });
     }
 
-    parse(zipObject, dbName, setupFn, parseFn) {
+    parse(zipObject, dbName, setupFn, parseFn, completeFn) {
         let db = new PouchDB(dbName);
         this.databases[dbName] = db;
 
         return db.info()
             .then((result) => {
                 if (result.doc_count == 0) {
-                    return this.doParse(db, zipObject, dbName, setupFn, parseFn);
+                    return this.doParse(db, zipObject, dbName, setupFn, parseFn, completeFn);
                 } else {
                     return dbName;
                 }
             });
     }
 
-    doParse(db, zipObject, dbName, setupFn, parseFn) {
+    doParse(db, zipObject, dbName, setupFn, parseFn, completeFn) {
         const stream = zipObject.internalStream('text');
 
         /**
@@ -169,20 +153,31 @@ class Parser {
                     dynamicTyping: true,
                     header: true,
                     chunk: (row, parser) => {
-                        console.log(zipObject.name, 'parsing', row);
-                        parser.pause();
-                        parseFn(db, row.data, idx).then((r) => {
-                            parser.resume();
-                        }).catch((e) => {
-                            console.log('Error parsing', e);
-                            parser.abort();
-                        });
+                        try {
+                            console.log(zipObject.name, 'parsing', row);
+                            parser.pause();
+                            parseFn(db, row.data, idx).then((r) => {
+                                parser.resume();
+                            }).catch((e) => {
+                                console.log('Error parsing', e);
+                                parser.abort();
+                            });
 
-                        idx += row.data.length;
+                            idx += row.data.length;
+                        } catch (e) {
+                            console.log('Error during parsing', zipObject.name, e);
+                            parser.abort();
+                        }
                     },
                     complete: () => {
                         console.log(zipObject.name, 'complete');
-                        resolve(dbName);
+                        if (completeFn) {
+                            completeFn(db).then(() => {
+                                resolve(dbName);
+                            });
+                        } else {
+                            resolve(dbName);
+                        }
                     }});
                 // start the streamer
                 streamer.resume();
@@ -251,6 +246,14 @@ class Parser {
         db.createIndex({
             index: {
                 fields: ['stop_id']
+            }
+        });
+    }
+
+    setupShapes(db) {
+        db.createIndex({
+            index: {
+                fields: ['shape_id']
             }
         });
     }
@@ -347,6 +350,57 @@ class Parser {
             })
             .catch((err) => {
                 console.log('Error inserting StopTimes', err);
+            });
+    }
+
+    parseShapes(shapeState, db, rows, idx) {
+        let docs = [];
+
+        for (let row of rows) {
+            if (!row.shape_id) {
+                return null;
+            }
+
+            if (shapeState.shapeId !== row.shape_id) {
+                if (shapeState.shapeId) {
+                    docs.push({
+                        shape_id: shapeState.shapeId,
+                        points: shapeState.points
+                    });
+                }
+
+                // reset
+                shapeState.shapeId = row.shape_id;
+                shapeState.points = [];
+            }
+
+            const idx = row.shape_pt_sequence - 1;
+            shapeState.points[idx] = [row.shape_pt_lat,
+                                      row.shape_pt_lon];
+        }
+
+        return db.bulkDocs(docs)
+            .catch((err) => {
+                console.log('Error inserting shapes', err);
+            });
+    }
+
+    completeShapes(shapeState, db) {
+        let docs = [];
+
+        if (shapeState.shapeId) {
+            docs.push({
+                shape_id: shapeState.shapeId,
+                points: shapeState.points
+            });
+
+            shapeState.shapeId = null;
+            shapeState.points = [];
+        }
+
+        return db.bulkDocs(docs)
+            .catch((err) => {
+                console.log('Error inserting shapes', err);
             });
     }
 }
