@@ -39,8 +39,13 @@ class Parser {
                 databases['routes'] = `${dbPrefix}_routes`;
                 databases['stops'] = `${dbPrefix}_stops`;
 
-                const doParse = true;
+                const doParse = false;
                 if (doParse) {
+                    let state = {
+                        shapes: {},
+                        routes: {}
+                    };
+
                     console.log('starting destroy');
                     await this.destroyDatabases();
                     console.log('doing create');
@@ -61,25 +66,19 @@ class Parser {
 
                     console.log('parsing shapes');
                     const shapesObject = unzipped.file('shapes.txt');
-                    let shapesState = {
-                        shapes: {}
-                    };
                     await this.parse(shapesObject,
                                      this.setupDefault,
-                                     (rows, idx) => this.parseShapes(shapesState, rows, idx),
-                                     () => this.completeShapes(shapesState));
+                                     (rows, idx) => this.parseShapes(state, rows, idx),
+                                     () => this.completeShapes(state));
 
                     console.log('parsing trips');
                     const tripsObject = unzipped.file('trips.txt');
-                    let tripsState = {
-                        routes: {}
-                    };
                     await this.parse(tripsObject,
                                      this.setupDefault,
-                                     (rows, idx) => this.parseTrips(tripsState, rows, idx),
-                                     () => this.completeTrips(tripsState, shapesState, this.databases['routes']));
+                                     (rows, idx) => this.parseTrips(state, rows, idx),
+                                     () => this.completeTrips(state, this.databases['routes']));
                     // clean up the shapes state
-                    shapesState = null;
+                    state.shapes = {};
 
                     console.log('parsing stop times');
                     const stopTimesObject = unzipped.file('stop_times.txt');
@@ -287,21 +286,21 @@ class Parser {
             });
     }
 
-    parseTrips(tripsState, rows, idx) {
+    parseTrips(state, rows, idx) {
         return new Promise((resolve, reject) => {
             for (let row of rows) {
                 if (!row.route_id) {
                     break;
                 }
 
-                if (!(row.route_id in tripsState.routes)) {
-                    tripsState.routes[row.route_id] = {
+                if (!(row.route_id in state.routes)) {
+                    state.routes[row.route_id] = {
                         trips: new Set(),
                         shapes: new Set()
                     };
                 }
-                tripsState.routes[row.route_id].trips.add(`${row.trip_id}`);
-                tripsState.routes[row.route_id].shapes.add(row.shape_id);
+                state.routes[row.route_id].trips.add(`${row.trip_id}`);
+                state.routes[row.route_id].shapes.add(row.shape_id);
             }
 
             resolve([]);
@@ -331,21 +330,21 @@ class Parser {
             });
     }
 
-    parseShapes(shapesState, rows, idx) {
+    parseShapes(state, rows, idx) {
         return new Promise((resolve, reject) => {
             for (let row of rows) {
                 if (!row.shape_id) {
                     break;
                 }
 
-                if (!(row.shape_id in shapesState.shapes)) {
-                    shapesState.shapes[row.shape_id] = {
+                if (!(row.shape_id in state.shapes)) {
+                    state.shapes[row.shape_id] = {
                         points: []
                     };
                 }
 
                 const idx = row.shape_pt_sequence - 1;
-                shapesState.shapes[row.shape_id].points[idx] = [row.shape_pt_lat,
+                state.shapes[row.shape_id].points[idx] = [row.shape_pt_lat,
                                                                 row.shape_pt_lon];
             }
 
@@ -361,16 +360,16 @@ class Parser {
         });
     }
 
-    completeTrips(tripsState, shapesState, routesDB) {
-        console.log('completeTrips', tripsState);
+    completeTrips(state, routesDB) {
+        console.log('completeTrips', state.routes);
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
                 const tripId = parseInt(row.id);
                 return {
                     ...row.doc,
-                    trips: [...tripsState.routes[tripId].trips],
-                    shapes: [...tripsState.routes[tripId].shapes].map(s => shapesState.shapes[s].points)
+                    trips: [...state.routes[tripId].trips],
+                    shapes: [...state.routes[tripId].shapes].map(s => state.shapes[s].points)
                 };
             });
 
