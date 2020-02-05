@@ -85,17 +85,10 @@ class GTFSRTParser {
         let shapesDB = openDB('shapes');
 
         return db.allDocs({include_docs: true})
-            .then(async (results) => {
+            .then((results) => {
                 //console.log('results', results);
-                return Promise.all(results.rows.map(async (row) => {
+                return Promise.all(results.rows.map((row) => {
                     console.log('mapping', row);
-
-                    // get the shapes
-                    const shapes = await shapesDB.find({
-                        selector: {_id: {$in: row.doc.shapes}},
-                        fields: ['points']
-                    });
-                    console.log('got shapes', shapes);
 
                     //console.log(row);
                     return new RouteType({
@@ -104,7 +97,7 @@ class GTFSRTParser {
                         //color: row.doc.color,
                         color: 'ff0000',
                         name: row.doc.name,
-                        polyline: shapes.docs.map(x => x.points)
+                        polyline: row.doc.shapes
                     });
                 }));
             })

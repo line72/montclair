@@ -34,44 +34,58 @@ class Parser {
                 let databases = {};
                 const dbPrefix = this.name;
 
-                // parse each file in order
-                console.log('parsing routes');
-                const routesObject = unzipped.file('routes.txt');
-                databases['routes'] = await this.parse(routesObject, `${dbPrefix}_routes`,
-                                                       this.setupDefault, this.parseRoutes);
+                const doParse = false;
+                if (doParse) {
 
-                console.log('parsing stops');
-                const stopsObject = unzipped.file('stops.txt');
-                databases['stops'] = await this.parse(stopsObject, `${dbPrefix}_stops`,
-                                                      this.setupDefault, this.parseStops);
+                    // parse each file in order
+                    console.log('parsing routes');
+                    const routesObject = unzipped.file('routes.txt');
+                    databases['routes'] = await this.parse(routesObject, `${dbPrefix}_routes`,
+                                                           this.setupDefault, this.parseRoutes);
 
-                console.log('parsing shapes');
-                const shapesObject = unzipped.file('shapes.txt');
-                let shapeState = {
-                    shapeId: null,
-                    points: []
-                };
-                databases['shapes'] = await this.parse(shapesObject, `${dbPrefix}_shapes`,
-                                                       this.setupShapes,
-                                                       (db, rows, idx) => this.parseShapes(shapeState, db, rows, idx),
-                                                       (db) => this.completeShapes(shapeState, db));
+                    console.log('parsing stops');
+                    const stopsObject = unzipped.file('stops.txt');
+                    databases['stops'] = await this.parse(stopsObject, `${dbPrefix}_stops`,
+                                                          this.setupDefault, this.parseStops);
 
-                console.log('parsing trips');
-                const tripsObject = unzipped.file('trips.txt');
-                let tripsState = {
-                    routes: {}
-                };
-                databases['trips'] = await this.parse(tripsObject, `${dbPrefix}_trips`,
-                                                      this.setupTrips,
-                                                      (db, rows, idx) => this.parseTrips(tripsState, db, rows, idx),
-                                                      (db) => this.completeTrips(tripsState, db, this.databases[`${dbPrefix}_routes`]));
+                    console.log('parsing shapes');
+                    const shapesObject = unzipped.file('shapes.txt');
+                    let shapesState = {
+                        shapes: {}
+                    };
+                    databases['shapes'] = await this.parse(shapesObject, `${dbPrefix}_shapes`,
+                                                           this.setupShapes,
+                                                           (db, rows, idx) => this.parseShapes(shapesState, db, rows, idx),
+                                                           (db) => this.completeShapes(shapesState, db));
 
-                // !mwd - TODO: close all the database
+                    console.log('parsing trips');
+                    const tripsObject = unzipped.file('trips.txt');
+                    let tripsState = {
+                        routes: {}
+                    };
+                    databases['trips'] = await this.parse(tripsObject, `${dbPrefix}_trips`,
+                                                          this.setupTrips,
+                                                          (db, rows, idx) => this.parseTrips(tripsState, db, rows, idx),
+                                                          (db) => this.completeTrips(tripsState, shapesState, db, this.databases[`${dbPrefix}_routes`]));
 
+                    // !mwd - TODO: close all the database
 
-                // return the db keys
-                console.log('done', databases);
-                return databases;
+                    // return the db keys
+                    console.log('done', databases);
+                    return databases;
+                } else {
+                    console.log('skipping parsing');
+                    let databases = {};
+                    const dbPrefix = this.name;
+
+                    databases['routes'] = `${dbPrefix}_routes`;
+                    databases['stops'] = `${dbPrefix}_stops`;
+                    databases['shapes'] = `${dbPrefix}_shapes`;
+                    databases['trips'] = `${dbPrefix}_trips`;
+
+                    return databases;
+                }
+
             } catch (e) {
                 console.log('Parser.build: Error:', e);
 
@@ -292,22 +306,22 @@ class Parser {
     }
 
     parseTrips(tripsState, db, rows, idx) {
-        for (let row of rows) {
-            if (!row.route_id) {
-                break;
-            }
-
-            if (!Object.keys(tripsState.routes).includes(row.route_id)) {
-                tripsState.routes[row.route_id] = {
-                    trips: new Set(),
-                    shapes: new Set()
-                };
-            }
-            tripsState.routes[row.route_id].trips.add(`${row.trip_id}`);
-            tripsState.routes[row.route_id].shapes.add(`${row.shape_id}`);
-        }
-
         return new Promise((resolve, reject) => {
+            for (let row of rows) {
+                if (!row.route_id) {
+                    break;
+                }
+
+                if (!(row.route_id in tripsState.routes)) {
+                    tripsState.routes[row.route_id] = {
+                        trips: new Set(),
+                        shapes: new Set()
+                    };
+                }
+                tripsState.routes[row.route_id].trips.add(`${row.trip_id}`);
+                tripsState.routes[row.route_id].shapes.add(row.shape_id);
+            }
+
             resolve([]);
         });
     }
@@ -335,60 +349,35 @@ class Parser {
             });
     }
 
-    parseShapes(shapeState, db, rows, idx) {
-        let docs = [];
-
-        for (let row of rows) {
-            if (!row.shape_id) {
-                break;
-            }
-
-            if (shapeState.shapeId !== row.shape_id) {
-                if (shapeState.shapeId) {
-                    docs.push({
-                        _id: `${shapeState.shapeId}`,
-                        shape_id: shapeState.shapeId,
-                        points: shapeState.points
-                    });
+    parseShapes(shapesState, db, rows, idx) {
+        return new Promise((resolve, reject) => {
+            for (let row of rows) {
+                if (!row.shape_id) {
+                    break;
                 }
 
-                // reset
-                shapeState.shapeId = row.shape_id;
-                shapeState.points = [];
+                if (!(row.shape_id in shapesState.shapes)) {
+                    shapesState.shapes[row.shape_id] = {
+                        points: []
+                    };
+                }
+
+                const idx = row.shape_pt_sequence - 1;
+                shapesState.shapes[row.shape_id].points[idx] = [row.shape_pt_lat,
+                                                                row.shape_pt_lon];
             }
 
-            const idx = row.shape_pt_sequence - 1;
-            shapeState.points[idx] = [row.shape_pt_lat,
-                                      row.shape_pt_lon];
-        }
-
-        return db.bulkDocs(docs)
-            .catch((err) => {
-                console.log('Error inserting shapes', err);
-            });
+            resolve([]);
+        });
     }
 
-    completeShapes(shapeState, db) {
-        let docs = [];
-
-        if (shapeState.shapeId) {
-            docs.push({
-                _id: `${shapeState.shapeId}`,
-                shape_id: shapeState.shapeId,
-                points: shapeState.points
-            });
-
-            shapeState.shapeId = null;
-            shapeState.points = [];
-        }
-
-        return db.bulkDocs(docs)
-            .catch((err) => {
-                console.log('Error inserting shapes', err);
-            });
+    completeShapes(shapesState, db) {
+        return new Promise((resolve, reject) => {
+            resolve([]);
+        });
     }
 
-    completeTrips(tripsState, _db, routesDB) {
+    completeTrips(tripsState, shapesState, _db, routesDB) {
         console.log('completeTrips', tripsState);
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
@@ -398,7 +387,7 @@ class Parser {
                 return {
                     ...row.doc,
                     trips: [...tripsState.routes[tripId].trips],
-                    shapes: [...tripsState.routes[tripId].shapes]
+                    shapes: [...tripsState.routes[tripId].shapes].map(s => shapesState.shapes[s].points)
                 };
             });
 
