@@ -64,6 +64,15 @@ class GTFSRTParser {
         });
     }
 
+    openDB(name) {
+        const n = this.databaseKeys[name];
+        if (!Object.keys(this.databases).includes(n)) {
+            this.databases[n] = new PouchDB(n);
+        }
+        let db = this.databases[n];
+        return db;
+    }
+
     /**
      * Get the routes.
      *
@@ -72,16 +81,7 @@ class GTFSRTParser {
     getRoutes() {
         console.log('getRoutes', this);
 
-        let openDB = (name) => {
-            const n = this.databaseKeys[name];
-            if (!Object.keys(this.databases).includes(n)) {
-                this.databases[n] = new PouchDB(n);
-            }
-            let db = this.databases[n];
-            return db;
-        }
-
-        let db = openDB('routes');
+        let db = this.openDB('routes');
 
         return db.allDocs({include_docs: true})
             .then((results) => {
@@ -111,31 +111,24 @@ class GTFSRTParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        return new Promise((success, failure) => {
-            success([]);
-        });
+        let routesDB = this.openDB('routes');
+        let stopsDB = this.openDB('stops');
 
-        // // !mwd - For now, just get ALL the stops.
-        // const n = this.databaseKeys['stops'];
-        // if (!Object.keys(this.databases).includes(n)) {
-        //     this.databases[n] = new PouchDB(n);
-        // }
-        // let db = this.databases[n];
-
-        // return db.allDocs({include_docs: true})
-        //     .then((results) => {
-        //         return results.rows.map((row) => {
-        //             //console.log(row.doc);
-        //             if (isNaN(row.doc.latitude) || isNaN(row.doc.longitude)) {
-        //                 console.log('NAN', row.doc);
-        //             }
-        //             return new StopType({
-        //                 id: row.doc.sId,
-        //                 name: row.doc.name,
-        //                 position: [row.doc.latitude, row.doc.longitude]
-        //             });
-        //         });
-        //     });
+        return routesDB.get(`${route.id}`)
+            .then((r) => {
+                const stopKeys = r.stop_ids.map(x => `${x}`);
+                return stopsDB.allDocs({include_docs: true,
+                                        keys: stopKeys})
+                    .then((stops) => {
+                        return stops.rows.map((stop) => {
+                            return new StopType({
+                                id: stop.doc.sId,
+                                name: stop.doc.name,
+                                position: [stop.doc.latitude, stop.doc.longitude]
+                            });
+                        });
+                    });
+            });
     }
 
     /**

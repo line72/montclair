@@ -43,6 +43,7 @@ class Parser {
                 if (doParse) {
                     let state = {
                         shapes: {},
+                        trips: {},
                         routes: {}
                     };
 
@@ -82,6 +83,10 @@ class Parser {
 
                     console.log('parsing stop times');
                     const stopTimesObject = unzipped.file('stop_times.txt');
+                    await this.parse(stopTimesObject,
+                                     this.setupDefault,
+                                     (rows, idx) => this.parseStopTimes(state, rows, idx),
+                                     () => this.completeStopTimes(state, this.databases['routes']));
 
                     // !mwd - TODO: close all the database
 
@@ -90,6 +95,8 @@ class Parser {
                     return databases;
                 } else {
                     console.log('skipping parsing');
+
+                    // !mwd - TODO: close all the database
 
                     return databases;
                 }
@@ -295,39 +302,34 @@ class Parser {
 
                 if (!(row.route_id in state.routes)) {
                     state.routes[row.route_id] = {
+                        stops: new Set(),
                         trips: new Set(),
                         shapes: new Set()
                     };
                 }
-                state.routes[row.route_id].trips.add(`${row.trip_id}`);
+                state.routes[row.route_id].trips.add(row.trip_id);
                 state.routes[row.route_id].shapes.add(row.shape_id);
+
+                // store the route for a trip
+                state.trips[row.trip_id] = row.route_id;
             }
 
             resolve([]);
         });
     }
 
-    parseStopTimes(db, rows, idx) {
-        let docs = rows.map((row, i) => {
-            if (!row.trip_id) {
-                return null;
+    parseStopTimes(state, rows, idx) {
+        return new Promise((resolve, reject) => {
+            for (let row of rows) {
+                if (!row.trip_id) {
+                    break;
+                }
+
+                state.routes[state.trips[row.trip_id]].stops.add(row.stop_id)
             }
 
-            return {
-                trip_id: row.trip_id,
-                stop_id: row.stop_id
-            };
-        }).filter(x => !!x);
-
-        console.log('Bulk StopTimes', idx, docs.length);
-        return db.bulkDocs(docs)
-            .then((resp) => {
-                console.log('Inserted StopTimes', idx);
-                return resp;
-            })
-            .catch((err) => {
-                console.log('Error inserting StopTimes', err);
-            });
+            resolve([]);
+        });
     }
 
     parseShapes(state, rows, idx) {
@@ -365,11 +367,11 @@ class Parser {
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
-                const tripId = parseInt(row.id);
+                const routeId = parseInt(row.id);
                 return {
                     ...row.doc,
-                    trips: [...state.routes[tripId].trips],
-                    shapes: [...state.routes[tripId].shapes].map(s => state.shapes[s].points)
+                    trip_ids: [...state.routes[routeId].trips],
+                    shapes: [...state.routes[routeId].shapes].map(s => state.shapes[s].points)
                 };
             });
 
@@ -379,6 +381,28 @@ class Parser {
                 })
                 .catch((err) => {
                     console.log('Error inserting trips', err);
+                });
+        });
+    }
+
+    completeStopTimes(state, routesDB) {
+        console.log('completeStoptimes');
+        // update all the routes
+        return routesDB.allDocs({include_docs: true}).then((results) => {
+            let docs = results.rows.map((row) => {
+                const routeId = parseInt(row.id);
+                return {
+                    ...row.doc,
+                    stop_ids: [...state.routes[routeId].stops]
+                };
+            });
+
+            return routesDB.bulkDocs(docs)
+                .then((resp) => {
+                    return resp;
+                })
+                .catch((err) => {
+                    console.log('Error inserting stop times', err);
                 });
         });
     }
