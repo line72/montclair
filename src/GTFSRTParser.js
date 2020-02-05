@@ -89,8 +89,7 @@ class GTFSRTParser {
                     return new RouteType({
                         id: row.doc.rId,
                         number: row.doc.number,
-                        //color: row.doc.color,
-                        color: 'ff0000',
+                        color: row.doc.color.trim() || 'ff0000',
                         name: row.doc.name,
                         polyline: row.doc.shapes
                     });

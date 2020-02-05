@@ -57,7 +57,11 @@ class Parser {
                     const routesObject = unzipped.file('routes.txt');
                     await this.parse(routesObject,
                                      this.setupDefault,
-                                     (rows, idx) => this.parseRoutes(this.databases['routes'], rows, idx));
+                                     (rows, idx) => this.parseRoutes(state, this.databases['routes'], rows, idx),
+                                     null,
+                                     {'route_id': true, agency_id: true, route_short_name: false,
+                                      route_long_name: false, route_desc: false, route_type: true,
+                                      route_url: false, route_color: false, route_text_color: false});
 
                     console.log('parsing stops');
                     const stopsObject = unzipped.file('stops.txt');
@@ -131,12 +135,15 @@ class Parser {
                 .then((r) => {
                     console.log('destroyed', k);
                     return r;
+                }).catch((e) => {
+                    console.log('error destroying', k, e);
+                    return true;
                 });
         });
         return Promise.all(promises);
     }
 
-    parse(zipObject, setupFn, parseFn, completeFn) {
+    parse(zipObject, setupFn, parseFn, completeFn, dynamicTyping = true) {
         const stream = zipObject.internalStream('text');
 
         /**
@@ -199,7 +206,7 @@ class Parser {
             let idx = 0;
             try {
                 Papa.parse(streamer, {
-                    dynamicTyping: true,
+                    dynamicTyping: dynamicTyping,
                     header: true,
                     chunk: (row, parser) => {
                         try {
@@ -244,8 +251,16 @@ class Parser {
     }
 
     /** Parse functions **/
-    parseRoutes(db, rows, idx) {
+    parseRoutes(state, db, rows, idx) {
         let docs = rows.map((row, i) => {
+            if (!(row.route_id in state.routes)) {
+                state.routes[row.route_id] = {
+                    stops: new Set(),
+                    trips: new Set(),
+                    shapes: new Set()
+                };
+            }
+
             return {
                 _id: `${row.route_id}`,
                 rId: row.route_id,
