@@ -82,15 +82,10 @@ class GTFSRTParser {
         }
 
         let db = openDB('routes');
-        let shapesDB = openDB('shapes');
 
         return db.allDocs({include_docs: true})
             .then((results) => {
-                //console.log('results', results);
                 return Promise.all(results.rows.map((row) => {
-                    console.log('mapping', row);
-
-                    //console.log(row);
                     return new RouteType({
                         id: row.doc.rId,
                         number: row.doc.number,
@@ -102,7 +97,6 @@ class GTFSRTParser {
                 }));
             })
             .then((routes) => {
-                console.log('reducing');
                 return routes.reduce((acc, route) => {
                     acc[route.id] = route;
                     return acc;

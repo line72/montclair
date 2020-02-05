@@ -23,7 +23,10 @@ class Parser {
         this.name = name;
         this.url = url;
         // create the database
-        this.databases = {};
+        this.databases = {
+            'routes': new PouchDB(`${this.name}_routes`),
+            'stops': new PouchDB(`${this.name}_stops`)
+        };
     }
 
     build() {
@@ -33,40 +36,53 @@ class Parser {
             try {
                 let databases = {};
                 const dbPrefix = this.name;
+                databases['routes'] = `${dbPrefix}_routes`;
+                databases['stops'] = `${dbPrefix}_stops`;
 
-                const doParse = false;
+                const doParse = true;
                 if (doParse) {
+                    console.log('starting destroy');
+                    await this.destroyDatabases();
+                    console.log('doing create');
+                    await this.createDatabases();
 
                     // parse each file in order
                     console.log('parsing routes');
                     const routesObject = unzipped.file('routes.txt');
-                    databases['routes'] = await this.parse(routesObject, `${dbPrefix}_routes`,
-                                                           this.setupDefault, this.parseRoutes);
+                    await this.parse(routesObject,
+                                     this.setupDefault,
+                                     (rows, idx) => this.parseRoutes(this.databases['routes'], rows, idx));
 
                     console.log('parsing stops');
                     const stopsObject = unzipped.file('stops.txt');
-                    databases['stops'] = await this.parse(stopsObject, `${dbPrefix}_stops`,
-                                                          this.setupDefault, this.parseStops);
+                    await this.parse(stopsObject,
+                                     this.setupDefault,
+                                     (rows, idx) => this.parseStops(this.databases['stops'], rows, idx));
 
                     console.log('parsing shapes');
                     const shapesObject = unzipped.file('shapes.txt');
                     let shapesState = {
                         shapes: {}
                     };
-                    databases['shapes'] = await this.parse(shapesObject, `${dbPrefix}_shapes`,
-                                                           this.setupShapes,
-                                                           (db, rows, idx) => this.parseShapes(shapesState, db, rows, idx),
-                                                           (db) => this.completeShapes(shapesState, db));
+                    await this.parse(shapesObject,
+                                     this.setupDefault,
+                                     (rows, idx) => this.parseShapes(shapesState, rows, idx),
+                                     () => this.completeShapes(shapesState));
 
                     console.log('parsing trips');
                     const tripsObject = unzipped.file('trips.txt');
                     let tripsState = {
                         routes: {}
                     };
-                    databases['trips'] = await this.parse(tripsObject, `${dbPrefix}_trips`,
-                                                          this.setupTrips,
-                                                          (db, rows, idx) => this.parseTrips(tripsState, db, rows, idx),
-                                                          (db) => this.completeTrips(tripsState, shapesState, db, this.databases[`${dbPrefix}_routes`]));
+                    await this.parse(tripsObject,
+                                     this.setupDefault,
+                                     (rows, idx) => this.parseTrips(tripsState, rows, idx),
+                                     () => this.completeTrips(tripsState, shapesState, this.databases['routes']));
+                    // clean up the shapes state
+                    shapesState = null;
+
+                    console.log('parsing stop times');
+                    const stopTimesObject = unzipped.file('stop_times.txt');
 
                     // !mwd - TODO: close all the database
 
@@ -75,13 +91,6 @@ class Parser {
                     return databases;
                 } else {
                     console.log('skipping parsing');
-                    let databases = {};
-                    const dbPrefix = this.name;
-
-                    databases['routes'] = `${dbPrefix}_routes`;
-                    databases['stops'] = `${dbPrefix}_stops`;
-                    databases['shapes'] = `${dbPrefix}_shapes`;
-                    databases['trips'] = `${dbPrefix}_trips`;
 
                     return databases;
                 }
@@ -97,21 +106,31 @@ class Parser {
             });
     }
 
-    parse(zipObject, dbName, setupFn, parseFn, completeFn) {
-        let db = new PouchDB(dbName);
-        this.databases[dbName] = db;
+    createDatabases() {
+        // create indexes
+        return new Promise((resolve, reject) => {
+            this.databases = {
+                'routes': new PouchDB(`${this.name}_routes`),
+                'stops': new PouchDB(`${this.name}_stops`)
+            };
 
-        return db.info()
-            .then((result) => {
-                if (result.doc_count == 0) {
-                    return this.doParse(db, zipObject, dbName, setupFn, parseFn, completeFn);
-                } else {
-                    return dbName;
-                }
-            });
+            resolve(this.databases);
+        });
     }
 
-    doParse(db, zipObject, dbName, setupFn, parseFn, completeFn) {
+    destroyDatabases() {
+        let promises = Object.keys(this.databases).map((k) => {
+            console.log('destroying', k);
+            return this.databases[k].destroy()
+                .then((r) => {
+                    console.log('destroyed', k);
+                    return r;
+                });
+        });
+        return Promise.all(promises);
+    }
+
+    parse(zipObject, setupFn, parseFn, completeFn) {
         const stream = zipObject.internalStream('text');
 
         /**
@@ -169,7 +188,7 @@ class Parser {
 
         return new Promise((resolve, reject) => {
             // set up the db
-            setupFn(db);
+            setupFn();
 
             let idx = 0;
             try {
@@ -178,9 +197,8 @@ class Parser {
                     header: true,
                     chunk: (row, parser) => {
                         try {
-                            console.log(zipObject.name, 'parsing', row);
                             parser.pause();
-                            parseFn(db, row.data, idx).then((r) => {
+                            parseFn(row.data, idx).then((r) => {
                                 parser.resume();
                             }).catch((e) => {
                                 console.log('Error parsing', e);
@@ -196,14 +214,14 @@ class Parser {
                     complete: () => {
                         console.log(zipObject.name, 'complete');
                         if (completeFn) {
-                            completeFn(db).then(() => {
-                                resolve(dbName);
+                            completeFn().then(() => {
+                                resolve(true);
                             }).catch((err) => {
                                 console.warn('Error in complete', err);
                                 reject(err);
                             });
                         } else {
-                            resolve(dbName);
+                            resolve(true);
                         }
                     }});
                 // start the streamer
@@ -215,47 +233,12 @@ class Parser {
         });
     }
 
-    setupDefault(db) {
+    /** Setup functions **/
+    setupDefault() {
     }
 
-    setupTrips(db) {
-        // // create an index
-        // db.createIndex({
-        //     index: {
-        //         fields: ['route_id']
-        //     }
-        // });
-        // db.createIndex({
-        //     index: {
-        //         fields: ['trip_id']
-        //     }
-        // });
-    }
-
-    setupStopTimes(db) {
-        // create an index
-        db.createIndex({
-            index: {
-                fields: ['trip_id']
-            }
-        });
-        db.createIndex({
-            index: {
-                fields: ['stop_id']
-            }
-        });
-    }
-
-    setupShapes(db) {
-        db.createIndex({
-            index: {
-                fields: ['shape_id']
-            }
-        });
-    }
-
+    /** Parse functions **/
     parseRoutes(db, rows, idx) {
-        console.log('inserting Routes', idx);
         let docs = rows.map((row, i) => {
             return {
                 _id: `${row.route_id}`,
@@ -297,7 +280,6 @@ class Parser {
 
         return db.bulkDocs(docs)
             .then((resp) => {
-                console.log('parseStops insert complete');
                 return resp;
             })
             .catch((err) => {
@@ -305,7 +287,7 @@ class Parser {
             });
     }
 
-    parseTrips(tripsState, db, rows, idx) {
+    parseTrips(tripsState, rows, idx) {
         return new Promise((resolve, reject) => {
             for (let row of rows) {
                 if (!row.route_id) {
@@ -349,7 +331,7 @@ class Parser {
             });
     }
 
-    parseShapes(shapesState, db, rows, idx) {
+    parseShapes(shapesState, rows, idx) {
         return new Promise((resolve, reject) => {
             for (let row of rows) {
                 if (!row.shape_id) {
@@ -371,18 +353,19 @@ class Parser {
         });
     }
 
-    completeShapes(shapesState, db) {
+    /** completion functions **/
+
+    completeShapes(shapesState) {
         return new Promise((resolve, reject) => {
             resolve([]);
         });
     }
 
-    completeTrips(tripsState, shapesState, _db, routesDB) {
+    completeTrips(tripsState, shapesState, routesDB) {
         console.log('completeTrips', tripsState);
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
-                console.log('row', row);
                 const tripId = parseInt(row.id);
                 return {
                     ...row.doc,
@@ -393,7 +376,6 @@ class Parser {
 
             return routesDB.bulkDocs(docs)
                 .then((resp) => {
-                    console.log('Inserted trips');
                     return resp;
                 })
                 .catch((err) => {
