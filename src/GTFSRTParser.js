@@ -17,15 +17,17 @@ import PouchDBFind from 'pouchdb-find';
 
 import RouteType from './RouteType';
 import StopType from './StopType';
+import VehicleType from './VehicleType';
 import GTFSWorker from './workers/gtfs-parser.worker';
 
 PouchDB.plugin(PouchDBFind);
 
 class GTFSRTParser {
-    constructor(name, gtfsUrl) {
+    constructor(name, gtfsUrl, vehiclePositionsUrl) {
         console.log('constructor', name, gtfsUrl);
         this.name = name;
         this.gtfsUrl = gtfsUrl;
+        this.vehiclePositionsUrl = vehiclePositionsUrl;
 
         this.databases = {};
         this.databaseKeys = {};
@@ -50,6 +52,17 @@ class GTFSRTParser {
             this.worker.onmessage = (e) => {
                 console.log('got result message', e);
                 this.databaseKeys = e.data.result;
+
+                // start the vehicle updated
+                this.worker.postMessage({
+                    id: this.jobId++,
+                    message: 'VEHICLE_UPDATE_START',
+                    data: {
+                        dbName: this.databaseKeys['routes'],
+                        url: this.vehiclePositionsUrl,
+                    }
+                });
+
                 success(true);
             };
             console.log('GTFSRTParser is posting a message');
@@ -151,9 +164,28 @@ class GTFSRTParser {
      * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
      */
     getVehicles(bounds, visible_routes) {
-        return new Promise((success, failure) => {
-            success([]);
-        });
+
+        let db = this.openDB('routes');
+
+        return db.allDocs({include_docs: true,
+                           keys: visible_routes.map(x => `${x.id}`)})
+            .then((routes) => {
+                return routes.rows.reduce((acc, route) => {
+                    let vehicles = route.doc.vehicles.map((v) => {
+                        return new VehicleType({
+                            id: v.id,
+                            position: v.position,
+                            heading: v.bearing,
+                            color: route.doc.color,
+                            route_id: route.doc.rId
+                        });
+                    });
+
+                    console.log(route.doc.rId, vehicles);
+                    acc[route.doc.rId] = vehicles;
+                    return acc;
+                }, {});
+            });
     }
 
     /**

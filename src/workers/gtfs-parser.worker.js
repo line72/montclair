@@ -13,6 +13,7 @@
  *******************************************/
 
 import Parser from '../gtfs/Parser';
+import RTVehicleParser from '../gtfs/RTVehicleParser';
 
 function doBuild({name, url}) {
     console.log('doBuild', name, url);
@@ -24,6 +25,15 @@ function doBuild({name, url}) {
             result: r
         };
     });
+}
+
+function startVehicleUpdate({dbName, url}) {
+    console.log('start Vehicle Update');
+
+    let p = new RTVehicleParser(dbName, url);
+    p.update();
+
+    setInterval(() => { p.update(); }, 10000);
 }
 
 onmessage = function({data}) {
@@ -44,6 +54,9 @@ onmessage = function({data}) {
                 });
             });
 
+        break;
+    case 'VEHICLE_UPDATE_START':
+        startVehicleUpdate(data.data);
         break;
     default:
         console.warn(`gtfs-parser: Unknown message type: ${data.message}`);

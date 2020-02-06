@@ -27,6 +27,26 @@ class Parser {
             'routes': new PouchDB(`${this.name}_routes`),
             'stops': new PouchDB(`${this.name}_stops`)
         };
+
+        // specify some parsing options, specifically,
+        //  which fields we want papaParse to dynmically type
+        this.parsingOptions = {
+            routes: {route_id: false, agency_id: false, route_short_name: false,
+                     route_long_name: false, route_desc: false, route_type: true,
+                     route_url: false, route_color: false, route_text_color: false},
+            stops: {stop_id: false, stop_code: false, stop_name: false,
+                    stop_desc: false, stop_lat: true, stop_lon: true,
+                    zone_id: false, stop_url: false, location_type: false,
+                    parent_station: false, stop_timezone: false, wheelchair_boarding: false},
+            shapes: {shape_id: false, shape_pt_lon: true, shape_pt_lat: true,
+                     shape_pt_sequence: true, shape_dist_traveled: true},
+            trips: {route_id: false, service_id: true, trip_id: false,
+                    direction_id: true, block_id: false, shape_id: false},
+            stop_times: {trip_id: false, arrival_time: true, departure_time: true,
+                         stop_id: false, stop_sequence: true, stop_headsign: false,
+                         pickup_type: true, drop_off_type: true, shape_dist_traveled: true,
+                         timepoint: true}
+        };
     }
 
     build() {
@@ -58,30 +78,30 @@ class Parser {
                     await this.parse(routesObject,
                                      this.setupDefault,
                                      (rows, idx) => this.parseRoutes(state, this.databases['routes'], rows, idx),
-                                     null,
-                                     {'route_id': true, agency_id: true, route_short_name: false,
-                                      route_long_name: false, route_desc: false, route_type: true,
-                                      route_url: false, route_color: false, route_text_color: false});
+                                     null, this.parsingOptions['routes']);
 
                     console.log('parsing stops');
                     const stopsObject = unzipped.file('stops.txt');
                     await this.parse(stopsObject,
                                      this.setupDefault,
-                                     (rows, idx) => this.parseStops(this.databases['stops'], rows, idx));
+                                     (rows, idx) => this.parseStops(this.databases['stops'], rows, idx),
+                                     null, this.parsingOptions['stops']);
 
                     console.log('parsing shapes');
                     const shapesObject = unzipped.file('shapes.txt');
                     await this.parse(shapesObject,
                                      this.setupDefault,
                                      (rows, idx) => this.parseShapes(state, rows, idx),
-                                     () => this.completeShapes(state));
+                                     () => this.completeShapes(state),
+                                     this.parsingOptions['shapes']);
 
                     console.log('parsing trips');
                     const tripsObject = unzipped.file('trips.txt');
                     await this.parse(tripsObject,
                                      this.setupDefault,
                                      (rows, idx) => this.parseTrips(state, rows, idx),
-                                     () => this.completeTrips(state, this.databases['routes']));
+                                     () => this.completeTrips(state, this.databases['routes']),
+                                    this.parsingOptions['trips']);
                     // clean up the shapes state
                     state.shapes = {};
 
@@ -90,7 +110,8 @@ class Parser {
                     await this.parse(stopTimesObject,
                                      this.setupDefault,
                                      (rows, idx) => this.parseStopTimes(state, rows, idx),
-                                     () => this.completeStopTimes(state, this.databases['routes']));
+                                     () => this.completeStopTimes(state, this.databases['routes']),
+                                    this.parsingOptions['stop_times']);
 
                     // !mwd - TODO: close all the database
 
@@ -267,7 +288,10 @@ class Parser {
                 number: row.route_short_name,
                 color: row.route_color,
                 name: row.route_long_name,
-                description: row.route_desc
+                description: row.route_desc,
+                trip_ids: [],
+                shapes: [],
+                vehicles: []
             };
         });
 
