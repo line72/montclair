@@ -406,7 +406,7 @@ class Parser {
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
-                const routeId = parseInt(row.id);
+                const routeId = row.id;
                 return {
                     ...row.doc,
                     trip_ids: [...state.routes[routeId].trips],
@@ -429,7 +429,7 @@ class Parser {
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
-                const routeId = parseInt(row.id);
+                const routeId = row.id;
                 return {
                     ...row.doc,
                     stop_ids: [...state.routes[routeId].stops]
