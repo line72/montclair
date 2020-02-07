@@ -34,8 +34,20 @@ class GTFSRTParser {
 
         // create a web worker
         console.log('GTFSRTParser');
+        this.jobs = {};
         this.jobId = 1;
-        this.worker = null;
+        this.worker = new GTFSWorker();
+        this.worker.onmessage = (e) => {
+            console.log('got result message', e);
+            if (e.data.id in this.jobs) {
+                let cb = this.jobs[e.data.id];
+                delete this.jobs[e.data.id];
+
+                cb(e);
+            } else {
+                console.warn('got message with unknown id', e.data.id);
+            }
+        };
     }
 
     /**
@@ -47,13 +59,13 @@ class GTFSRTParser {
      */
     initialize() {
         console.log('initialize');
-        return new Promise((success, failure) => {
-            this.worker = new GTFSWorker();
-            this.worker.onmessage = (e) => {
-                console.log('got result message', e);
-                this.databaseKeys = e.data.result;
+        return this.postWorkerMessage('BUILD', {name: this.name, url: this.gtfsUrl})
+            .then((result) => {
+                this.databaseKeys = result;
 
-                // start the vehicle updated
+                // start the vehicle update.
+                // We never get a response from this message, so
+                //  just post it directly
                 this.worker.postMessage({
                     id: this.jobId++,
                     message: 'VEHICLE_UPDATE_START',
@@ -63,18 +75,8 @@ class GTFSRTParser {
                     }
                 });
 
-                success(true);
-            };
-            console.log('GTFSRTParser is posting a message');
-            this.worker.postMessage({
-                id: this.jobId++,
-                message: 'BUILD',
-                data: {
-                    name: this.name,
-                    url: this.gtfsUrl
-                }
+                return true;
             });
-        });
     }
 
     openDB(name) {
@@ -152,6 +154,9 @@ class GTFSRTParser {
      */
     getArrivalsFor(stopId, routes) {
         return new Promise((success, failure) => {
+            // this.worker.postMessage({
+
+            // });
             success([]);
         });
     }
@@ -199,6 +204,27 @@ class GTFSRTParser {
         return new Promise((success, failure) => {
             success([]);
         });
+    }
+
+    postWorkerMessage(message_type, data) {
+        let promise = new Promise((resolve, reject) => {
+            this.jobs[this.jobId] = (result) => {
+                if (result.data.status) {
+                    resolve(result.data.result);
+                } else {
+                    reject(resolve.data.result);
+                }
+            };
+
+            this.worker.postMessage({
+                id: this.jobId++,
+                message: message_type,
+                data: data
+            });
+        });
+
+        return promise;
+
     }
 }
 
