@@ -14,6 +14,7 @@
 
 import Parser from '../gtfs/Parser';
 import RTVehicleParser from '../gtfs/RTVehicleParser';
+import RTTripParser from '../gtfs/RTTripParser';
 
 function doBuild({name, url}) {
     console.log('doBuild', name, url);
@@ -36,6 +37,27 @@ function startVehicleUpdate({dbName, url}) {
     setInterval(() => { p.update(); }, 10000);
 }
 
+function fetchStopEstimates({id, data: {url, stopId}}) {
+    console.log('fetchStopEstimates', id, url, stopId);
+    let p = new RTTripParser(url);
+    p.update(stopId)
+        .then((stopInfo) => {
+            postMessage({
+                id: id,
+                status: true,
+                result: stopInfo
+            });
+        })
+        .catch((err) => {
+            console.warn(`gtfs-parser: Error fetching stop updates: ${err}`);
+            postMessage({
+                id: id,
+                status: false,
+                result: `${err}`
+            });
+        });
+}
+
 onmessage = function({data}) {
     console.log('onmessage', data);
     switch (data.message) {
@@ -50,13 +72,16 @@ onmessage = function({data}) {
                 postMessage({
                     id: data.id,
                     status: false,
-                    result: err
+                    result: `${err}`
                 });
             });
 
         break;
     case 'VEHICLE_UPDATE_START':
         startVehicleUpdate(data.data);
+        break;
+    case 'FETCH_STOP_ESTIMATES':
+        fetchStopEstimates(data);
         break;
     default:
         console.warn(`gtfs-parser: Unknown message type: ${data.message}`);

@@ -18,16 +18,18 @@ import PouchDBFind from 'pouchdb-find';
 import RouteType from './RouteType';
 import StopType from './StopType';
 import VehicleType from './VehicleType';
+import ArrivalType from './ArrivalType';
 import GTFSWorker from './workers/gtfs-parser.worker';
 
 PouchDB.plugin(PouchDBFind);
 
 class GTFSRTParser {
-    constructor(name, gtfsUrl, vehiclePositionsUrl) {
+    constructor(name, gtfsUrl, vehiclePositionsUrl, tripUpdatesUrl) {
         console.log('constructor', name, gtfsUrl);
         this.name = name;
         this.gtfsUrl = gtfsUrl;
         this.vehiclePositionsUrl = vehiclePositionsUrl;
+        this.tripUpdatesUrl = tripUpdatesUrl;
 
         this.databases = {};
         this.databaseKeys = {};
@@ -153,11 +155,20 @@ class GTFSRTParser {
      * @return Promise -> [ArrivalType] : in sorted order
      */
     getArrivalsFor(stopId, routes) {
-        return new Promise((success, failure) => {
-            // this.worker.postMessage({
-
-            // });
-            success([]);
+        return this.postWorkerMessage('FETCH_STOP_ESTIMATES', {
+            url: this.tripUpdatesUrl,
+            stopId: stopId
+        }).then((result) => {
+            return result[stopId].map((e) => {
+                console.log('Arrival', e);
+                return new ArrivalType({
+                    route: routes[e.routeId],
+                    direction: '',
+                    arrival: e.arrival * 1000, /* convert from seconds to ms */
+                    vehicleId: e.vehicleId,
+                    tripId: e.tripId
+                });
+            });
         });
     }
 
@@ -212,7 +223,7 @@ class GTFSRTParser {
                 if (result.data.status) {
                     resolve(result.data.result);
                 } else {
-                    reject(resolve.data.result);
+                    reject(result.data.result);
                 }
             };
 
