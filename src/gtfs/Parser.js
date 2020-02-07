@@ -24,6 +24,7 @@ class Parser {
         this.url = url;
         // create the database
         this.databases = {
+            'info': new PouchDB(`${this.name}_info`),
             'routes': new PouchDB(`${this.name}_routes`),
             'stops': new PouchDB(`${this.name}_stops`)
         };
@@ -50,17 +51,41 @@ class Parser {
     }
 
     build() {
-        return fetch(this.url, {responseType: 'arraybuffer'}).then((resp) => {
-                return JSZip.loadAsync(resp.arrayBuffer());
-        }).then(async (unzipped) => {
-            try {
-                let databases = {};
-                const dbPrefix = this.name;
-                databases['routes'] = `${dbPrefix}_routes`;
-                databases['stops'] = `${dbPrefix}_stops`;
+        let databases = {};
+        const dbPrefix = this.name;
+        databases['routes'] = `${dbPrefix}_routes`;
+        databases['stops'] = `${dbPrefix}_stops`;
 
-                const doParse = false;
-                if (doParse) {
+        return fetch(this.url, {responseType: 'arraybuffer'}).then((resp) => {
+            return this.databases['info'].get('info')
+                .then((doc) => {
+                    let contentLength = resp.headers.get('content-length');
+                    let etag = resp.headers.get('etag');
+
+                    if (doc.contentLength === contentLength && doc.etag == etag) {
+                        console.log('Already parsed!');
+                        return databases;
+                    } else {
+                        console.log('change');
+                        return this.load(resp, databases);
+                    }
+                })
+                .catch((err) => {
+                    console.log('first time', err);
+                    // no info has been created yet.
+                    //  This is the first time.
+                    return this.load(resp, databases);
+                });
+        });
+    }
+
+    load(resp, databases) {
+        let contentLength = resp.headers.get('content-length');
+        let etag = resp.headers.get('etag');
+
+        return JSZip.loadAsync(resp.arrayBuffer())
+            .then(async (unzipped) => {
+                try {
                     let state = {
                         shapes: {},
                         trips: {},
@@ -111,29 +136,28 @@ class Parser {
                                      this.setupDefault,
                                      (rows, idx) => this.parseStopTimes(state, rows, idx),
                                      () => this.completeStopTimes(state, this.databases['routes']),
-                                    this.parsingOptions['stop_times']);
+                                     this.parsingOptions['stop_times']);
+
+                    // finally the info
+                    await this.databases['info'].put({
+                        _id: 'info',
+                        contentLength: contentLength,
+                        etag: etag
+                    });
 
                     // !mwd - TODO: close all the database
 
                     // return the db keys
                     console.log('done', databases);
                     return databases;
-                } else {
-                    console.log('skipping parsing');
+                } catch (e) {
+                    console.log('Parser.build: Error:', e);
 
                     // !mwd - TODO: close all the database
 
-                    return databases;
+
+                    throw e;
                 }
-
-            } catch (e) {
-                console.log('Parser.build: Error:', e);
-
-                // !mwd - TODO: close all the database
-
-
-                throw e;
-            }
             });
     }
 
@@ -141,6 +165,7 @@ class Parser {
         // create indexes
         return new Promise((resolve, reject) => {
             this.databases = {
+                'info': new PouchDB(`${this.name}_info`),
                 'routes': new PouchDB(`${this.name}_routes`),
                 'stops': new PouchDB(`${this.name}_stops`)
             };
