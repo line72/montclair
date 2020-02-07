@@ -159,7 +159,7 @@ class GTFSRTParser {
             url: this.tripUpdatesUrl,
             stopId: stopId
         }).then((result) => {
-            return result[stopId].map((e) => {
+            let arrivals = result[stopId].map((e) => {
                 console.log('Arrival', e);
                 return new ArrivalType({
                     route: routes[e.routeId],
@@ -168,6 +168,17 @@ class GTFSRTParser {
                     vehicleId: e.vehicleId,
                     tripId: e.tripId
                 });
+            });
+
+            // sort based on arrival time
+            return arrivals.sort((a, b) => {
+                if (a.arrival.isBefore(b.arrival)) {
+                    return -1;
+                } else if (a.arrival.isSame(b.arrival)) {
+                    return 0;
+                } else {
+                    return 1;
+                }
             });
         });
     }
@@ -180,7 +191,6 @@ class GTFSRTParser {
      * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
      */
     getVehicles(bounds, visible_routes) {
-
         let db = this.openDB('routes');
 
         return db.allDocs({include_docs: true,
