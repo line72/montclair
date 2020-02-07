@@ -212,9 +212,27 @@ class GTFSRTParser {
      * @return Promise -> VehicleType | nil : The vehicle if found
      */
     getVehicle(route, vehicleId) {
-        return new Promise((success, failure) => {
-            success([]);
-        });
+        console.log('get vehicle', vehicleId);
+        let db = this.openDB('routes');
+
+        return db.get(`${route.id}`)
+            .then((r) => {
+                let v = r.vehicles.find((v) => {
+                    return v.id === vehicleId;
+                });
+
+                if (v) {
+                    return new VehicleType({
+                        id: v.id,
+                        position: v.position,
+                        heading: v.bearing,
+                        color: route.color,
+                        route_id: route.id
+                    });
+                } else {
+                    return null;
+                }
+            });
     }
 
     postWorkerMessage(message_type, data) {
