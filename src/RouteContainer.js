@@ -20,6 +20,7 @@ import StopOverlayType from './StopOverlayType';
 import LocalStorage from './LocalStorage';
 import StopEstimatesContainer from './StopEstimatesContainer';
 import ExploreContainer from './ExploreContainer';
+import LoadingModal from './LoadingModal';
 
 import './w3.css';
 import './RouteContainer.css';
@@ -47,6 +48,7 @@ class RouteContainer extends Component {
         this.has_fetched_routes = false;
 
         this.state = {
+            loading: true,
             mode: MODE.EXPLORE,
             agencies: agencies,
             stopOverlay: new StopOverlayType({})
@@ -58,6 +60,10 @@ class RouteContainer extends Component {
             return a.parser.initialize();
         })).then((results) => {
             console.log('initialization Complete:', results);
+            this.setState({
+                loading: false
+            });
+
             this.getRoutes().then((results) => {
                 this.has_fetched_routes = true;
 
@@ -287,29 +293,45 @@ class RouteContainer extends Component {
         });
     }
 
+    renderLoading() {
+        if (this.state.loading) {
+            return (
+                <LoadingModal />
+            );
+        } else {
+            return (null);
+        }
+    }
+
     render() {
         if (this.state.mode === MODE.STOP) {
             return (
-                <StopEstimatesContainer
-                  configuration={this.configuration}
-                  stopOverlay={this.state.stopOverlay}
-                  onClose={this.onStopOverlayClosed}
-                  initialViewport={this.initialViewport}
-                />
+                <div>
+                  { this.renderLoading() }
+                  <StopEstimatesContainer
+                    configuration={this.configuration}
+                    stopOverlay={this.state.stopOverlay}
+                    onClose={this.onStopOverlayClosed}
+                    initialViewport={this.initialViewport}
+                  />
+                </div>
             );
         } else {
             return (
-                <ExploreContainer
-                  configuration={this.configuration}
-                  agencies={this.state.agencies}
-                  isFirstRun={this.storage.isFirstRun()}
-                  onStopClicked={this.onStopClicked}
-                  togggleAgency={this.toggleAgency}
-                  toggleRoute={this.toggleRoute}
-                  initialViewport={this.initialViewport}
-                  onBoundsChanged={this.onBoundsChanged}
-                  onViewportChanged={this.onViewportChanged}
-                />
+                <div>
+                  { this.renderLoading() }
+                  <ExploreContainer
+                    configuration={this.configuration}
+                    agencies={this.state.agencies}
+                    isFirstRun={this.storage.isFirstRun()}
+                    onStopClicked={this.onStopClicked}
+                    togggleAgency={this.toggleAgency}
+                    toggleRoute={this.toggleRoute}
+                    initialViewport={this.initialViewport}
+                    onBoundsChanged={this.onBoundsChanged}
+                    onViewportChanged={this.onViewportChanged}
+                  />
+                </div>
             );
         }
     }
