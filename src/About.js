@@ -15,11 +15,12 @@
 import React, { Component } from 'react';
 
 import packageJson from '../package.json';
+import './About.css';
 
 class About extends Component {
     render() {
         return (
-            <div className="w3-panel w3-light-grey">
+            <div className="w3-bar-item w3-light-grey About">
               <hr />
               <p>© 2020 Marcus Dillavou</p>
               <p><a href="https://gotransitapp.com">Go Transit</a></p>

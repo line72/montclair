@@ -94,9 +94,11 @@ class AgencyList extends Component {
                 </div>
 
                 {/* items */}
-                <div className="w3-padding-64 w3-large w3-text-grey">
+                <div className="w3-large w3-text-grey">
                   {agencies}
                 </div>
+
+                {/* expand */}
 
                 <About />
               </nav>
