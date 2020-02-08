@@ -25,10 +25,12 @@
 }
 
 .AgencyList-title {
+    font-family: 'Pacifico', cursive;
     font-size: 1.5em;
 }
 
 .AgencyList-bar-item {
+    font-family: 'Pacifico', cursive;
     font-size: .90em;
     position: fixed;
     left: 10px;
