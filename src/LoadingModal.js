@@ -21,7 +21,7 @@ class LoadingModal extends Component {
     render() {
         return (
             <div id="LoadingModal-Modal" className="w3-modal">
-              <div id="LoadingModal-Content" className="w3-modal-content w3-round-xlarge w3-blue-grey">
+              <div id="LoadingModal-Content" className="w3-modal-content w3-round-xlarge w3-light-grey">
                 <div id="LoadingModal-SpinnerContainer" className="w3-container w3-center">
                   <div id="LoadingModal-Message" className="w3-center">
                     <h2>Initializing App...</h2>
