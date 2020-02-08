@@ -25,7 +25,6 @@ PouchDB.plugin(PouchDBFind);
 
 class GTFSRTParser {
     constructor(name, gtfsUrl, vehiclePositionsUrl, tripUpdatesUrl) {
-        console.log('constructor', name, gtfsUrl);
         this.name = name;
         this.gtfsUrl = gtfsUrl;
         this.vehiclePositionsUrl = vehiclePositionsUrl;
@@ -35,19 +34,17 @@ class GTFSRTParser {
         this.databaseKeys = {};
 
         // create a web worker
-        console.log('GTFSRTParser');
         this.jobs = {};
         this.jobId = 1;
         this.worker = new GTFSWorker();
         this.worker.onmessage = (e) => {
-            console.log('got result message', e);
             if (e.data.id in this.jobs) {
                 let cb = this.jobs[e.data.id];
                 delete this.jobs[e.data.id];
 
                 cb(e);
             } else {
-                console.warn('got message with unknown id', e.data.id);
+                console.warn('GTFSRTParser: got message with unknown id', e.data.id);
             }
         };
     }
@@ -60,7 +57,6 @@ class GTFSRTParser {
      * @return Promise -> true
      */
     initialize() {
-        console.log('initialize');
         return this.postWorkerMessage('BUILD', {name: this.name, url: this.gtfsUrl})
             .then((result) => {
                 this.databaseKeys = result;
@@ -96,8 +92,6 @@ class GTFSRTParser {
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
     getRoutes() {
-        console.log('getRoutes', this);
-
         let db = this.openDB('routes');
 
         return db.allDocs({include_docs: true})
@@ -160,7 +154,6 @@ class GTFSRTParser {
             stopId: stopId
         }).then((result) => {
             let arrivals = result[stopId].map((e) => {
-                console.log('Arrival', e);
                 return new ArrivalType({
                     route: routes[e.routeId],
                     direction: '',
@@ -207,7 +200,6 @@ class GTFSRTParser {
                         });
                     });
 
-                    console.log(route.doc.rId, vehicles);
                     acc[route.doc.rId] = vehicles;
                     return acc;
                 }, {});
@@ -222,7 +214,6 @@ class GTFSRTParser {
      * @return Promise -> VehicleType | nil : The vehicle if found
      */
     getVehicle(route, vehicleId) {
-        console.log('get vehicle', vehicleId);
         let db = this.openDB('routes');
 
         return db.get(`${route.id}`)

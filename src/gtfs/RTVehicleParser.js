@@ -35,7 +35,6 @@ class RTVehicleParser {
      * @return Promise -> true | false
      */
     update() {
-        console.log('Updating Vehicle Locations');
         return fetch(this.url, {responseType: 'arraybuffer'}).then((resp) => {
             return resp.arrayBuffer();
         })
@@ -44,8 +43,6 @@ class RTVehicleParser {
                 let feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(msg);
                 let vehicles = feed.entity.reduce((acc, entity) => {
                     if (entity.vehicle && entity.vehicle.trip) {
-                        //console.log('entity=', entity.vehicle);
-
                         let position = [entity.vehicle.position.latitude,
                                         entity.vehicle.position.longitude];
                         let bearing = entity.vehicle.position.bearing;
@@ -53,7 +50,6 @@ class RTVehicleParser {
                         let vehicleId = `${entity.vehicle.vehicle.id}`;
                         let nextStop = `${entity.vehicle.stopId}`;
 
-                        //console.log(routeId);
                         if (!(routeId in acc)) {
                             acc[routeId] = [];
                         }
@@ -64,7 +60,7 @@ class RTVehicleParser {
                             bearing: bearing
                         });
                     } else {
-                        console.log('skipping', entity);
+                        // skip
                     }
 
                     return acc;
@@ -86,11 +82,10 @@ class RTVehicleParser {
                     });
             })
             .then((resp) => {
-                console.log('all good on inserert');
-                return resp;
+                return true;
             })
             .catch((e) => {
-                console.log('Error updating vechile locations', e);
+                console.warn('Gtfs.RTVehicleParser.update: Error updating vehicle locations', e);
                 return true;
             });
     }

@@ -21,6 +21,7 @@ import LocalStorage from './LocalStorage';
 import StopEstimatesContainer from './StopEstimatesContainer';
 import ExploreContainer from './ExploreContainer';
 import LoadingModal from './LoadingModal';
+import ErrorPage from './ErrorPage';
 
 import './w3.css';
 import './RouteContainer.css';
@@ -48,6 +49,8 @@ class RouteContainer extends Component {
         this.has_fetched_routes = false;
 
         this.state = {
+            error: false,
+            errorMessage: '',
             loading: true,
             mode: MODE.EXPLORE,
             agencies: agencies,
@@ -59,7 +62,6 @@ class RouteContainer extends Component {
         axios.all(this.state.agencies.map((a, index) => {
             return a.parser.initialize();
         })).then((results) => {
-            console.log('initialization Complete:', results);
             this.setState({
                 loading: false
             });
@@ -73,6 +75,13 @@ class RouteContainer extends Component {
                 // setup a timer to fetch the vehicles
                 this.getVehicles();
                 setInterval(() => {this.getVehicles();}, 10000);
+            });
+        }).catch((e) => {
+            console.error('Uh-oh...', e);
+            // This is an unrecoverable error
+            this.setState({
+                error: true,
+                errorMessage: 'Uh-oh: An unrecoverable error happened.'
             });
         });
     }
@@ -304,6 +313,12 @@ class RouteContainer extends Component {
     }
 
     render() {
+        if (this.state.error) {
+            return (
+                <ErrorPage message={this.state.errorMessage}/>
+            );
+        }
+
         if (this.state.mode === MODE.STOP) {
             return (
                 <div>

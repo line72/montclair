@@ -33,7 +33,6 @@ class RTTripParser {
      * @return Promise -> map(StopId,[Vehicles])
      */
     update(stopId) {
-        console.log('Updating Stop Estimates');
         return fetch(this.url, {responseType: 'arraybuffer'}).then((resp) => {
             return resp.arrayBuffer();
         })

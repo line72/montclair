@@ -17,10 +17,8 @@ import RTVehicleParser from '../gtfs/RTVehicleParser';
 import RTTripParser from '../gtfs/RTTripParser';
 
 function doBuild({name, url}) {
-    console.log('doBuild', name, url);
     let p = new Parser(name, url);
     return p.build().then((r) => {
-        console.log('r=', r);
         return {
             status: true,
             result: r
@@ -29,8 +27,6 @@ function doBuild({name, url}) {
 }
 
 function startVehicleUpdate({dbName, url}) {
-    console.log('start Vehicle Update');
-
     let p = new RTVehicleParser(dbName, url);
     p.update();
 
@@ -38,7 +34,6 @@ function startVehicleUpdate({dbName, url}) {
 }
 
 function fetchStopEstimates({id, data: {url, stopId}}) {
-    console.log('fetchStopEstimates', id, url, stopId);
     let p = new RTTripParser(url);
     p.update(stopId)
         .then((stopInfo) => {
@@ -59,12 +54,10 @@ function fetchStopEstimates({id, data: {url, stopId}}) {
 }
 
 onmessage = function({data}) {
-    console.log('onmessage', data);
     switch (data.message) {
     case 'BUILD':
         doBuild(data.data)
             .then((result) => {
-                console.log('posting result', result);
                 postMessage({id: data.id, ...result});
             })
             .catch((err) => {
@@ -92,4 +85,4 @@ onmessage = function({data}) {
         });
         break;
     }
-}
+};

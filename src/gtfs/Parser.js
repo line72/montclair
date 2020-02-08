@@ -63,15 +63,14 @@ class Parser {
                     let etag = resp.headers.get('etag');
 
                     if (doc.contentLength === contentLength && doc.etag == etag) {
-                        console.log('Already parsed!');
                         return databases;
                     } else {
-                        console.log('change');
+                        console.log('Gtfs.Parser: GTFS data has changed, rebuilding...');
                         return this.load(resp, databases);
                     }
                 })
                 .catch((err) => {
-                    console.log('first time', err);
+                    console.log('Gtfs.Parser: No database exists, building...');
                     // no info has been created yet.
                     //  This is the first time.
                     return this.load(resp, databases);
@@ -92,27 +91,22 @@ class Parser {
                         routes: {}
                     };
 
-                    console.log('starting destroy');
                     await this.destroyDatabases();
-                    console.log('doing create');
                     await this.createDatabases();
 
                     // parse each file in order
-                    console.log('parsing routes');
                     const routesObject = unzipped.file('routes.txt');
                     await this.parse(routesObject,
                                      this.setupDefault,
                                      (rows, idx) => this.parseRoutes(state, this.databases['routes'], rows, idx),
                                      null, this.parsingOptions['routes']);
 
-                    console.log('parsing stops');
                     const stopsObject = unzipped.file('stops.txt');
                     await this.parse(stopsObject,
                                      this.setupDefault,
                                      (rows, idx) => this.parseStops(this.databases['stops'], rows, idx),
                                      null, this.parsingOptions['stops']);
 
-                    console.log('parsing shapes');
                     const shapesObject = unzipped.file('shapes.txt');
                     await this.parse(shapesObject,
                                      this.setupDefault,
@@ -120,7 +114,6 @@ class Parser {
                                      () => this.completeShapes(state),
                                      this.parsingOptions['shapes']);
 
-                    console.log('parsing trips');
                     const tripsObject = unzipped.file('trips.txt');
                     await this.parse(tripsObject,
                                      this.setupDefault,
@@ -130,7 +123,6 @@ class Parser {
                     // clean up the shapes state
                     state.shapes = {};
 
-                    console.log('parsing stop times');
                     const stopTimesObject = unzipped.file('stop_times.txt');
                     await this.parse(stopTimesObject,
                                      this.setupDefault,
@@ -148,13 +140,11 @@ class Parser {
                     // !mwd - TODO: close all the database
 
                     // return the db keys
-                    console.log('done', databases);
                     return databases;
                 } catch (e) {
-                    console.log('Parser.build: Error:', e);
+                    console.error('Gtfs.Parser.build: Error:', e);
 
                     // !mwd - TODO: close all the database
-
 
                     throw e;
                 }
@@ -176,13 +166,11 @@ class Parser {
 
     destroyDatabases() {
         let promises = Object.keys(this.databases).map((k) => {
-            console.log('destroying', k);
             return this.databases[k].destroy()
                 .then((r) => {
-                    console.log('destroyed', k);
                     return r;
                 }).catch((e) => {
-                    console.log('error destroying', k, e);
+                    console.log('Gtfs.Parser: Error destroying database', k, e);
                     return true;
                 });
         });
@@ -260,13 +248,13 @@ class Parser {
                             parseFn(row.data, idx).then((r) => {
                                 parser.resume();
                             }).catch((e) => {
-                                console.log('Error parsing', e);
+                                console.error('Gtfs.Parser.parse: Error parsing chunk', e);
                                 parser.abort();
                             });
 
                             idx += row.data.length;
                         } catch (e) {
-                            console.log('Error during parsing', zipObject.name, e);
+                            console.error('Gtfs.Parser.parse: Error during parsing', zipObject.name, e);
                             parser.abort();
                         }
                     },
@@ -276,7 +264,7 @@ class Parser {
                             completeFn().then(() => {
                                 resolve(true);
                             }).catch((err) => {
-                                console.warn('Error in complete', err);
+                                console.error('Gtfs.Parser.parse: Error in complete', err);
                                 reject(err);
                             });
                         } else {
@@ -286,7 +274,7 @@ class Parser {
                 // start the streamer
                 streamer.resume();
             } catch (e) {
-                console.log('error creating papa:', e);
+                console.error('Gtfs.Parser.parse: Error creating papa, maybe an invalid CSV?', e);
                 reject(e);
             }
         });
@@ -322,18 +310,17 @@ class Parser {
 
         return db.bulkDocs(docs)
             .then((resp) => {
-                console.log('Inserted routes', idx);
                 return resp;
             })
             .catch((err) => {
-                console.log('Error inserting Routes', err);
+                console.warn('Gtfs.Parser.parseRoutes: Error inserting Routes', err);
+                throw err;
             });
     }
 
     parseStops(db, rows, idx) {
         let docs = rows.map((row, i) => {
             if (!row.stop_id) {
-                console.warn('parseStops: Invalid row', row);
                 return null;
             }
 
@@ -353,7 +340,8 @@ class Parser {
                 return resp;
             })
             .catch((err) => {
-                console.log('Error inserting Stops', err);
+                console.log('Gtfs.Parser.parseStops: Error inserting Stops', err);
+                throw err;
             });
     }
 
@@ -389,7 +377,7 @@ class Parser {
                     break;
                 }
 
-                state.routes[state.trips[row.trip_id]].stops.add(row.stop_id)
+                state.routes[state.trips[row.trip_id]].stops.add(row.stop_id);
             }
 
             resolve([]);
@@ -411,7 +399,7 @@ class Parser {
 
                 const idx = row.shape_pt_sequence - 1;
                 state.shapes[row.shape_id].points[idx] = [row.shape_pt_lat,
-                                                                row.shape_pt_lon];
+                                                          row.shape_pt_lon];
             }
 
             resolve([]);
@@ -427,7 +415,6 @@ class Parser {
     }
 
     completeTrips(state, routesDB) {
-        console.log('completeTrips', state.routes);
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
@@ -444,13 +431,13 @@ class Parser {
                     return resp;
                 })
                 .catch((err) => {
-                    console.log('Error inserting trips', err);
+                    console.warn('Gtfs.Parser.completeTrips: Error inserting trips', err);
+                    throw err;
                 });
         });
     }
 
     completeStopTimes(state, routesDB) {
-        console.log('completeStoptimes');
         // update all the routes
         return routesDB.allDocs({include_docs: true}).then((results) => {
             let docs = results.rows.map((row) => {
@@ -466,7 +453,8 @@ class Parser {
                     return resp;
                 })
                 .catch((err) => {
-                    console.log('Error inserting stop times', err);
+                    console.warn('Gtfs.Parser.completeStopTimes: Error inserting stop times', err);
+                    throw err;
                 });
         });
     }
