@@ -204,7 +204,7 @@ class Parser {
             };
 
             this.read = function() {
-                console.log('read is being called!');
+
             };
 
             this.pause = function() {
@@ -259,7 +259,6 @@ class Parser {
                         }
                     },
                     complete: () => {
-                        console.log(zipObject.name, 'complete');
                         if (completeFn) {
                             completeFn().then(() => {
                                 resolve(true);

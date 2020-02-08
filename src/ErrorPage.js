@@ -22,7 +22,7 @@ class ErrorPage extends Component {
             <div id="ErrorPage" className="w3-container w3-light-grey">
               <div className="w3-row">
                 <div className="w3-half">
-                  <img src="/bus-crashing.gif" className="w3-round-xlarge w3-grayscale-max" />
+                  <img src="/bus-crashing.gif" alt="Bus crashing" className="w3-round-xlarge w3-grayscale-max" />
                 </div>
                 <div className="w3-half">
                   <h1>Oh no!</h1>

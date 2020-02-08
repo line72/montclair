@@ -153,18 +153,24 @@ class GTFSRTParser {
             url: this.tripUpdatesUrl,
             stopId: stopId
         }).then((result) => {
-            let arrivals = result[stopId].map((e) => {
-                return new ArrivalType({
-                    route: routes[e.routeId],
-                    direction: '',
-                    arrival: e.arrival * 1000, /* convert from seconds to ms */
-                    vehicleId: e.vehicleId,
-                    tripId: e.tripId
-                });
-            });
+            let arrivals = () => {
+                if (stopId in result) {
+                    return result[stopId].map((e) => {
+                        return new ArrivalType({
+                            route: routes[e.routeId],
+                            direction: '',
+                            arrival: e.arrival * 1000, /* convert from seconds to ms */
+                            vehicleId: e.vehicleId,
+                            tripId: e.tripId
+                        });
+                    });
+                } else {
+                    return [];
+                }
+            };
 
             // sort based on arrival time
-            return arrivals.sort((a, b) => {
+            return arrivals().sort((a, b) => {
                 if (a.arrival.isBefore(b.arrival)) {
                     return -1;
                 } else if (a.arrival.isSame(b.arrival)) {
