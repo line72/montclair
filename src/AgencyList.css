@@ -2,21 +2,58 @@
 
 }
 
-.AgencyList-header {
-    display: inline-block;
-    max-width: 260px;
-    overflow: hidden;
-    white-space:nowrap;
-    text-overflow: ellipsis;
-    text-align: left!important;
-    padding-left: 0px;
-    font-size: 24px;
-    font-style: italic;
-}
+@media only screen and (min-width: 400px) {
 
-.AgencyList-sidebar {
-    width: 350px!important;
-    z-index: 3000!important;
+    .AgencyList-header {
+	display: inline-block;
+	max-width: 260px;
+	overflow: hidden;
+	white-space:nowrap;
+	text-overflow: ellipsis;
+	text-align: left!important;
+	padding-left: 0px;
+	font-size: 24px;
+	font-style: italic;
+    }
+    
+    .AgencyList-sidebar {
+	width: 350px!important;
+	z-index: 3000!important;
+    }
+    .AgencyList-route-name {
+	font-size: .9em;
+	display: inline-block;
+	max-width: 260px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+    }
+}
+@media only screen and (max-width: 400px) {
+    .AgencyList-header {
+	display: inline-block;
+	max-width: 210px;
+	overflow: hidden;
+	white-space:nowrap;
+	text-overflow: ellipsis;
+	text-align: left!important;
+	padding-left: 0px;
+	font-size: 24px;
+	font-style: italic;
+    }
+    
+    .AgencyList-sidebar {
+	width: 300px!important;
+	z-index: 3000!important;
+    }
+    .AgencyList-route-name {
+	font-size: .9em;
+	display: inline-block;
+	max-width: 210px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+    }
 }
 
 .AgencyList-sidebar-overlay {
@@ -54,15 +91,6 @@
 
 .AgencyList-route {
     padding-left: 25px !important;
-}
-
-.AgencyList-route-name {
-    font-size: .9em;
-    display: inline-block;
-    max-width: 260px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .AgencyList-checked {
