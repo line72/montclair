@@ -19,6 +19,7 @@ import './App.css';
 import './w3.css';
 import 'leaflet/dist/leaflet.css';
 import 'font-awesome/css/font-awesome.min.css';
+import './fonts.css';
 
 class App extends Component {
     render() {

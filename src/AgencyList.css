@@ -4,7 +4,7 @@
 
 .AgencyList-header {
     display: inline-block;
-    max-width: 160px;
+    max-width: 260px;
     overflow: hidden;
     white-space:nowrap;
     text-overflow: ellipsis;
@@ -15,7 +15,7 @@
 }
 
 .AgencyList-sidebar {
-    width: 250px!important;
+    width: 350px!important;
     z-index: 3000!important;
 }
 
@@ -24,9 +24,21 @@
     z-index: 2999!important;
 }
 
+.AgencyList-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.5em;
+}
 
 .AgencyList-bar-item {
+    font-family: 'Pacifico', cursive;
     font-size: .90em;
+    position: fixed;
+    left: 10px;
+    margin-top: 10px;
+}
+
+.AgencyList-bar-item-close {
+    opacity: 1.0;
 }
 
 .AgencyList-padding-0 {
@@ -45,8 +57,9 @@
 }
 
 .AgencyList-route-name {
+    font-size: .9em;
     display: inline-block;
-    max-width: 160px;
+    max-width: 260px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
