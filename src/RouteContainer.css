@@ -9,8 +9,8 @@
 
 .RouteContainer-header {
     z-index: 10;
-    background-color: rgba(0, 0, 0, 1);
-    color: rgba(255, 255, 255, 1);
+    /* background-color: rgba(0, 0, 0, 1); */
+    /* color: rgba(255, 255, 255, 1); */
 }
 
 .RouteContainer-header-margin {
@@ -21,5 +21,7 @@
     font-size: 2.5em;
     margin-top: 0px;
     margin-bottom: 0px;
+    margin-left: 110px;
+    text-align: left;
     z-index: 5000;
 }

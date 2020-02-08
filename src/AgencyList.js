@@ -84,43 +84,40 @@ class AgencyList extends Component {
 
         return(
             <div>
-                <nav className="w3-sidebar w3-bar-block w3-white w3-collapse w3-top AgencyList-sidebar" id="sidebar" style={{display: display}}>
-                    {/* Close Button */}
-                    <div className="w3-container w3-display-container">
-                        <i onClick={() => this.onClose()} className="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
-                        {/*
-                        <span className="w3-medium w3-text-grey AgencyList-padding-0">
-                            <span className="w3-bar-item AgencyList-padding-0">
-                            </span>
-                        </span>
-                        */}
-                    </div>
-
-                    {/* items */}
-                    <div className="w3-padding-64 w3-large w3-text-grey">
-                        {agencies}
-                    </div>
-
-                  <About />
-                </nav>
-
-                {/* Top menu on small screens */}
-                <header className="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
-                    <span className="AgencyList-bar-item">
-                        Birmingham Transit
-                    </span>
-                    <span className="w3-button w3-right" onClick={() => this.onOpen()}>
-                        <i className="fa fa-bars"></i>
-                    </span>
-                </header>
-
-                {/* Overlay effect with sidebar */}
-                <div className="w3-overlay w3-hide-large AgencyList-sidebar-overlay"
-                     title="Close side menu"
-                     id="sidebar-overlay"
-                     style={{display: display}}
-                     onClick={() => this.onClose()}>
+              <nav className="w3-sidebar w3-animate-left w3-overlay w3-bar-block w3-white w3-collapse w3-top AgencyList-sidebar" id="sidebar" style={{display: display}}>
+                {/* Close Button */}
+                <div className="w3-bar w3-light-grey">
+                  <span className="w3-bar-item w3-padding-16 w3-hide-small w3-hide-medium AgencyList-title">Birmingham Transit</span>
+                  <button onClick={() => this.onClose()}
+                        className="w3-button w3-display-topright w3-hover-red w3-padding-16 w3-hide-large"
+                        title="Close Modal">&times;</button>
                 </div>
+
+                {/* items */}
+                <div className="w3-padding-64 w3-large w3-text-grey">
+                  {agencies}
+                </div>
+
+                <About />
+              </nav>
+
+              {/* Top menu on small screens */}
+              <header className="w3-bar w3-top w3-hide-large w3-xlarge w3-light-grey">
+                <span className="AgencyList-bar-item">
+                  Birmingham Transit
+                </span>
+                <span className="AgencyList-bar-item-close w3-button w3-right w3-red" onClick={() => this.onOpen()}>
+                  <i className="fa fa-bars"></i>
+                </span>
+              </header>
+
+              {/* Overlay effect with sidebar */}
+              <div className="w3-overlay w3-hide-large AgencyList-sidebar-overlay"
+                   title="Close side menu"
+                   id="sidebar-overlay"
+                   style={{display: display}}
+                   onClick={() => this.onClose()}>
+              </div>
             </div>
         );
     }
