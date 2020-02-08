@@ -57,12 +57,6 @@ class ExploreContainer extends Component {
               <div className="w3-hide-large RouteContainer-header-margin">
               </div>
 
-              {/*
-              <div className="w3-hide-medium w3-hide-small w3-light-grey RouteContainer-header">
-                <h1 className="RouteContainer-h1">Birmingham Transit</h1>
-              </div>
-               */}
-
               <div className="">
                 <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
                 <BaseMap

@@ -98,8 +98,6 @@ class AgencyList extends Component {
                   {agencies}
                 </div>
 
-                {/* expand */}
-
                 <About />
               </nav>
 
