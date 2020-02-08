@@ -36,7 +36,7 @@ class Route extends Component {
 
     render() {
         let style = () => {
-            let w = this.state.selected ? 7 : 1;
+            let w = this.state.selected ? 7 : 4;
 
             return {
                 color: `#${this.props.color}`,
