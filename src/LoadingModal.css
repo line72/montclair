@@ -1,0 +1,21 @@
+.LoadingModal {
+}
+
+#LoadingModal-Modal {
+    display: block;
+    z-index: 5000;
+}
+
+#LoadingModal-Content {
+}
+
+#LoadingModal-SpinnerContainer {
+}
+
+#LoadingModal-Spinner {
+
+}
+
+#LoadingModal-Message {
+    padding: 40px;
+}

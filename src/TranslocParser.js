@@ -32,6 +32,24 @@ class TranslocParser {
         });
     }
 
+    /**
+     * Initialze the parser.
+     *
+     * This should be called Before calling any other method.
+     *
+     * @return Promise -> true
+     */
+    initialize() {
+        return new Promise((success, failure) => {
+            success(true);
+        });
+    }
+
+    /**
+     * Get the routes.
+     *
+     * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
+     */
     getRoutes() {
         // first get the segments so we can build our route paths
         let url = `/segments.json?agencies=${this.agency_id}`;
@@ -133,6 +151,13 @@ class TranslocParser {
             });
     }
 
+    /**
+     * Get the vehicles for an area or a list of routes
+     *
+     * @param bounds -> ([LatLng]) : The leaflef bounds of the map
+     * @param visible_routes -> ([RouteType]) : The list of routes
+     * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
+     */
     getVehicles(bounds, visible_routes) {
         let url = `/vehicles.json?agencies=${this.agency_id}`;
 
