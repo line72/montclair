@@ -1,0 +1,25 @@
+.AttributionModal h1 {
+    font-size: 2em;
+}
+
+.AttributionModal h2 {
+    font-size: 1.5em;
+}
+
+.AttributionModal .w3-col {
+    padding-bottom: 50px !important;
+}
+
+.AttributionModal .attribution {
+    /*height: 150px;*/
+}
+
+.AttributionModal .license {
+    text-align: left !important;
+}
+
+.AttributionModal code {
+    text-align: left !important;
+    white-space: pre-wrap;
+}
+
