@@ -90,7 +90,7 @@ class AttributionModal extends Component {
                   <p>License: {this.licenses[key.license].name}</p>
                 </div>
                 <footer className="w3-container w3-light-grey">
-                  <p><a href="{key.website}">Website</a></p>
+                  <p><a href={key.website}>Website</a></p>
                 </footer>
               </div>
             </div>
