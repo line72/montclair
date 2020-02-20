@@ -25,7 +25,7 @@ PouchDB.plugin(PouchDBFind);
 class RTVehicleParser {
     constructor(dbName, url) {
         this.url = url;
-        this.db = new PouchDB(dbName);
+        this.db = new PouchDB(dbName, { auto_compaction: true });
     }
 
     /**
