@@ -24,9 +24,9 @@ class Parser {
         this.url = url;
         // create the database
         this.databases = {
-            'info': new PouchDB(`${this.name}_info`),
-            'routes': new PouchDB(`${this.name}_routes`),
-            'stops': new PouchDB(`${this.name}_stops`)
+            'info': new PouchDB(`${this.name}_info`, { auto_compaction: true }),
+            'routes': new PouchDB(`${this.name}_routes`, { auto_compaction: true }),
+            'stops': new PouchDB(`${this.name}_stops`, { auto_compaction: true })
         };
 
         // specify some parsing options, specifically,
@@ -155,9 +155,9 @@ class Parser {
         // create indexes
         return new Promise((resolve, reject) => {
             this.databases = {
-                'info': new PouchDB(`${this.name}_info`),
-                'routes': new PouchDB(`${this.name}_routes`),
-                'stops': new PouchDB(`${this.name}_stops`)
+                'info': new PouchDB(`${this.name}_info`, { auto_compaction: true }),
+                'routes': new PouchDB(`${this.name}_routes`, { auto_compaction: true }),
+                'stops': new PouchDB(`${this.name}_stops`, { auto_compaction: true })
             };
 
             resolve(this.databases);
