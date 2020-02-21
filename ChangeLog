@@ -1,3 +1,5 @@
+1.8.1
+==========
 2020-02-21  Marcus Dillavou  <line72@line72.net>
 	* Backported ISSUE-87 - Auto compact the pouchdb
 
