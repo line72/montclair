@@ -66,6 +66,7 @@ class ExploreContainer extends Component {
                   initialViewport={this.props.initialViewport}
                   onBoundsChanged={this.props.onBoundsChanged}
                   onViewportChanged={this.props.onViewportChanged}
+                  showLocation={true}
                 >
                   {routes}
                 </BaseMap>

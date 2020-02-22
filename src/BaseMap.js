@@ -102,7 +102,7 @@ class BaseMap extends React.Component {
 
                     {this.props.children}
 
-                  <LocateControl />
+                  {this.props.showLocation ? <LocateControl /> : null}
                 </BoundsMap>
             </div>
         );
