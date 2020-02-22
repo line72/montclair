@@ -15,6 +15,7 @@
 import React, { createRef } from 'react';
 import { TileLayer } from 'react-leaflet';
 import BoundsMap from './BoundsMap';
+import LocateControl from './LocateControl';
 
 class BaseMap extends React.Component {
     constructor(props) {
@@ -101,6 +102,7 @@ class BaseMap extends React.Component {
 
                     {this.props.children}
 
+                  <LocateControl />
                 </BoundsMap>
             </div>
         );

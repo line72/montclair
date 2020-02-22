@@ -19,6 +19,8 @@ import BaseMap from './BaseMap';
 import AgencyList from './AgencyList';
 import FirstRunHint from './FirstRunHint';
 
+import './ExploreContainer.css';
+
 class ExploreContainer extends Component {
     render() {
         let routes_list = this.props.agencies.map((agency) => {
@@ -57,7 +59,7 @@ class ExploreContainer extends Component {
               <div className="w3-hide-large RouteContainer-header-margin">
               </div>
 
-              <div className="">
+              <div className="ExploreContainer-map">
                 <FirstRunHint key="first-run-dialog" isFirstRun={first_run} />
                 <BaseMap
                   configuration={this.props.configuration}
