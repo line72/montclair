@@ -5,6 +5,7 @@
   "dependencies": {
     "gtfs-realtime-bindings": "0.0.5",
     "jszip": "^3.2.2",
+    "leaflet.locatecontrol": "^0.70.0",
     "moment": "^2.24.0",
     "papaparse": "^5.1.1",
     "pouchdb": "^7.1.1",
