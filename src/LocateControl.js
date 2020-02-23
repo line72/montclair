@@ -18,7 +18,7 @@ import 'leaflet.locatecontrol';
 
 class LocateControl extends MapControl {
     createLeafletElement(props) {
-        return L.control.locate({position: 'topleft'});
+        return L.control.locate({position: 'bottomright'});
     }
 }
 

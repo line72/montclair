@@ -66,6 +66,10 @@
     font-size: 1.5em;
 }
 
+.AgencyList-small-header {
+    z-index: 10;
+}
+
 .AgencyList-bar-item {
     font-family: 'Pacifico', cursive;
     font-size: .90em;

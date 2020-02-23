@@ -5,6 +5,7 @@
 	top: 0px;
 	width: calc(100vw - 350px);
 	height: 100vh;
+	z-index: 0;
     }
 }
 
@@ -15,5 +16,6 @@
 	top: 52px; /* push down for the header */
 	width: 100vw;
 	height: calc(100vh - 52px);
+	z-index: 0;
     }
 }

@@ -102,7 +102,7 @@ class AgencyList extends Component {
               </nav>
 
               {/* Top menu on small screens */}
-              <header className="w3-bar w3-top w3-hide-large w3-xlarge w3-light-grey">
+              <header className="w3-bar w3-top w3-hide-large w3-xlarge w3-light-grey AgencyList-small-header">
                 <span className="AgencyList-bar-item">
                   Birmingham Transit
                 </span>
