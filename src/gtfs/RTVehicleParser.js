@@ -67,14 +67,13 @@ class RTVehicleParser {
                 }, {});
 
                 // update the database.
-                return this.db.allDocs({include_docs: true,
-                                        keys: Object.keys(vehicles)})
+                return this.db.allDocs({include_docs: true})
                     .then((routes) => {
                         // insert the vehicle locations into the route.
                         let updates = routes.rows.map((route) => {
                             return {
                                 ...route.doc,
-                                vehicles: vehicles[route.doc.rId]
+                                vehicles: vehicles[route.doc.rId] || []
                             };
                         });
 
