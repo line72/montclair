@@ -72,10 +72,14 @@ class RTVehicleParser {
                     .then((routes) => {
                         // insert the vehicle locations into the route.
                         let updates = routes.rows.map((route) => {
-                            return {
-                                ...route.doc,
-                                vehicles: vehicles[route.doc.rId]
-                            };
+                            if (!!route.error) {
+                                return {};
+                            } else {
+                                return {
+                                    ...route.doc,
+                                    vehicles: vehicles[route.doc.rId]
+                                };
+                            }
                         });
 
                         return this.db.bulkDocs(updates);
