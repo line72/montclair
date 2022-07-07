@@ -5,7 +5,7 @@
   "dependencies": {
     "gtfs-realtime-bindings": "0.0.5",
     "jszip": "^3.2.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "papaparse": "^5.1.1",
     "pouchdb": "^7.1.1",
     "pouchdb-find": "^7.1.1",
