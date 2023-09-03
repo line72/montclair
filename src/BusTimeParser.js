@@ -178,6 +178,12 @@ class BusTimeParser {
      * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
      */
     getVehicles(bounds, visible_routes) {
+        if (visible_routes.length == 0) {
+            return new Promise((success, failure) => {
+                success({});
+            });
+        }
+
         const url = '/getvehicles';
         const params = {
             key: this.key,
@@ -186,6 +192,10 @@ class BusTimeParser {
             tmres: 's'
         };
         return this.requestor.get(url, {params: params}).then((response) => {
+            if (response.data['bustime-response']['error']) {
+                return {};
+            }
+            
             return response.data['bustime-response']['vehicle'].reduce((acc, vehicle) => {
                 if (!Object.hasOwn(acc, vehicle.rt)) {
                     acc[vehicle.rt] = [];
@@ -213,6 +223,12 @@ class BusTimeParser {
      * @return Promise -> VehicleType | nil : The vehicle if found
      */
     getVehicle(route, vehicleId) {
+        if (!vehicleId) {
+            return new Promise((success, failure) => {
+                success(null);
+            });
+        }
+        
         const url = '/getvehicles';
         const params = {
             key: this.key,
@@ -221,6 +237,10 @@ class BusTimeParser {
             tmres: 's'
         };
         return this.requestor.get(url, {params: params}).then((response) => {
+            if (response.data['bustime-response']['error']) {
+                return null;
+            }
+
             let vehicles = response.data['bustime-response']['vehicle'].map((vehicle) => {
                 return new VehicleType({
                     id: vehicle.vid,
