@@ -24,7 +24,6 @@ class BusTimeParser {
         this.url = url;
         this.key = key;
 
-        console.log(this.url);
         this.requestor = axios.create({
             baseURL: this.url + '/bustime/api/v3'
         });
@@ -179,8 +178,30 @@ class BusTimeParser {
      * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
      */
     getVehicles(bounds, visible_routes) {
-        return new Promise((success, failure) => {
-            success({});
+        const url = '/getvehicles';
+        const params = {
+            key: this.key,
+            format: 'json',
+            rt: visible_routes.map(r => r.id).join(','),
+            tmres: 's'
+        };
+        return this.requestor.get(url, {params: params}).then((response) => {
+            return response.data['bustime-response']['vehicle'].reduce((acc, vehicle) => {
+                if (!Object.hasOwn(acc, vehicle.rt)) {
+                    acc[vehicle.rt] = [];
+                }
+                acc[vehicle.rt].push(new VehicleType({
+                    id: vehicle.vid,
+                    position: [vehicle.lat, vehicle.lon],
+                    desitination: vehicle.des,
+                    on_board: vehicle.psgld,
+                    heading: parseInt(vehicle.hdg, 10),
+                    route_id: vehicle.rt,
+                    color: this.findRoute(visible_routes, vehicle.rt).color
+                }));
+
+                return acc;
+            }, {});
         });
     }
 
@@ -211,6 +232,10 @@ class BusTimeParser {
         // change to
         // 20230903T18:30:00
         return t.replace(' ', 'T').replaceAll(':', '');
+    }
+
+    findRoute(routes, r_id) {
+        return routes.find((e) => e.id === r_id);
     }
 }
 
