@@ -138,8 +138,36 @@ class BusTimeParser {
      * @return Promise -> [ArrivalType] : in sorted order
      */
     getArrivalsFor(stopId, routes) {
-        return new Promise((success, failure) => {
-            success([]);
+        const url = '/getpredictions';
+        const params = {
+            key: this.key,
+            format: 'json',
+            stpid: stopId,
+            top: 10,
+            tmres: 's'
+        };
+
+        return this.requestor.get(url, {params: params}).then((response) => {
+            let arrivals = response.data['bustime-response']['prd'].map((i) => {
+                return new ArrivalType({
+                    route: routes[i.rt],
+                    direction: i.rtdir,
+                    arrival: this.fixDateTime(i.prdtm),
+                    vehicleId: i.vid,
+                    tripId: i.tatripid
+                });
+            });
+
+            // sort based on arrival time
+            return arrivals.sort((a, b) => {
+                if (a.arrival.isBefore(b.arrival)) {
+                    return -1;
+                } else if (a.arrival.isSame(b.arrival)) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            });
         });
     }
 
@@ -175,6 +203,14 @@ class BusTimeParser {
                 return [p.lat, p.lon];
             });
         });
+    }
+
+    fixDateTime(t) {
+        // Format is currently 20230903 18:30:00
+        // which moment won't parse
+        // change to
+        // 20230903T18:30:00
+        return t.replace(' ', 'T').replaceAll(':', '');
     }
 }
 
