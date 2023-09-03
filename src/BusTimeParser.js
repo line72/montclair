@@ -92,8 +92,41 @@ class BusTimeParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        return new Promise((success, failure) => {
-            success([]);
+        // Get all the directions of a route (usually inbound and outbound)
+        //  Then for each direction, get the list of stops
+        const url = '/getdirections';
+        const params = {
+            key: this.key,
+            format: 'json',
+            rt: route.id
+        };
+        return this.requestor.get(url, {params: params}).then((response) => {
+            const promises = response.data['bustime-response']['directions'].map((direction) => {
+                const url = '/getstops';
+                const params = {
+                    key: this.key,
+                    format: 'json',
+                    rt: route.id,
+                    dir: direction.id
+                };
+
+                return this.requestor.get(url, {params: params}).then((response2) => {
+                    return response2.data['bustime-response']['stops'].map((stop) => {
+                        return new StopType({
+                            id: stop.stpid,
+                            name: stop.stpnm,
+                            position: [stop.lat, stop.lon]
+                        });
+                    });
+                });
+            });
+
+            return axios.all(promises).then((results) => {
+                // flatten the map
+                return results.flatMap((stops) => {
+                    return stops;
+                });
+            });
         });
     }
 
