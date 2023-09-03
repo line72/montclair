@@ -213,8 +213,27 @@ class BusTimeParser {
      * @return Promise -> VehicleType | nil : The vehicle if found
      */
     getVehicle(route, vehicleId) {
-        return new Promise((success, failure) => {
-            success(null);
+        const url = '/getvehicles';
+        const params = {
+            key: this.key,
+            format: 'json',
+            vid: vehicleId,
+            tmres: 's'
+        };
+        return this.requestor.get(url, {params: params}).then((response) => {
+            let vehicles = response.data['bustime-response']['vehicle'].map((vehicle) => {
+                return new VehicleType({
+                    id: vehicle.vid,
+                    position: [parseFloat(vehicle.lat), parseFloat(vehicle.lon)],
+                    desitination: vehicle.des,
+                    on_board: vehicle.psgld,
+                    heading: parseInt(vehicle.hdg, 10),
+                    route_id: vehicle.rt,
+                    color: route.color
+                });
+            });
+
+            return this.firstItem(vehicles, null);
         });
     }
 
@@ -236,6 +255,14 @@ class BusTimeParser {
 
     findRoute(routes, r_id) {
         return routes.find((e) => e.id === r_id);
+    }
+
+    firstItem(arr, default_v) {
+        if (arr && arr.length > 0) {
+            return arr[0];
+        }
+
+        return default_v;
     }
 }
 
