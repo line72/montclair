@@ -1,6 +1,6 @@
 {
   "name": "montclair",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "private": true,
   "dependencies": {
     "gtfs-realtime-bindings": "0.0.5",
