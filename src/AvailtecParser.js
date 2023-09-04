@@ -39,6 +39,9 @@ class AvailtecParser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
     getRoutes(options) {
@@ -46,10 +49,17 @@ class AvailtecParser {
 
         return axios.get(url).then((response) => {
             let routes = response.data.reduce((acc, route) => {
+                let parseName = (n) => {
+                    if (options && options.parseNameFn) {
+                        return options.parseNameFn(n);
+                    }
+                    return n;
+                };
+                
                 acc[route.RouteId] = new RouteType({
                     id: route.RouteId,
                     number: route.RouteId,
-                    name: route.LongName,
+                    name: parseName(route.LongName),
                     color: route.Color,
                     kml: this.url + '/Resources/Traces/' + route.RouteTraceFilename
                 });

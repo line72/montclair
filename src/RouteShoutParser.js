@@ -59,6 +59,9 @@ class RouteShoutParser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
     getRoutes(options) {
@@ -72,10 +75,17 @@ class RouteShoutParser {
                     // generate a list of lat/long as a polyine
                     const polyline = this.generatePolyline(response.data);
 
+                    let parseName = (n) => {
+                        if (options && options.parseNameFn) {
+                            return options.parseNameFn(n);
+                        }
+                        return n;
+                    };
+                    
                     return new RouteType({
                         id: idx,
                         number: number,
-                        name: name,
+                        name: parseName(name),
                         color: color,
                         polyline: polyline
                     });

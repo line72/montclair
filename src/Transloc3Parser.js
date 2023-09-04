@@ -47,6 +47,9 @@ class Transloc3Parser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
     getRoutes(options) {
@@ -77,10 +80,17 @@ class Transloc3Parser {
                         }
                     });
 
+                    let parseName = (n) => {
+                        if (options && options.parseNameFn) {
+                            return options.parseNameFn(n);
+                        }
+                        return n;
+                    };
+                    
                     acc[route.id] = new RouteType({
                         id: route.id,
                         number: route.short_name,
-                        name: route.long_name,
+                        name: parseName(route.long_name),
                         color: route.color,
                         polyline: polyline
                     });

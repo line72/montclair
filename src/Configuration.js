@@ -59,7 +59,7 @@ class Configuration {
             {
                 name: 'Raleigh, NC',
                 parser: new BusTimeParser('https://raleigh.gotransitapp.com/api/no.php',
-                                          this.bustime_key),
+                                          bustime_key),
                 options: {
                     parseNameFn: (n) => {
                         // remove the beginning route number
