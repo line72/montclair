@@ -20,6 +20,8 @@ jobs:
           echo "VER=$(echo $GITHUB_REF | cut -d '/' -f 3-)" >> "$GITHUB_OUTPUT"
         
       - name: Build
+        env:
+          NODE_OPTIONS: "--openssl-legacy-provider"
         run: |
           npm install
           npm run-script build
