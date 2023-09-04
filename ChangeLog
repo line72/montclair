@@ -1,4 +1,5 @@
 2023-09-03  Marcus Dillavou  <line72@line72.net>
+	* ISSUE-125 - Add a Route Name Transformer
 	* ISSUE-122 - Add Support for Clever Devices Bustime API
 
 1.9.1

@@ -48,9 +48,12 @@ class TranslocParser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         // first get the segments so we can build our route paths
         let url = `/segments.json?agencies=${this.agency_id}`;
         return this.requestor.get(url).then((response) => {
@@ -73,10 +76,17 @@ class TranslocParser {
                         }
                     });
 
+                    let parseName = (n) => {
+                        if (options && options.parseNameFn) {
+                            return options.parseNameFn(n);
+                        }
+                        return n;
+                    };
+                    
                     acc[route.route_id] = new RouteType({
                         id: route.route_id,
                         number: route.short_name,
-                        name: route.long_name,
+                        name: parseName(route.long_name),
                         color: route.color,
                         polyline: polyline
                     });

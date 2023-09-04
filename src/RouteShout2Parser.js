@@ -46,9 +46,12 @@ class RouteShout2Parser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         const url = '/rs.routes.getList';
 
         return this.requestor.get(url, {params: {key: this.key, agency: this.agency_id}})
@@ -63,10 +66,17 @@ class RouteShout2Parser {
                     }}).then((response2) => {
                         const polyline = this.generatePolyline(response2.data);
 
+                        let parseName = (n) => {
+                            if (options && options.parseNameFn) {
+                                return options.parseNameFn(n);
+                            }
+                            return n;
+                        };
+                    
                         return new RouteType({
                             id: route.id,
                             number: route.sn,
-                            name: route.ln,
+                            name: parseName(route.ln),
                             color: route.c.slice(1), // strip the #
                             polyline: polyline
                         });

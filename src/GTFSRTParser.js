@@ -89,19 +89,29 @@ class GTFSRTParser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         let db = this.openDB('routes');
 
         return db.allDocs({include_docs: true})
             .then((results) => {
                 return Promise.all(results.rows.map((row) => {
+                    let parseName = (n) => {
+                        if (options && options.parseNameFn) {
+                            return options.parseNameFn(n);
+                        }
+                        return n;
+                    };
+
                     return new RouteType({
                         id: row.doc.rId,
                         number: row.doc.number,
                         color: row.doc.color.trim() || 'ff0000',
-                        name: row.doc.name,
+                        name: parseName(row.doc.name),
                         polyline: row.doc.shapes
                     });
                 }));
