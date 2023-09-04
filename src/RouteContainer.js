@@ -37,6 +37,7 @@ class RouteContainer extends Component {
         let agencies = this.configuration.agencies.map((a) => {
             return {name: a.name,
                     visible: true,
+                    options: a.options || {},
                     parser: a.parser,
                     hideRouteNumber: !!a.hideRouteNumber,
                     routes: {}};
@@ -90,7 +91,7 @@ class RouteContainer extends Component {
         return axios.all(this.state.agencies.map((a, index) => {
             a.visible = this.storage.isAgencyVisible(a);
 
-            return a.parser.getRoutes().then((routes) => {
+            return a.parser.getRoutes(a.options || {}).then((routes) => {
                 // the visibility is stored offline in local storage,
                 //  restore it.
                 const r = Object.keys(routes).reduce((acc, key) => {

@@ -49,7 +49,7 @@ class Transloc3Parser {
      *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         // first get the segments so we can build our route paths
         let url = '/segments.json';
         return this.requestor.get(url, {params: {agencies: this.agency_id}}).then((response) => {

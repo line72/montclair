@@ -91,7 +91,7 @@ class GTFSRTParser {
      *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         let db = this.openDB('routes');
 
         return db.allDocs({include_docs: true})

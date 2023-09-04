@@ -15,20 +15,23 @@
 import AvailtecParser from './AvailtecParser';
 import TranslocParser from './TranslocParser';
 import RouteShoutParser from './RouteShoutParser';
+import BusTimeParser from './BusTimeParser';
 
 class Configuration {
     constructor() {
         this.transloc_key = '';
+        const bustime_key = '';
+        
 
         // Birmingham, AL
-        this.center = [33.5084801, -86.8006611];
+        //this.center = [33.5084801, -86.8006611];
 
-        this.agencies = [
-            {
-                name: 'BJCTA',
-                parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
-            }
-        ];
+        // this.agencies = [
+        //     {
+        //         name: 'BJCTA',
+        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
+        //     }
+        // ];
 
         // // example showing hiding the route numbers in the agency list (defaults to false)
         // this.agencies = [
@@ -50,8 +53,22 @@ class Configuration {
         //     }
         // ]
 
-        // // Raleigh, NC
-        // this.center = [35.7740151,-78.6449387];
+        // Raleigh, NC
+        this.center = [35.7740151,-78.6449387];
+        this.agencies = [
+            {
+                name: 'Raleigh, NC',
+                parser: new BusTimeParser('https://raleigh.gotransitapp.com/api/no.php',
+                                          this.bustime_key),
+                options: {
+                    parseNameFn: (n) => {
+                        // remove the beginning route number
+                        // from the name
+                        return n.replace(/^\w+\s+/, '');
+                    }
+                }
+            }
+        ];
         // this.agencies = [
         //     {
         //         name: 'Raleigh, NC',

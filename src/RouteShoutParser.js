@@ -61,7 +61,7 @@ class RouteShoutParser {
      *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         // !mwd - TODO, will need to use routeshout api to
         //  get this list
         return new Promise((resolve, reject) => {

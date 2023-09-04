@@ -41,7 +41,7 @@ class AvailtecParser {
      *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         let url = this.url + '/rest/Routes/GetVisibleRoutes';
 
         return axios.get(url).then((response) => {

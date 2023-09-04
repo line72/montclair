@@ -48,7 +48,7 @@ class RouteShout2Parser {
      *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
         const url = '/rs.routes.getList';
 
         return this.requestor.get(url, {params: {key: this.key, agency: this.agency_id}})

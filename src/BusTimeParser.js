@@ -45,9 +45,13 @@ class BusTimeParser {
     /**
      * Get the routes.
      *
+     * Available options:
+     *  - parseNameFn :: (str) -> str :: This can transform the route name
+     *
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
-    getRoutes() {
+    getRoutes(options) {
+        console.log('options=', options);
         const url = '/getroutes';
         const params = {
             key: this.key,
@@ -64,10 +68,17 @@ class BusTimeParser {
                 return this.requestor.get(url, {params: params}).then((response2) => {
                     const polyline = this.generatePolyline(response2.data['bustime-response']['ptr']);
 
+                    let parseName = (n) => {
+                        if (options && options.parseNameFn) {
+                            return options.parseNameFn(n);
+                        }
+                        return n;
+                    };
+                    
                     return new RouteType({
                         id: route.rt,
                         number: route.rtdd,
-                        name: route.rtnm,
+                        name: parseName(route.rtnm),
                         color: route.rtclr.slice(1), // strip the #
                         polyline: polyline
                     });
@@ -178,7 +189,7 @@ class BusTimeParser {
      * @return Promise -> map(RouteId,VehicleType) : Returns a map of VehicleType by RouteId
      */
     getVehicles(bounds, visible_routes) {
-        if (visible_routes.length == 0) {
+        if (visible_routes.length === 0) {
             return new Promise((success, failure) => {
                 success({});
             });
