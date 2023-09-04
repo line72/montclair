@@ -51,7 +51,6 @@ class BusTimeParser {
      * @return Promise -> map(Id,RouteType) : Returns a map of RouteTypes by Id
      */
     getRoutes(options) {
-        console.log('options=', options);
         const url = '/getroutes';
         const params = {
             key: this.key,
