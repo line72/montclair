@@ -12,9 +12,9 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-import AvailtecParser from './AvailtecParser';
-import TranslocParser from './TranslocParser';
-import RouteShoutParser from './RouteShoutParser';
+//import AvailtecParser from './AvailtecParser';
+//import TranslocParser from './TranslocParser';
+//import RouteShoutParser from './RouteShoutParser';
 import BusTimeParser from './BusTimeParser';
 
 class Configuration {
