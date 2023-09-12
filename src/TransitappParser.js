@@ -14,6 +14,7 @@
 
 import axios from 'axios';
 import polyUtil from 'polyline-encoded';
+import moment from 'moment';
 
 import RouteType from './RouteType';
 import VehicleType from './VehicleType';
@@ -184,7 +185,36 @@ class TransitappParser {
      * @return Promise -> [ArrivalType] : in sorted order
      */
     getArrivalsFor(stopId, routes) {
-        return Promise.resolve([]);
+        const url = '/stop_departures';
+        const params = {
+            global_stop_id: stopId
+        };
+
+        return this.requestor.get(url, {params: params}).then((response) => {
+            let arrivals = response.data.route_departures.flatMap((r) => {
+                return r.itineraries.flatMap((i) => {
+                    return i.schedule_items.flatMap((s) => {
+                        return new ArrivalType({
+                            route: routes[r.global_route_id],
+                            direction: i.merged_headsign,
+                            arrival: moment.unix(s.departure_time),
+                            tripId: s.rt_trip_id
+                        });
+                    });
+                });
+            });
+
+            // sort based on arrival time
+            return arrivals.sort((a, b) => {
+                if (a.arrival.isBefore(b.arrival)) {
+                    return -1;
+                } else if (a.arrival.isSame(b.arrival)) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            });
+        });
     }
 
     /**
