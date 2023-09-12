@@ -17,7 +17,6 @@ import polyUtil from 'polyline-encoded';
 import moment from 'moment';
 
 import RouteType from './RouteType';
-import VehicleType from './VehicleType';
 import StopType from './StopType';
 import ArrivalType from './ArrivalType';
 
