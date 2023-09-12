@@ -30,6 +30,31 @@ class TransitappParser {
             baseURL: this.url + '/v3/public',
             headers: {apiKey: this.apikey}
         });
+        
+        const retryFn = (err) => {
+            // check if we have exceeded the rate limit (429(
+            if (err.response && err.response.status === 429) {
+                const {config, headers} = err.response;
+                const timeout = (parseInt(headers['retry-after']) || 10) * 1000;
+
+                const p = new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(true)
+                    }, timeout);
+                });
+                return p.then(() => {
+                    const url = config.url;
+                    const params = config.params;
+                    return this.requestor.get(url, {params: params});
+                });
+            }
+
+            return Promise.reject(err);
+        };
+
+        this.requestor.interceptors.response.use((response) => {
+            return response;
+        }, retryFn);
     }
 
     /**
@@ -104,13 +129,14 @@ class TransitappParser {
                             global_route_id: r.global_route_id
                         };
 
-                        return this.requestor.get(url, {params: params}).then((response2) => {
-                            const polylines = response2.data.itineraries.map((i) => {
-                                return polyUtil.decode(i.shape);
+                        return this.requestor.get(url, {params: params})
+                            .then((response2) => {
+                                const polylines = response2.data.itineraries.map((i) => {
+                                    return polyUtil.decode(i.shape);
+                                });
+                                
+                                return polylines;
                             });
-
-                            return polylines;
-                        });
                     }
                 }));
             });
