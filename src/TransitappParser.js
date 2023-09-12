@@ -158,7 +158,22 @@ class TransitappParser {
      * @return Promise -> [StopType] : Returns a list of StopTypes
      */
     getStopsFor(route) {
-        return Promise.resolve(route.stops);
+        const url = '/route_details';
+        const params = {
+            global_route_id: route.id
+        }
+
+        return this.requestor.get(url, {params: params}).then((response) => {
+            return response.data.itineraries.flatMap((i) => {
+                return i.stops.map((s) => {
+                    return new StopType({
+                        id: s.global_stop_id,
+                        name: s.stop_name,
+                        position: [s.stop_lat, s.stop_lon]
+                    });
+                });
+            });
+        });
     }
 
     /**
