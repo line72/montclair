@@ -85,39 +85,6 @@ class TransitappParser {
 
         return this.requestor.get(url, {params: params}).then((response) => {
             const promises = response.data['routes'].map((r) => {
-                // const url = '/route_details';
-                // const params = {
-                //     global_route_id: r.global_route_id
-                // }
-
-                // return this.requestor.get(url, {params: params}).then((response2) => {
-                //     const polylines = response2.data.itineraries.map((i) => {
-                //         return i.shape;
-                //     });
-
-                //     // since we already have stops, include them here!
-                //     const stops = response2.itineraries.flatMap((i) => {
-                //         return i.stops.map((s) => {
-                //             return new StopType({
-                //                 id: s.global_stop_id,
-                //                 name: s.stop_name,
-                //                 position: [s.stop_lat, s.stop_lon]
-                //             });
-                //         });
-                //     });
-                    
-                //     const route = new RouteType({
-                //         id: r.global_route_id,
-                //         number: r.route_short_name,
-                //         name: r.route_long_name,
-                //         color: r.route_color,
-                //         polyline: polylines
-                //     });
-                //     route.stops = stops;
-
-                //     return route;
-                // });
-
                 // We'll get the polylines later
                 return Promise.resolve(new RouteType({
                     id: r.global_route_id,
