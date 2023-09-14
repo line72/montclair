@@ -17,7 +17,7 @@ import toGeoJSON from '@mapbox/togeojson';
 import L from 'leaflet';
 
 class RouteType {
-    constructor({id, number, name, color, kml, polyline}) {
+    constructor({id, number, name, color, kml, polyline, polylineDeferred}) {
         this.id = id;
         this.number = number;
         this.name = name;
@@ -25,6 +25,7 @@ class RouteType {
         this.selected = false;
         this.kml = kml;
         this.polyline = polyline;
+        this.polylineDeferred = polylineDeferred;
         this.visible = true;
 
         this.stops = [];
@@ -43,6 +44,14 @@ class RouteType {
                 const l = L.polyline(this.polyline);
 
                 resolve(l.toGeoJSON());
+            });
+        } else if (this.polylineDeferred != null) {
+            return this.polylineDeferred().then((response) => {
+                this.polyline = response;
+
+                const l = L.polyline(this.polyline);
+
+                return l.toGeoJSON();
             });
         } else {
             return new Promise((resolve, reject) => {
