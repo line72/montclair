@@ -12,26 +12,40 @@
  * Licensed Under the GPLv3
  *******************************************/
 
-//import AvailtecParser from './AvailtecParser';
+import AvailtecParser from './AvailtecParser';
 //import TranslocParser from './TranslocParser';
 //import RouteShoutParser from './RouteShoutParser';
-import BusTimeParser from './BusTimeParser';
+//import BusTimeParser from './BusTimeParser';
 
 class Configuration {
     constructor() {
         this.transloc_key = '';
         const bustime_key = '';
+
+        const tiles = {
+            stamen_toner: {
+                url: "https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png",
+                subdomains: 'abcd',
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            },
+            local: {
+                url: 'https://birmingham.gotransitapp.com/tiles/{z}/{x}/{y}.png',
+                subdomains: ''
+            }
+        };
+
+        this.tileserver = tiles.local;
+
         
-
         // Birmingham, AL
-        //this.center = [33.5084801, -86.8006611];
+        this.center = [33.5084801, -86.8006611];
 
-        // this.agencies = [
-        //     {
-        //         name: 'BJCTA',
-        //         parser: new AvailtecParser('https://realtimebjcta.availtec.com/InfoPoint')
-        //     }
-        // ];
+        this.agencies = [
+            {
+                name: 'BJCTA',
+                parser: new AvailtecParser('https:realtimebjcta.availtec.com/InfoPoint')
+            }
+        ];
 
         // // example showing hiding the route numbers in the agency list (defaults to false)
         // this.agencies = [
@@ -53,22 +67,22 @@ class Configuration {
         //     }
         // ]
 
-        // Raleigh, NC
-        this.center = [35.7740151,-78.6449387];
-        this.agencies = [
-            {
-                name: 'Raleigh, NC',
-                parser: new BusTimeParser('https://raleigh.gotransitapp.com/api/no.php',
-                                          bustime_key),
-                options: {
-                    parseNameFn: (n) => {
-                        // remove the beginning route number
-                        // from the name
-                        return n.replace(/^\w+\s+/, '');
-                    }
-                }
-            }
-        ];
+        // // Raleigh, NC
+        // this.center = [35.7740151,-78.6449387];
+        // this.agencies = [
+        //     {
+        //         name: 'Raleigh, NC',
+        //         parser: new BusTimeParser('https://raleigh.gotransitapp.com/api/no.php',
+        //                                   bustime_key),
+        //         options: {
+        //             parseNameFn: (n) => {
+        //                 // remove the beginning route number
+        //                 // from the name
+        //                 return n.replace(/^\w+\s+/, '');
+        //             }
+        //         }
+        //     }
+        // ];
         // this.agencies = [
         //     {
         //         name: 'Raleigh, NC',

@@ -20,29 +20,20 @@ class BaseMap extends React.Component {
     constructor(props) {
         super(props);
 
-        // pulled from:
-        //  https://leaflet-extras.github.io/leaflet-providers/preview/
-        let tiles = {
-            stamen_toner: {
-                url: "https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png",
-                subdomains: 'abcd',
-                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            },
-            black_and_white: {
-                url: 'https://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
-                subdomains: 'abcd',
-                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }
-        }
-
         let configuration = this.props.configuration;
         this.mapRef = createRef();
+
+        const default_tiles = {
+            url: "https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png",
+            subdomains: 'abcd',
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        };
 
         this.state = {
             initial_viewport: true,
             center: configuration.center,
             zoom: 13,
-            tile: tiles.stamen_toner
+            tile: configuration.tileserver || default_tiles
         };
     }
 
@@ -88,6 +79,7 @@ class BaseMap extends React.Component {
                 <BoundsMap
                     ref={this.mapRef}
                     zoomControl={false}
+                    maxZoom={18}
                     onBoundsChanged={this.onBoundsChanged}
                     onViewportDidChange={this.onViewportChanged}
                     {...extra_props}
